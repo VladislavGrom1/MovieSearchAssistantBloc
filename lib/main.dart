@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:movie_search_assistant_bloc/core/router/app_router.dart';
+import 'package:movie_search_assistant_bloc/app/router/app_router.dart';
+import 'package:movie_search_assistant_bloc/injection_container.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDependencies();
   runApp(const MyApp());
 }
 

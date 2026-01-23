@@ -17,6 +17,7 @@ final class AuthenticationSuccess extends AuthenticationState{
 }
 
 final class AuthenticationFailure extends AuthenticationState{
-  final Object exception;
-  AuthenticationFailure({required this.exception});
+  final String exceptionType;
+  final int? statusCode;
+  AuthenticationFailure({required this.exceptionType, this.statusCode});
 }

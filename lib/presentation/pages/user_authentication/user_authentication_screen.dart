@@ -32,7 +32,7 @@ class _UserAuthenticationScreenState extends State<UserAuthenticationScreen> {
                 context.router.replace(HomeRoute());
               } else if (state is AuthenticationFailure) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Не удалось выполнить вход")));
+                    SnackBar(content: Text("Не удалось выполнить вход: ${state.exceptionType}, ${state.statusCode}")));
               }
             },
             child: Center(

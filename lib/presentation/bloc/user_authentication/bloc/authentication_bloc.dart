@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:movie_search_assistant_bloc/app/exceptions/api_exception.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/authentication_use_case.dart';
 
@@ -17,8 +18,10 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     try{
       final UserEntity userInfo = await authenticationUseCase.call(apiKey: event.apiKey);
       emit(AuthenticationSuccess(userInfo: userInfo));
+    } on ApiException catch(e){
+      emit(AuthenticationFailure(exceptionType: e.exceptionType.name, statusCode: e.statusCode));
     } catch(e){
-      emit(AuthenticationFailure(exception: e));
+      emit(AuthenticationFailure(exceptionType: "неизвестная ошибка"));
     }
   }
 

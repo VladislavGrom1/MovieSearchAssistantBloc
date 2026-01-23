@@ -11,7 +11,7 @@ final getIt = GetIt.instance;
 Future<void> initializeDependencies() async{
     // API Client
     getIt.registerSingleton(DioApiClient());
-    getIt.registerSingleton(getIt<DioApiClient>().getDio());
+    getIt.registerSingleton(getIt<DioApiClient>().dio);
 
     // DataSources
     getIt.registerLazySingleton(() => UserDataSource(dio: getIt()));

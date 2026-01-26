@@ -11,13 +11,13 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i16;
 import 'package:flutter/material.dart' as _i17;
-import 'package:movie_search_assistant_bloc/app/router/search_film/search_film_wrapper_screen.dart'
+import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/search_film/search_film_wrapper_screen.dart'
     as _i7;
-import 'package:movie_search_assistant_bloc/app/router/user_profile/user_profile_wrapper_screen.dart'
+import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/user_profile/user_profile_wrapper_screen.dart'
     as _i11;
-import 'package:movie_search_assistant_bloc/app/router/watched_collection/watched_collection_wrapper_screen.dart'
+import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/watched_collection/watched_collection_wrapper_screen.dart'
     as _i13;
-import 'package:movie_search_assistant_bloc/app/router/will_watch_collection/will_watch_collection_wrapper_screen.dart'
+import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/will_watch_collection/will_watch_collection_wrapper_screen.dart'
     as _i15;
 import 'package:movie_search_assistant_bloc/presentation/pages/change_api_key/change_api_key_screen.dart'
     as _i1;

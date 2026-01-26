@@ -7,6 +7,7 @@ class DioApiClient {
   String? _apiKey;
   
   factory DioApiClient() => _instance;
+  Dio get dio => _dio;
   
   DioApiClient._internal() {
     _dio = Dio(BaseOptions(
@@ -23,15 +24,8 @@ class DioApiClient {
     ));
   }
   
-  Dio get dio => _dio;
-  
-  void updateApiKeyHeaders(String newApiKey){
+  void updateApiKeyHeaders(String? newApiKey){
     _apiKey = newApiKey;
-    log(_apiKey.toString());
   }
 
-  String getApiKeyFromStorage(){
-    // TODO: Получение ApiKey из LocalStorage
-    return "";
-  }
 }

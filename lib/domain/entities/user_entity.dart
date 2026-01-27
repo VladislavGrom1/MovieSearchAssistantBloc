@@ -15,5 +15,5 @@ class UserEntity extends Equatable{
     });
   
   @override
-  List<Object?> get props => [apiKey];
+  List<Object?> get props => [apiKey, accountType, limitCount, useCount];
 }

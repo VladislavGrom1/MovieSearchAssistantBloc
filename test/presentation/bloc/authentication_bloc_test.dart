@@ -12,7 +12,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/user_authenticatio
 
 class MockAuthenticationUseCase extends Mock implements AuthenticationUseCase {}
 
-UserEntity buildUserEntity({
+UserEntity _buildUserEntity({
   String? apiKey = "TestApiKey",
   String? accountType = "FREE",
   int? limitCount = 500,
@@ -26,7 +26,7 @@ UserEntity buildUserEntity({
 
 void main(){
   group("AuthenticationBloc", () {
-    final userEntity = buildUserEntity();
+    final userEntity = _buildUserEntity();
     final mockAuthenticationUseCase = MockAuthenticationUseCase();
 
     setUp(() {

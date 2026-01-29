@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.shifting,
             backgroundColor: Colors.black,
-            selectedItemColor: Colors.blue,
+            selectedItemColor: Colors.purple,
             unselectedItemColor: Colors.white,
             currentIndex: tabsRouter.activeIndex,
             onTap: tabsRouter.setActiveIndex,

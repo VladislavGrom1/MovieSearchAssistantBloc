@@ -16,7 +16,7 @@ class MockUserLocalDataSource extends Mock implements UserLocalDataSource{}
 class FakeUserModel extends Fake implements UserModel {}
 class FakeUserEntity extends Fake implements UserEntity {}
 
-UserModel buildUserModel({
+UserModel _buildUserModel({
   String? apiKey = "TestApiKey", 
   String? accountType = "FREE", 
   int? limitCount = 500, 
@@ -28,7 +28,7 @@ UserModel buildUserModel({
     useCount: useCount
   );
 
-UserEntity buildUserEntity({
+UserEntity _buildUserEntity({
   String? apiKey = "TestApiKey",
   String? accountType = "FREE",
   int? limitCount = 500,
@@ -61,8 +61,8 @@ void main(){
 
   group("getUserApiKeyInfoFromRemoteDataSource", () {
     const testApiKey = "TestApiKey";
-    final testUserModel = buildUserModel();
-    final testUserEntity = buildUserEntity();
+    final testUserModel = _buildUserModel();
+    final testUserEntity = _buildUserEntity();
 
     test('should return UserEntity when remote data source returns UserModel', () async {
       when(() => mockUserRemoteDataSource.getUserApiKeyInfo(testApiKey)).thenAnswer((_) async => testUserModel);
@@ -93,8 +93,8 @@ void main(){
   });
 
   group("getUserApiKeyInfoFromLocalDataSource", () {
-    final testUserModel = buildUserModel();
-    final testUserEntity = buildUserEntity();
+    final testUserModel = _buildUserModel();
+    final testUserEntity = _buildUserEntity();
 
     test('should return UserEntity when local data source returns UserModel', () async {
       when(() => mockUserLocalDataSource.getUserApiKeyInfo()).thenReturn(testUserModel);
@@ -120,7 +120,7 @@ void main(){
   });
 
   group("addUserApiKeyInfoInLocalDataSource", () {
-    final testUserEntity = buildUserEntity();
+    final testUserEntity = _buildUserEntity();
 
     test('should rethrow LocalDataSourceException when remote data source throws LocalDataSourceException', () async {
       when(() => mockUserLocalDataSource.addUserApiKeyInfo(any())).thenThrow(LocalDataSourceException(message: ""));

@@ -22,7 +22,7 @@ class _UserAuthenticationScreenState extends State<UserAuthenticationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.white,
         body: BlocListener<AuthenticationBloc, AuthenticationState>(
             bloc: _authBloc,
             listener: (context, state) {

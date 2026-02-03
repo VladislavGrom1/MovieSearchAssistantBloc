@@ -44,16 +44,30 @@ FilmCardModel _buildFilmCardModel({
 
 FilmCardEntity _buildFilmCardEntity({
   int? kinopoiskId = 0,
-  String? nameRu = "Фильм №1",
+  String? nameRu = "Фильм №1", 
   String? nameEn = "Film №1",
   String? nameOriginal = "Film №1",
-  num? ratingKinopoisk = 7.9
+  List<String>? countries = const ["Россия", "США"],
+  List<String>? genres = const ["Детектив"],
+  num? ratingKinopoisk = 7.9,
+  num? ratingImbd = 8.1,
+  int? year = 1995,
+  String? type = "MOVIE",
+  String? posterUrl = "posterUrl",
+  String? posterUrlPreview = "posterUrlPreview"
 }) => FilmCardEntity(
   kinopoiskId: kinopoiskId,
   nameRu: nameRu,
   nameEn: nameEn,
   nameOriginal: nameOriginal,
-  ratingKinopoisk: ratingKinopoisk
+  countries: countries,
+  genres: genres,
+  ratingKinopoisk: ratingKinopoisk,
+  ratingImbd: ratingImbd,
+  year: year,
+  type: type,
+  posterUrl: posterUrl,
+  posterUrlPreview: posterUrlPreview
 );
 
 void main(){

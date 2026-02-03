@@ -30,7 +30,7 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
 
   void onSearchSubmitted(String keyword){
     // TODO: Доработать передачу аргумента при переходе
-    context.router.push(SearchedFilmsRoute());
+    context.router.push(SearchedFilmsRoute(keyword: keyword, page: 1));
   }
 
   void onFilterSubmitted(){
@@ -64,7 +64,7 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
                           return Center(child: Text("${state.exceptionType} ${state.statusCode}"));
                         }
 
-                        if (state is CollectionsFilmsLoadedSuccesful) {
+                        if (state is CollectionsFilmsLoadedSuccessful) {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -99,15 +99,14 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
                   IconButton(
                       // TODO: Добавить переход на экран SearchedFilms
                       onPressed: () {
-                        context.router.push(SearchedFilmsRoute());
+                        context.router.push(SearchedFilmsRoute(page: 1));
                       },
                       icon: Icon(Icons.arrow_forward, color: Colors.purple))
                 ],
               ),
               SizedBox(
                   height: 185.h,
-                  child: _buildFilmCollection(
-                      filmCollectionsMap, filmCollectionsNamesList[index]))
+                  child: _buildFilmCollection(filmCollectionsMap, filmCollectionsNamesList[index]))
             ],
           );
         },

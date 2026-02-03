@@ -12,9 +12,9 @@ class UserRemoteDataSource {
     ApiKeysApi apiKeysApi = ApiKeysApi(dio, standardSerializers);
     try{
       DioApiClient().updateApiKeyHeaders(apiKey);
-      Response<ApiKeyResponse> responseData = await apiKeysApi.apiV1ApiKeysApiKeyGet(apiKey: apiKey);
-      if(responseData.data != null){
-        return UserModel.fromObject(responseData.data!, apiKey);
+      Response<ApiKeyResponse> response = await apiKeysApi.apiV1ApiKeysApiKeyGet(apiKey: apiKey);
+      if(response.data != null){
+        return UserModel.fromObject(response.data!, apiKey);
       }
       return null;
     } on DioException catch(e){

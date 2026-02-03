@@ -73,39 +73,40 @@ void main(){
   });
 
   group("getCollectionFilmsFromRemoteDataSource", () {
-    const testApiKey = "TestApiKey";
     const collectionName = "TOP_POPULAR_MOVIES";
     const page = 1;
     final List<FilmCardModel> testfilmCardModelList = List.filled(2, _buildFilmCardModel());
     final List<FilmCardEntity> testfilmCardEntityList = List.filled(2, _buildFilmCardEntity());
     
     test('should return List<FilmCardEntity> when remote data source returns List<FilmCardModel>', () async {
-      when(() => mockFilmRemoteDataSource.getCollectionFilms(testApiKey, collectionName, page)).thenAnswer((_) async => testfilmCardModelList);
-      final result = await filmRepositoryImpl.getCollectionFilms(testApiKey, collectionName, page);
+      when(() => mockFilmRemoteDataSource.getCollectionFilms(collectionName, page)).thenAnswer((_) async => testfilmCardModelList);
+      final result = await filmRepositoryImpl.getCollectionFilms(collectionName, page);
       expect(result, equals(testfilmCardEntityList));
-      verify(() => mockFilmRemoteDataSource.getCollectionFilms(testApiKey, collectionName, page)).called(1);
+      verify(() => mockFilmRemoteDataSource.getCollectionFilms(collectionName, page)).called(1);
     });
 
     test('should return NULL when remote data source returns NULL', () async {
-      when(() => mockFilmRemoteDataSource.getCollectionFilms(testApiKey, collectionName, page)).thenAnswer((_) async => null);
-      final result = await filmRepositoryImpl.getCollectionFilms(testApiKey, collectionName, page);
+      when(() => mockFilmRemoteDataSource.getCollectionFilms(collectionName, page)).thenAnswer((_) async => null);
+      final result = await filmRepositoryImpl.getCollectionFilms(collectionName, page);
       expect(result, isNull);
-      verify(() => mockFilmRemoteDataSource.getCollectionFilms(testApiKey, collectionName, page)).called(1);
+      verify(() => mockFilmRemoteDataSource.getCollectionFilms(collectionName, page)).called(1);
     });
 
     test('should rethrow RemoteDataSourceException when remote data source throws RemoteDataSourceException', () async {
-      when(() => mockFilmRemoteDataSource.getCollectionFilms(testApiKey, collectionName, page)).thenThrow(RemoteDataSourceException(
+      when(() => mockFilmRemoteDataSource.getCollectionFilms(collectionName, page)).thenThrow(RemoteDataSourceException(
         DioExceptionType.connectionError, 
         HttpStatus.connectionClosedWithoutResponse
       ));
-      expect(() => filmRepositoryImpl.getCollectionFilms(testApiKey, collectionName, page), throwsA(isA<RemoteDataSourceException>()));
+      expect(() => filmRepositoryImpl.getCollectionFilms(collectionName, page), throwsA(isA<RemoteDataSourceException>()));
     });
 
     test('should rethrow Exception when remote data source throws Exception', () async {
-      when(() => mockFilmRemoteDataSource.getCollectionFilms(testApiKey, collectionName, page)).thenThrow(Exception());
-      expect(() => filmRepositoryImpl.getCollectionFilms(testApiKey, collectionName, page), throwsA(isA<Exception>()));
+      when(() => mockFilmRemoteDataSource.getCollectionFilms(collectionName, page)).thenThrow(Exception());
+      expect(() => filmRepositoryImpl.getCollectionFilms(collectionName, page), throwsA(isA<Exception>()));
     });    
   });
+
+  // TODO: Тесты для getFilterFilmsFromRemoteDataSource
 
   // TODO: Тесты для LocalDataSource
 }

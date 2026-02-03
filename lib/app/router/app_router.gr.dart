@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i16;
+import 'package:collection/collection.dart' as _i18;
 import 'package:flutter/material.dart' as _i17;
 import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/search_film/search_film_wrapper_screen.dart'
     as _i7;
@@ -132,7 +133,7 @@ class FilterFilmRoute extends _i16.PageRouteInfo<void> {
 class FilterListRoute extends _i16.PageRouteInfo<FilterListRouteArgs> {
   FilterListRoute({
     _i17.Key? key,
-    required String filterType,
+    required dynamic filterType,
     List<_i16.PageRouteInfo>? children,
   }) : super(
           FilterListRoute.name,
@@ -149,7 +150,7 @@ class FilterListRoute extends _i16.PageRouteInfo<FilterListRouteArgs> {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<FilterListRouteArgs>(
         orElse: () =>
-            FilterListRouteArgs(filterType: pathParams.getString('filterType')),
+            FilterListRouteArgs(filterType: pathParams.get('filterType')),
       );
       return _i4.FilterListScreen(key: args.key, filterType: args.filterType);
     },
@@ -161,7 +162,7 @@ class FilterListRouteArgs {
 
   final _i17.Key? key;
 
-  final String filterType;
+  final dynamic filterType;
 
   @override
   String toString() {
@@ -229,18 +230,101 @@ class SearchFilmWrapperRoute extends _i16.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.SearchedFilmsScreen]
-class SearchedFilmsRoute extends _i16.PageRouteInfo<void> {
-  const SearchedFilmsRoute({List<_i16.PageRouteInfo>? children})
-      : super(SearchedFilmsRoute.name, initialChildren: children);
+class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
+  SearchedFilmsRoute({
+    _i17.Key? key,
+    String? keyword,
+    List<int>? countries,
+    List<int>? genres,
+    int? yearFrom,
+    int? yearTo,
+    required int page,
+    List<_i16.PageRouteInfo>? children,
+  }) : super(
+          SearchedFilmsRoute.name,
+          args: SearchedFilmsRouteArgs(
+            key: key,
+            keyword: keyword,
+            countries: countries,
+            genres: genres,
+            yearFrom: yearFrom,
+            yearTo: yearTo,
+            page: page,
+          ),
+          initialChildren: children,
+        );
 
   static const String name = 'SearchedFilmsRoute';
 
   static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
-      return const _i8.SearchedFilmsScreen();
+      final args = data.argsAs<SearchedFilmsRouteArgs>();
+      return _i8.SearchedFilmsScreen(
+        key: args.key,
+        keyword: args.keyword,
+        countries: args.countries,
+        genres: args.genres,
+        yearFrom: args.yearFrom,
+        yearTo: args.yearTo,
+        page: args.page,
+      );
     },
   );
+}
+
+class SearchedFilmsRouteArgs {
+  const SearchedFilmsRouteArgs({
+    this.key,
+    this.keyword,
+    this.countries,
+    this.genres,
+    this.yearFrom,
+    this.yearTo,
+    required this.page,
+  });
+
+  final _i17.Key? key;
+
+  final String? keyword;
+
+  final List<int>? countries;
+
+  final List<int>? genres;
+
+  final int? yearFrom;
+
+  final int? yearTo;
+
+  final int page;
+
+  @override
+  String toString() {
+    return 'SearchedFilmsRouteArgs{key: $key, keyword: $keyword, countries: $countries, genres: $genres, yearFrom: $yearFrom, yearTo: $yearTo, page: $page}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! SearchedFilmsRouteArgs) return false;
+    return key == other.key &&
+        keyword == other.keyword &&
+        const _i18.ListEquality<int>().equals(countries, other.countries) &&
+        const _i18.ListEquality<int>().equals(genres, other.genres) &&
+        yearFrom == other.yearFrom &&
+        yearTo == other.yearTo &&
+        page == other.page;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^
+      keyword.hashCode ^
+      const _i18.ListEquality<int>().hash(countries) ^
+      const _i18.ListEquality<int>().hash(genres) ^
+      yearFrom.hashCode ^
+      yearTo.hashCode ^
+      page.hashCode;
 }
 
 /// generated route for

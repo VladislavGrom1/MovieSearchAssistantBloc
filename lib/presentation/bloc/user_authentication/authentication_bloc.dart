@@ -11,7 +11,7 @@ part 'authentication_state.dart';
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
   final AuthenticationUseCase authenticationUseCase;
   AuthenticationBloc({required this.authenticationUseCase}) : super(AuthenticationInitial()) {
-    on<TryAuthenticationEvent>((event, emit) => _tryAuthentication(event, emit));
+    on<TryAuthenticationEvent>(_tryAuthentication);
   }
 
   Future<void> _tryAuthentication(TryAuthenticationEvent event, Emitter emit) async {

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
-import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/bloc/authentication_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
 
 @RoutePage()
 class UserAuthenticationScreen extends StatefulWidget {

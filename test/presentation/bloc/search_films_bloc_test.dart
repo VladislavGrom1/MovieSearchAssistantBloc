@@ -51,7 +51,7 @@ void main(){
       act: (bloc) => bloc.add(DisplayFilmCollectionsEvent()),
       expect: () => <SearchFilmsState>[
         SearchFilmsLoading(),
-        CollectionsFilmsLoadedSuccesful(filmCollectionsMap: testfilmCardEntityList)
+        CollectionsFilmsLoadedSuccessful(filmCollectionsMap: testfilmCardEntityList)
       ],
       verify: (_) {
         verify(() => mockDisplayFilmCollectionsUseCase.call(FilmCollectionNames.filmCollectionNames)).called(1);

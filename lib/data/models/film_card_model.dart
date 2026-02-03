@@ -29,20 +29,37 @@ class FilmCardModel {
     this.posterUrlPreview
   });
 
-  factory FilmCardModel.fromObject(FilmCollectionResponseItems object){
+  factory FilmCardModel.fromFilmCollectionResponseItems(FilmCollectionResponseItems film){
     return FilmCardModel(
-      kinopoiskId: object.kinopoiskId,
-      nameRu: object.nameRu,
-      nameEn: object.nameEn,
-      nameOriginal: object.nameOriginal,
-      countries: object.countries?.map((country) => country.country).toList(),
-      genres: object.genres?.map((genre) => genre.genre).toList(),
-      ratingKinopoisk: object.ratingKinopoisk,
-      ratingImbd: object.ratingImbd,
-      year: object.year,
-      type: object.type?.name,
-      posterUrl: object.posterUrl,
-      posterUrlPreview: object.posterUrlPreview
+      kinopoiskId: film.kinopoiskId,
+      nameRu: film.nameRu,
+      nameEn: film.nameEn,
+      nameOriginal: film.nameOriginal,
+      countries: film.countries?.map((country) => country.country).toList(),
+      genres: film.genres?.map((genre) => genre.genre).toList(),
+      ratingKinopoisk: film.ratingKinopoisk,
+      ratingImbd: film.ratingImbd,
+      year: film.year,
+      type: film.type?.name,
+      posterUrl: film.posterUrl,
+      posterUrlPreview: film.posterUrlPreview
+    );
+  }
+
+  factory FilmCardModel.fromFilmSearchByFiltersResponseItems(FilmSearchByFiltersResponseItems film){
+    return FilmCardModel(
+      kinopoiskId: film.kinopoiskId,
+      nameRu: film.nameRu,
+      nameEn: film.nameEn,
+      nameOriginal: film.nameOriginal,
+      countries: film.countries?.map((country) => country.country).toList(),
+      genres: film.genres?.map((genre) => genre.genre).toList(),
+      ratingKinopoisk: film.ratingKinopoisk,
+      ratingImbd: film.ratingImdb,
+      year: film.year?.toInt(),
+      type: film.type?.name,
+      posterUrl: film.posterUrl,
+      posterUrlPreview: film.posterUrlPreview
     );
   }
 }

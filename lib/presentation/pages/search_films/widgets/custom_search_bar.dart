@@ -84,8 +84,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 if (keyword == "") {
                   return;
                 } else {
-                  _clearText();
                   widget.onSearchSubmitted(_searchController.text);
+                  _clearText();
                 }
               },
               cursorColor: Colors.black,

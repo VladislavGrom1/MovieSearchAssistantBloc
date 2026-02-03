@@ -26,5 +26,4 @@ class DioApiClient {
   void updateApiKeyHeaders(String? newApiKey){
     _apiKey = newApiKey;
   }
-
 }

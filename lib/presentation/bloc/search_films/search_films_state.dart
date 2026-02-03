@@ -11,9 +11,9 @@ final class SearchFilmsInitial extends SearchFilmsState {}
 
 final class SearchFilmsLoading extends SearchFilmsState{}
 
-final class CollectionsFilmsLoadedSuccesful extends SearchFilmsState{
+final class CollectionsFilmsLoadedSuccessful extends SearchFilmsState{
   Map<String, List<FilmCardEntity>?>? filmCollectionsMap;
-  CollectionsFilmsLoadedSuccesful({required this.filmCollectionsMap});
+  CollectionsFilmsLoadedSuccessful({required this.filmCollectionsMap});
 
   @override
   List<Object> get props => [if (filmCollectionsMap != null) filmCollectionsMap!];

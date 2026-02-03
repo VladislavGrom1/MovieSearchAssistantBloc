@@ -8,7 +8,7 @@ import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exc
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/authentication_use_case.dart';
-import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/bloc/authentication_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
 
 class MockAuthenticationUseCase extends Mock implements AuthenticationUseCase {}
 

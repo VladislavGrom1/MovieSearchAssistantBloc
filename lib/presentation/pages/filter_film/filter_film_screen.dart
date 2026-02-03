@@ -1,12 +1,9 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/country_ids.dart';
-import 'package:movie_search_assistant_bloc/app/util/constants/filter_labels.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/genre_ids.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/filter_data.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
@@ -23,13 +20,9 @@ class FilterFilmScreen extends StatefulWidget {
 class _FilterFilmScreenState extends State<FilterFilmScreen> {
   final _filterFilmBloc = getIt<FilterFilmBloc>();
 
-  // TODO: Реализовать передачу параметра (Тип фильтрации) при роуте на FilterListScreen
-  // TODO: Реализовать получение результата при переходе обратно
-
   @override
   void initState() {
     super.initState();
-    // Загружаем фильтры при инициализации
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _filterFilmBloc.add(LoadFilters());
     });
@@ -38,23 +31,28 @@ class _FilterFilmScreenState extends State<FilterFilmScreen> {
   String _showSelectedFilter(FilterType type, FiltersLoaded state) {
     switch (type) {
       case FilterType.countries:
-        if(state.country == -1) return "Все страны";
+        if (state.country == null) return "Все страны";
         final entry = CountriesIds.countriesMap.entries.firstWhere((entry) => entry.value == state.country);
         return entry.key;
       case FilterType.genres:
-        if(state.genre == -1) return "Все жанры";
-        final entry = GenresIds.genresMap.entries.firstWhere((entry) => entry.value == state.genre);
+        if (state.genre == null) return "Все жанры";
+        final entry = GenresIds.genresMap.entries
+            .firstWhere((entry) => entry.value == state.genre);
         return entry.key;
       case FilterType.years:
-        return state.years;
+        if (state.years == null) return "Все годы";
+        return state.years!;
     }
   }
 
   String _filterTypeToString(FilterType type) {
     switch (type) {
-      case FilterType.countries: return 'Страны';
-      case FilterType.genres: return 'Жанры';
-      case FilterType.years: return 'Годы';
+      case FilterType.countries:
+        return 'Страны';
+      case FilterType.genres:
+        return 'Жанры';
+      case FilterType.years:
+        return 'Годы';
     }
   }
 
@@ -68,98 +66,93 @@ class _FilterFilmScreenState extends State<FilterFilmScreen> {
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.only(left: 20.w, right: 20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                BlocBuilder<FilterFilmBloc, FilterFilmState>(
-                  bloc: _filterFilmBloc,
-                  builder: (context, state) {
+            child: BlocBuilder<FilterFilmBloc, FilterFilmState>(
+              bloc: _filterFilmBloc,
+              builder: (context, state) {
+                if (state is FiltersLoaded) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                          height: 180.h,
+                          child: ListView.separated(
+                              physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                final filterType = FilterType.values[index];
 
-                    if(state is FiltersLoaded){
-                      return SizedBox(
-                        height: 180.h,
-                        child: ListView.separated(
-                            physics: NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              final filterType = FilterType.values[index];
-
-                              return InkWell(
+                                return InkWell(
                                   onTap: () async {
-                                    final result = await context.router.push<dynamic>(FilterListRoute(filterType: filterType));
-                                    if (result != null){
-                                      _filterFilmBloc.add(UpdateFilterValue(filterType: filterType, value: result));
-                                    }
+                                    final filterTypeString = filterType.toString().split('.').last;
+                                    final result = await context.router.push<dynamic>(FilterListRoute(filterType: filterTypeString));
+                                    _filterFilmBloc.add(UpdateFilterValue(
+                                          filterType: filterType,
+                                          value: result
+                                    ));
                                   },
                                   child: Container(
                                     height: 48.h,
                                     width: double.infinity,
                                     color: Colors.purple,
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
+                                        Text(_filterTypeToString(filterType),
+                                            style:
+                                                TextStyle(color: Colors.white)),
                                         Text(
-                                          _filterTypeToString(filterType),
-                                          style:TextStyle(color: Colors.white)
-                                        ),
-                                        Text(
-                                          _showSelectedFilter(filterType, state), 
-                                          style:TextStyle(color: Colors.white)
-                                        ),
-                                        // Obx(() => Text(
-                                        //   controller.switchFilterData(index),
-                                        //   style: CustomTextStyles.m3BodyLarge(color: AppColors.primaryScheme)))
+                                            _showSelectedFilter(
+                                                filterType, state),
+                                            style:
+                                                TextStyle(color: Colors.white)),
                                       ],
                                     ),
                                   ),
                                 );
-                            },
-                            separatorBuilder: (context, index) => Divider(
-                                  color: Colors.purple,
-                                ),
-                            itemCount: 3)
-                      );
-                    }
-                    return Center(child: CircularProgressIndicator());
-                  },
-                ),
-                SizedBox(height: 20.h),
-                ElevatedButton(
-                  style: ButtonStyle(
-                      minimumSize:
-                          WidgetStatePropertyAll(Size(double.infinity, 40.h)),
-                      alignment: AlignmentGeometry.center,
-                      backgroundColor: WidgetStatePropertyAll(Colors.purple)),
-                  onPressed: () {
-                    // Get.toNamed(
-                    //   Routes.searchFiltersScreen,
-                    //   arguments: {
-                    //     "id": "SwitchFilterScreen",
-                    //     "countries": controller.countryValueToBuiltList(),
-                    //     "genres": controller.genreValueToBuiltList(),
-                    //     "years": controller.getYearsValue()
-                    //     },
-                    //   id: NavigatorIds.searchHome);
-                  },
-                  child:
-                      Text("Показать", style: TextStyle(color: Colors.white)),
-                ),
-                ElevatedButton(
-                  style: ButtonStyle(
-                      minimumSize:
-                          WidgetStatePropertyAll(Size(double.infinity, 40.h)),
-                      alignment: AlignmentGeometry.center,
-                      backgroundColor: WidgetStatePropertyAll(Colors.purple)),
-                  onPressed: () {
-                    //controller.resetFilters();
-                  },
-                  child: Text("Сбросить поиск",
-                      style: TextStyle(color: Colors.white)),
-                ),
-              ],
+                              },
+                              separatorBuilder: (context, index) => Divider(
+                                    color: Colors.purple,
+                                  ),
+                              itemCount: 3)),
+                      SizedBox(height: 20.h),
+                      ElevatedButton(
+                        style: ButtonStyle(
+                            minimumSize: WidgetStatePropertyAll(
+                                Size(double.infinity, 40.h)),
+                            alignment: AlignmentGeometry.center,
+                            backgroundColor:
+                                WidgetStatePropertyAll(Colors.purple)),
+                        onPressed: () {
+                          context.router.push(SearchedFilmsRoute(
+                              keyword: null,
+                              countries: state.country == null ? null : List.filled(1, state.country!),
+                              genres: state.genre == null ? null : List.filled(1, state.genre!),
+                              page: 1));
+                        },
+                        child: Text("Показать",
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                      ElevatedButton(
+                        style: ButtonStyle(
+                            minimumSize: WidgetStatePropertyAll(
+                                Size(double.infinity, 40.h)),
+                            alignment: AlignmentGeometry.center,
+                            backgroundColor:
+                                WidgetStatePropertyAll(Colors.purple)),
+                        onPressed: () {
+                          _filterFilmBloc.add(ResetFilters());
+                        },
+                        child: Text("Сбросить поиск",
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  );
+                }
+                return Center(child: CircularProgressIndicator());
+              },
             ),
           ),
-        )
-      );
+        ));
   }
 }

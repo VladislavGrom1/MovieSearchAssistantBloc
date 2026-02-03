@@ -14,19 +14,22 @@ class FiltersLoaded extends FilterFilmState {
   
   const FiltersLoaded({
     this.filters = const {
-      FilterType.countries: -1,
-      FilterType.genres: -1,
+      FilterType.countries: null,
+      FilterType.genres: null,
       FilterType.years: 'Все годы',
     },
   });
   
-  int get country => filters[FilterType.countries] as int;
-  int get genre => filters[FilterType.genres] as int;
-  String get years => filters[FilterType.years] as String;
+  int? get country => filters[FilterType.countries] as int?;
+  int? get genre => filters[FilterType.genres] as int?;
+  String? get years => filters[FilterType.years] as String?;
   
   // Для удобства
-  (int, int) get yearRange {
+  (int, int)? get yearRange {
     final yearsValue = years;
+    if(yearsValue == null){
+      return null;
+    }
     if (yearsValue.contains('-')) {
       final parts = yearsValue.split('-');
       return (int.parse(parts[0]), int.parse(parts[1]));

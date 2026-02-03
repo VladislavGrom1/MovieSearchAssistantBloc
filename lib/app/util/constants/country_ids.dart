@@ -1,6 +1,6 @@
 class CountriesIds {
   static Map<String, int?> countriesMap = {
-    "Все страны": -1,
+    "Все страны": null,
     "США": 1,
     "СССР": 33,
     "Россия": 34,

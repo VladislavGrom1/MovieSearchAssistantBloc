@@ -11,7 +11,7 @@ class FilterListScreen extends StatefulWidget {
     @PathParam("filterType") required this.filterType
   });
 
-  final dynamic filterType;
+  final String filterType;
 
   @override
   State<FilterListScreen> createState() => _FilterListScreenState();
@@ -22,19 +22,31 @@ class _FilterListScreenState extends State<FilterListScreen> {
 
   @override
   void initState() {
-    filterData = FilterData.fromType(widget.filterType.name);
+    filterData = FilterData.fromType(widget.filterType);
     super.initState();
   }
 
-  FilterData getFilterData(String filterType) {
-    return FilterData.fromType(filterType);
+  FilterType _stringToFilterType(String type) {
+    switch (type) {
+      case 'countries':
+        return FilterType.countries;
+      case 'genres':
+        return FilterType.genres;
+      case 'years':
+        return FilterType.years;
+      default:
+        throw ArgumentError('Unknown filter type: $type');
+    }
   }
 
-  String _filterTypeToString(FilterType type) {
-    switch (type) {
-      case FilterType.countries: return 'Страны';
-      case FilterType.genres: return 'Жанры';
-      case FilterType.years: return 'Годы';
+  String _filterTypeToString() {
+    switch (_stringToFilterType(widget.filterType)) {
+      case FilterType.countries:
+        return 'Страны';
+      case FilterType.genres:
+        return 'Жанры';
+      case FilterType.years:
+        return 'Годы';
     }
   }
 
@@ -43,7 +55,7 @@ class _FilterListScreenState extends State<FilterListScreen> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: Text(_filterTypeToString(widget.filterType), style: TextStyle(color: Colors.white)),
+          title: Text(_filterTypeToString(), style: TextStyle(color: Colors.white)),
         ),
         body: SafeArea(
           child: Padding(

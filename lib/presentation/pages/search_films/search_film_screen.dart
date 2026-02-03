@@ -29,7 +29,6 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
   }
 
   void onSearchSubmitted(String keyword){
-    // TODO: Доработать передачу аргумента при переходе
     context.router.push(SearchedFilmsRoute(keyword: keyword, page: 1));
   }
 

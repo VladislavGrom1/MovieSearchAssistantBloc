@@ -39,16 +39,14 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchedFilmsBloc.add(DisplaySearchedFilms(
+    _searchedFilmsBloc.add(DisplaySearchedFilms(
         keyword: widget.keyword,
         countries: widget.countries,
         genres: widget.genres,
         yearFrom: widget.yearFrom,
         yearTo: widget.yearTo,
         page: widget.page
-      ));
-    });
+    ));
   }
 
   @override
@@ -71,7 +69,7 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
                       _searchedFilmsBloc.add(DisplaySearchedFilms(
                         keyword: widget.keyword,
                         countries: widget.countries,
-                        genres: widget.countries,
+                        genres: widget.genres,
                         yearFrom: widget.yearFrom,
                         yearTo: widget.yearTo,
                         page: widget.page
@@ -101,7 +99,6 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20.h),
               ],
             ),
           ),

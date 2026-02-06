@@ -12,19 +12,37 @@ final class SearchedFilmsInitial extends SearchedFilmsState {}
 final class SearchedFilmsLoading extends SearchedFilmsState{}
 
 final class SearchedFilmsLoadedSuccessful extends SearchedFilmsState{
-  List<FilmCardEntity> searchedFilms;
+  final List<FilmCardEntity> searchedFilms;
+  final bool isLoadingMore;
+  final bool hasReachedMax;
 
-  SearchedFilmsLoadedSuccessful({required this.searchedFilms});
+  const SearchedFilmsLoadedSuccessful({
+    required this.searchedFilms,
+    this.isLoadingMore = false,
+    this.hasReachedMax = false
+  });
+
+  SearchedFilmsLoadedSuccessful copyWith({
+    List<FilmCardEntity>? searchedFilms,
+    bool? isLoadingMore,
+    bool? hasReachedMax,
+  }) {
+    return SearchedFilmsLoadedSuccessful(
+      searchedFilms: searchedFilms ?? this.searchedFilms,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+    );
+  }
 
   @override
-  List<Object> get props => [searchedFilms];
+  List<Object> get props => [searchedFilms, isLoadingMore, hasReachedMax];
 }
 
 final class SearchedFilmsLoadedFailure extends SearchedFilmsState{
   final String exceptionType;
   final int? statusCode;
   
-  SearchedFilmsLoadedFailure({required this.exceptionType, this.statusCode});
+  const SearchedFilmsLoadedFailure({required this.exceptionType, this.statusCode});
 
   @override
   List<Object> get props => [exceptionType, if (statusCode != null) statusCode!];

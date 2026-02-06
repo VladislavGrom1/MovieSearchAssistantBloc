@@ -3,20 +3,20 @@ import 'package:equatable/equatable.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_card_model.dart';
 
 class FilmCardEntity extends Equatable {
-  int? kinopoiskId;
-  String? nameRu;
-  String? nameEn;
-  String? nameOriginal;
-  List<String>? countries;
-  List<String>? genres;
-  num? ratingKinopoisk;
-  num? ratingImbd;
-  int? year;
-  String? type;
-  String? posterUrl;
-  String? posterUrlPreview;
+  final int? kinopoiskId;
+  final String? nameRu;
+  final String? nameEn;
+  final String? nameOriginal;
+  final List<String>? countries;
+  final List<String>? genres;
+  final num? ratingKinopoisk;
+  final num? ratingImbd;
+  final int? year;
+  final String? type;
+  final String? posterUrl;
+  final String? posterUrlPreview;
 
-  FilmCardEntity({
+  const FilmCardEntity({
     this.kinopoiskId,
     this.nameRu,
     this.nameEn,

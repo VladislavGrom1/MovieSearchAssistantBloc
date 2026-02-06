@@ -32,7 +32,8 @@ class _FilterFilmScreenState extends State<FilterFilmScreen> {
     switch (type) {
       case FilterType.countries:
         if (state.country == null) return "Все страны";
-        final entry = CountriesIds.countriesMap.entries.firstWhere((entry) => entry.value == state.country);
+        final entry = CountriesIds.countriesMap.entries
+            .firstWhere((entry) => entry.value == state.country);
         return entry.key;
       case FilterType.genres:
         if (state.genre == null) return "Все жанры";
@@ -56,6 +57,10 @@ class _FilterFilmScreenState extends State<FilterFilmScreen> {
     }
   }
 
+  void updateFilterValue(FilterType filterType, String result) {
+    _filterFilmBloc.add(UpdateFilterValue(filterType: filterType, value: result));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,91 +75,84 @@ class _FilterFilmScreenState extends State<FilterFilmScreen> {
               bloc: _filterFilmBloc,
               builder: (context, state) {
                 if (state is FiltersLoaded) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                          height: 180.h,
-                          child: ListView.separated(
-                              physics: NeverScrollableScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                final filterType = FilterType.values[index];
-
-                                return InkWell(
-                                  onTap: () async {
-                                    final filterTypeString = filterType.toString().split('.').last;
-                                    final result = await context.router.push<dynamic>(FilterListRoute(filterType: filterTypeString));
-                                    _filterFilmBloc.add(UpdateFilterValue(
-                                          filterType: filterType,
-                                          value: result
-                                    ));
-                                  },
-                                  child: Container(
-                                    height: 48.h,
-                                    width: double.infinity,
-                                    color: Colors.purple,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(_filterTypeToString(filterType),
-                                            style:
-                                                TextStyle(color: Colors.white)),
-                                        Text(
-                                            _showSelectedFilter(
-                                                filterType, state),
-                                            style:
-                                                TextStyle(color: Colors.white)),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                              separatorBuilder: (context, index) => Divider(
-                                    color: Colors.purple,
-                                  ),
-                              itemCount: 3)),
-                      SizedBox(height: 20.h),
-                      ElevatedButton(
-                        style: ButtonStyle(
-                            minimumSize: WidgetStatePropertyAll(
-                                Size(double.infinity, 40.h)),
-                            alignment: AlignmentGeometry.center,
-                            backgroundColor:
-                                WidgetStatePropertyAll(Colors.purple)),
-                        onPressed: () {
-                          context.router.push(SearchedFilmsRoute(
-                              keyword: null,
-                              countries: state.country == null ? null : List.filled(1, state.country!),
-                              genres: state.genre == null ? null : List.filled(1, state.genre!),
-                              page: 1,
-                              appBarTitle: "Результаты"
-                              ));
-                        },
-                        child: Text("Показать",
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                      ElevatedButton(
-                        style: ButtonStyle(
-                            minimumSize: WidgetStatePropertyAll(
-                                Size(double.infinity, 40.h)),
-                            alignment: AlignmentGeometry.center,
-                            backgroundColor:
-                                WidgetStatePropertyAll(Colors.purple)),
-                        onPressed: () {
-                          _filterFilmBloc.add(ResetFilters());
-                        },
-                        child: Text("Сбросить поиск",
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  );
+                  return _buildFilters(state);
                 }
                 return Center(child: CircularProgressIndicator());
               },
             ),
           ),
         ));
+  }
+
+  Widget _buildFilters(FiltersLoaded state) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        SizedBox(
+            height: 180.h,
+            child: ListView.separated(
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final filterType = FilterType.values[index];
+
+                  return InkWell(
+                    onTap: () async {
+                      final filterTypeString =
+                          filterType.toString().split('.').last;
+                      final result = await context.router.push<dynamic>(
+                          FilterListRoute(filterType: filterTypeString));
+                      updateFilterValue(filterType, result);
+                    },
+                    child: Container(
+                      height: 48.h,
+                      width: double.infinity,
+                      color: Colors.purple,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(_filterTypeToString(filterType),
+                              style: TextStyle(color: Colors.white)),
+                          Text(_showSelectedFilter(filterType, state),
+                              style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) => Divider(
+                      color: Colors.purple,
+                    ),
+                itemCount: 3)),
+        SizedBox(height: 20.h),
+        ElevatedButton(
+          style: ButtonStyle(
+              minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
+              alignment: AlignmentGeometry.center,
+              backgroundColor: WidgetStatePropertyAll(Colors.purple)),
+          onPressed: () {
+            context.router.push(SearchedFilmsRoute(
+                keyword: null,
+                countries: state.country == null
+                    ? null
+                    : List.filled(1, state.country!),
+                genres:
+                    state.genre == null ? null : List.filled(1, state.genre!),
+                appBarTitle: "Результаты"));
+          },
+          child: Text("Показать", style: TextStyle(color: Colors.white)),
+        ),
+        ElevatedButton(
+          style: ButtonStyle(
+              minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
+              alignment: AlignmentGeometry.center,
+              backgroundColor: WidgetStatePropertyAll(Colors.purple)),
+          onPressed: () {
+            _filterFilmBloc.add(ResetFilters());
+          },
+          child: Text("Сбросить поиск", style: TextStyle(color: Colors.white)),
+        ),
+      ],
+    );
   }
 }

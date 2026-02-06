@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/film_card_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
 
@@ -15,7 +14,6 @@ class SearchedFilmsScreen extends StatefulWidget {
   final int? yearFrom;
   final int? yearTo;
   final String appBarTitle;
-  final int page;
   
   const SearchedFilmsScreen({
     super.key,
@@ -26,37 +24,82 @@ class SearchedFilmsScreen extends StatefulWidget {
     this.yearFrom,
     this.yearTo,
     required this.appBarTitle,
-    required this.page
   });
 
   @override
   State<SearchedFilmsScreen> createState() => _SearchedFilmsScreenState();
 }
 
-// TODO: Реализовать пагинацию 
-
 class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
   final _searchedFilmsBloc = getIt<SearchedFilmsBloc>();
+  final _scrollController = ScrollController();
+  bool isSearchCollectionFilms = false;
 
   @override
   void initState() {
     super.initState();
-    if(widget.nameCollection != null){
-      _searchedFilmsBloc.add(
-        DisplaySearchedCollectionFilms(
-          nameCollection: widget.nameCollection!, 
-          page: 1
-      ));
+    isSearchCollectionFilms = widget.nameCollection != null;
+
+    if(isSearchCollectionFilms){
+      searchCollectionFilms();
     } else{
-      _searchedFilmsBloc.add(DisplaySearchedFilterFilms(
+      searchFilterFilms();
+    }
+
+    scrollControllerAddListener();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _scrollController.dispose();
+  }
+
+  void scrollControllerAddListener(){
+    _scrollController.addListener(() {
+      final isReadyToLoadMore = _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200;
+
+      if (isReadyToLoadMore && isSearchCollectionFilms) {
+        loadNextSearchedCollectionFilms();
+      }
+      if (isReadyToLoadMore && !isSearchCollectionFilms){
+        loadNextSearchedFilterFilms();
+      }
+    });
+  }
+
+  void loadNextSearchedFilterFilms() {
+    _searchedFilmsBloc.add(LoadNextSearchedFilterFilmsPage(
+      keyword: widget.keyword,
+      countries: widget.countries,
+      genres: widget.genres,
+      yearFrom: widget.yearFrom,
+      yearTo: widget.yearTo
+    ));
+  }
+
+  void loadNextSearchedCollectionFilms() {
+    _searchedFilmsBloc.add(LoadNextSearchedCollectionFilmsPage(
+      nameCollection: widget.nameCollection!
+    ));
+  }
+
+  void searchCollectionFilms(){
+    _searchedFilmsBloc.add(DisplaySearchedCollectionFilms(
+        nameCollection: widget.nameCollection!, 
+        page: 1
+    ));
+  }
+
+  void searchFilterFilms(){
+    _searchedFilmsBloc.add(DisplaySearchedFilterFilms(
         keyword: widget.keyword,
         countries: widget.countries,
         genres: widget.genres,
         yearFrom: widget.yearFrom,
         yearTo: widget.yearTo,
-        page: widget.page
-      ));
-    }
+        page: 1
+    ));
   }
 
   @override
@@ -79,14 +122,11 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      _searchedFilmsBloc.add(DisplaySearchedFilterFilms(
-                        keyword: widget.keyword,
-                        countries: widget.countries,
-                        genres: widget.genres,
-                        yearFrom: widget.yearFrom,
-                        yearTo: widget.yearTo,
-                        page: widget.page
-                      ));
+                      if(isSearchCollectionFilms){
+                        searchCollectionFilms();
+                      } else{
+                        searchFilterFilms();
+                      }
                     },
                     child: BlocBuilder<SearchedFilmsBloc, SearchedFilmsState>(
                       bloc: _searchedFilmsBloc,
@@ -94,18 +134,11 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
                         if (state is SearchedFilmsLoading) {
                           return Center(child: CircularProgressIndicator());
                         }
-
                         if (state is SearchedFilmsLoadedFailure) {
                           return Center(child: Text("${state.exceptionType} ${state.statusCode}"));
                         }
-
                         if (state is SearchedFilmsLoadedSuccessful) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(child: _buildFilterFilms(state.searchedFilms)),
-                            ],
-                          );
+                          return _buildSearchedFilms(state);
                         }
                         return SizedBox();
                       },
@@ -120,10 +153,24 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
 
   // TODO: Доработать отображение карточки фильмов (не все данные + покрытие NULL значений)
 
-  Widget _buildFilterFilms(List<FilmCardEntity> filterFilms){
+  Widget _buildSearchedFilms(SearchedFilmsLoadedSuccessful state){
+    final searchedFilms = state.searchedFilms;
+    
     return ListView.separated(
+        controller: _scrollController,
         itemBuilder: (context, index) {
+          
+          if (index >= state.searchedFilms.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          
+          final searchedFilm = searchedFilms[index];
+
           return InkWell(
+            // TODO: Переход на экран FilmScreen
             onTap: () {},
             child: Card(
               color: Colors.grey,
@@ -146,18 +193,22 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
                       children: [
                         SizedBox(height: 5.h),
                         Text(
-                          filterFilms[index].nameRu == null ? filterFilms[index].nameOriginal.toString() : filterFilms[index].nameRu.toString(), 
-                          //style: CustomTextStyles.m3TitleLarge2(),
+                          searchedFilm.nameRu == null 
+                          ? searchedFilm.nameOriginal.toString() 
+                          : searchedFilm.nameRu.toString(), 
                           overflow: TextOverflow.ellipsis,
                           maxLines: 2),
                         SizedBox(height: 10.h),
                         Text(
-                          filterFilms[index].nameOriginal == null ? "-" : filterFilms[index].nameOriginal.toString(),
-                          //style: CustomTextStyles.m3BodySmall(),
+                          searchedFilm.nameOriginal == null 
+                          ? "-" 
+                          : searchedFilm.nameOriginal.toString(),
                         ),
                         SizedBox(height: 10.h),
                         Text(
-                          filterFilms[index].countries!.isEmpty ? "${filterFilms[index].year}" : "${filterFilms[index].countries.toString()}, ${filterFilms[index].year}",
+                          searchedFilms[index].countries!.isEmpty 
+                          ? "${searchedFilm.year}" 
+                          : "${searchedFilm.countries.toString()}, ${searchedFilm.year}",
                         ),
                         SizedBox(height: 10.h),
                       ]
@@ -169,6 +220,7 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
           );
         },
         separatorBuilder: (context, index) => SizedBox(height: 12.h),
-        itemCount: filterFilms.length);
+        itemCount: state.searchedFilms.length + (state.isLoadingMore ? 1 : 0),
+        );
   }
 }

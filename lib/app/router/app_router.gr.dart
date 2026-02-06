@@ -240,7 +240,6 @@ class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
     int? yearFrom,
     int? yearTo,
     required String appBarTitle,
-    required int page,
     List<_i16.PageRouteInfo>? children,
   }) : super(
           SearchedFilmsRoute.name,
@@ -253,7 +252,6 @@ class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
             yearFrom: yearFrom,
             yearTo: yearTo,
             appBarTitle: appBarTitle,
-            page: page,
           ),
           initialChildren: children,
         );
@@ -273,7 +271,6 @@ class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
         yearFrom: args.yearFrom,
         yearTo: args.yearTo,
         appBarTitle: args.appBarTitle,
-        page: args.page,
       );
     },
   );
@@ -289,7 +286,6 @@ class SearchedFilmsRouteArgs {
     this.yearFrom,
     this.yearTo,
     required this.appBarTitle,
-    required this.page,
   });
 
   final _i17.Key? key;
@@ -308,11 +304,9 @@ class SearchedFilmsRouteArgs {
 
   final String appBarTitle;
 
-  final int page;
-
   @override
   String toString() {
-    return 'SearchedFilmsRouteArgs{key: $key, nameCollection: $nameCollection, keyword: $keyword, countries: $countries, genres: $genres, yearFrom: $yearFrom, yearTo: $yearTo, appBarTitle: $appBarTitle, page: $page}';
+    return 'SearchedFilmsRouteArgs{key: $key, nameCollection: $nameCollection, keyword: $keyword, countries: $countries, genres: $genres, yearFrom: $yearFrom, yearTo: $yearTo, appBarTitle: $appBarTitle}';
   }
 
   @override
@@ -326,8 +320,7 @@ class SearchedFilmsRouteArgs {
         const _i18.ListEquality<int>().equals(genres, other.genres) &&
         yearFrom == other.yearFrom &&
         yearTo == other.yearTo &&
-        appBarTitle == other.appBarTitle &&
-        page == other.page;
+        appBarTitle == other.appBarTitle;
   }
 
   @override
@@ -339,8 +332,7 @@ class SearchedFilmsRouteArgs {
       const _i18.ListEquality<int>().hash(genres) ^
       yearFrom.hashCode ^
       yearTo.hashCode ^
-      appBarTitle.hashCode ^
-      page.hashCode;
+      appBarTitle.hashCode;
 }
 
 /// generated route for

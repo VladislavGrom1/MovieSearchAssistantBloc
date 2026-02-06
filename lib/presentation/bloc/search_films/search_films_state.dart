@@ -12,8 +12,8 @@ final class SearchFilmsInitial extends SearchFilmsState {}
 final class SearchFilmsLoading extends SearchFilmsState{}
 
 final class CollectionsFilmsLoadedSuccessful extends SearchFilmsState{
-  Map<String, List<FilmCardEntity>?>? filmCollectionsMap;
-  CollectionsFilmsLoadedSuccessful({required this.filmCollectionsMap});
+  final Map<String, List<FilmCardEntity>?>? filmCollectionsMap;
+  const CollectionsFilmsLoadedSuccessful({required this.filmCollectionsMap});
 
   @override
   List<Object> get props => [if (filmCollectionsMap != null) filmCollectionsMap!];
@@ -23,7 +23,7 @@ final class CollectionsFilmsLoadedFailure extends SearchFilmsState{
   final String exceptionType;
   final int? statusCode;
   
-  CollectionsFilmsLoadedFailure({required this.exceptionType, this.statusCode});
+  const CollectionsFilmsLoadedFailure({required this.exceptionType, this.statusCode});
 
   @override
   List<Object> get props => [exceptionType, if (statusCode != null) statusCode!];

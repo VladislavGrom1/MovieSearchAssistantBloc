@@ -1,5 +1,5 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_card_entity.dart';
@@ -12,16 +12,34 @@ part 'searched_films_state.dart';
 class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
   final SearchFilterFilmsUseCase searchFilterFilmsUseCase;
   final SearchCollectionFilmsUseCase searchCollectionFilmsUseCase;
+  int currentPage;
+  bool hasReachedMax; 
+
   SearchedFilmsBloc({
     required this.searchFilterFilmsUseCase,
-    required this.searchCollectionFilmsUseCase
+    required this.searchCollectionFilmsUseCase,
+    this.currentPage = 1,
+    this.hasReachedMax = false
     }) : super(SearchedFilmsInitial()) {
     on<DisplaySearchedFilterFilms>(_displaySearchedFilterFilms);
     on<DisplaySearchedCollectionFilms>(_displaySearchedCollectionFilms);
+    on<LoadNextSearchedFilterFilmsPage>(_loadNextSearchedFilmsPage);
+    on<LoadNextSearchedCollectionFilmsPage>(_loadNextCollectionFilmsPage);
   }
 
   Future<void> _displaySearchedFilterFilms(DisplaySearchedFilterFilms event, Emitter emit) async{
     emit(SearchedFilmsLoading());
+
+    currentPage = 1;
+    hasReachedMax = false;
+
+    emit(SearchedFilmsLoadedSuccessful(
+        searchedFilms: [],
+        isLoadingMore: false,
+        hasReachedMax: false,
+      ),
+    );
+
     try{
       List<FilmCardEntity>? filterFilms = await searchFilterFilmsUseCase.call(
         event.keyword, 
@@ -47,6 +65,10 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
 
   Future<void> _displaySearchedCollectionFilms(DisplaySearchedCollectionFilms event, Emitter emit) async{
     emit(SearchedFilmsLoading());
+
+    currentPage = 1;
+    hasReachedMax = false;
+
     try{
       List<FilmCardEntity>? collectionFilms = await searchCollectionFilmsUseCase.call(
         event.nameCollection,
@@ -63,6 +85,66 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
       emit(SearchedFilmsLoadedFailure(exceptionType: e.message));
     } catch(e){
       emit(SearchedFilmsLoadedFailure(exceptionType: "Неизвестная ошибка"));
+    }
+  }
+
+  Future<void> _loadNextSearchedFilmsPage(LoadNextSearchedFilterFilmsPage event, Emitter emit) async {
+    final currentState = state;
+    if (currentState is !SearchedFilmsLoadedSuccessful ||
+        currentState.isLoadingMore ||
+        currentState.hasReachedMax) {
+      return;
+    }
+    emit(currentState.copyWith(isLoadingMore: true));
+    currentPage++;
+
+    final newFilms = await searchFilterFilmsUseCase.call(
+      event.keyword,
+      event.countries,
+      event.genres,
+      event.yearFrom,
+      event.yearTo,
+      currentPage,
+    );
+
+    if (newFilms == null || newFilms.isEmpty) {
+      emit(currentState.copyWith(
+        isLoadingMore: false,
+        hasReachedMax: true,
+      ));
+    } else {
+      emit(currentState.copyWith(
+        searchedFilms: [...currentState.searchedFilms, ...newFilms],
+        isLoadingMore: false,
+      ));
+    }
+  }
+
+  Future<void> _loadNextCollectionFilmsPage(LoadNextSearchedCollectionFilmsPage event, Emitter emit) async{
+    final currentState = state;
+    if (currentState is !SearchedFilmsLoadedSuccessful ||
+        currentState.isLoadingMore ||
+        currentState.hasReachedMax) {
+      return;
+    }
+    emit(currentState.copyWith(isLoadingMore: true));
+    currentPage++;
+
+    final newFilms = await searchCollectionFilmsUseCase.call(
+      event.nameCollection,
+      currentPage,
+    );
+
+    if (newFilms == null || newFilms.isEmpty) {
+      emit(currentState.copyWith(
+        isLoadingMore: false,
+        hasReachedMax: true,
+      ));
+    } else {
+      emit(currentState.copyWith(
+        searchedFilms: [...currentState.searchedFilms, ...newFilms],
+        isLoadingMore: false,
+      ));
     }
   }
 }

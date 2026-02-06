@@ -29,11 +29,11 @@ FilmCardEntity _buildFilmCardEntity({
 void main(){
   group("SearchFilmsBloc", () {
 
-    final Map<String, List<FilmCardEntity>?>? testfilmCardEntityList = {
-      FilmCollectionNames.TOP_POPULAR_MOVIES: List.filled(2, _buildFilmCardEntity()),
-      FilmCollectionNames.POPULAR_SERIES: List.filled(2, _buildFilmCardEntity()),
-      FilmCollectionNames.TOP_250_MOVIES: List.filled(2, _buildFilmCardEntity()),
-      FilmCollectionNames.TOP_250_TV_SHOWS: List.filled(2, _buildFilmCardEntity())
+    final Map<String, List<FilmCardEntity>?> testfilmCardEntityList = {
+      FilmCollectionNames.topPopularMovies: List.filled(2, _buildFilmCardEntity()),
+      FilmCollectionNames.popularSeries: List.filled(2, _buildFilmCardEntity()),
+      FilmCollectionNames.top250movies: List.filled(2, _buildFilmCardEntity()),
+      FilmCollectionNames.top250tvShows: List.filled(2, _buildFilmCardEntity())
     };
 
     final mockDisplayFilmCollectionsUseCase = MockDisplayFilmCollectionsUseCase();

@@ -1,5 +1,6 @@
-import 'package:bloc/bloc.dart';
+
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/filter_data.dart';
 
 part 'filter_film_event.dart';

@@ -29,7 +29,7 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
   }
 
   void onSearchSubmitted(String keyword){
-    context.router.push(SearchedFilmsRoute(keyword: keyword, page: 1, appBarTitle: "Поиск: $keyword"));
+    context.router.push(SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
   }
 
   void onFilterSubmitted(){
@@ -99,7 +99,6 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
                       onPressed: () {
                         context.router.push(SearchedFilmsRoute(
                           nameCollection: filmCollectionsNamesList[index],
-                          page: 1, 
                           appBarTitle: filmCollectionsNamesList[index]
                         ));
                       },
@@ -108,7 +107,10 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
               ),
               SizedBox(
                   height: 185.h,
-                  child: _buildFilmCollection(filmCollectionsMap, filmCollectionsNamesList[index]))
+                  child: _buildFilmCollection(
+                    filmCollectionsMap, 
+                    filmCollectionsNamesList[index]
+                  ))
             ],
           );
         },

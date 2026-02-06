@@ -12,12 +12,12 @@ final class SearchedFilmsInitial extends SearchedFilmsState {}
 final class SearchedFilmsLoading extends SearchedFilmsState{}
 
 final class SearchedFilmsLoadedSuccessful extends SearchedFilmsState{
-  List<FilmCardEntity> filterFilms;
+  List<FilmCardEntity> searchedFilms;
 
-  SearchedFilmsLoadedSuccessful({required this.filterFilms});
+  SearchedFilmsLoadedSuccessful({required this.searchedFilms});
 
   @override
-  List<Object> get props => [filterFilms];
+  List<Object> get props => [searchedFilms];
 }
 
 final class SearchedFilmsLoadedFailure extends SearchedFilmsState{

@@ -7,7 +7,7 @@ sealed class SearchedFilmsEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class DisplaySearchedFilms extends SearchedFilmsEvent{
+class DisplaySearchedFilterFilms extends SearchedFilmsEvent{
   String? keyword;
   List<int>? countries;
   List<int>? genres;
@@ -15,12 +15,22 @@ class DisplaySearchedFilms extends SearchedFilmsEvent{
   int? yearTo;
   int page;
 
-  DisplaySearchedFilms({
+  DisplaySearchedFilterFilms({
     this.keyword,
     this.countries,
     this.genres,
     this.yearFrom,
     this.yearTo,
+    required this.page
+  });
+}
+
+class DisplaySearchedCollectionFilms extends SearchedFilmsEvent{
+  String nameCollection;
+  int page;
+
+  DisplaySearchedCollectionFilms({
+    required this.nameCollection,
     required this.page
   });
 }

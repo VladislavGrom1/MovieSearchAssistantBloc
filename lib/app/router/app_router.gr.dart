@@ -133,7 +133,7 @@ class FilterFilmRoute extends _i16.PageRouteInfo<void> {
 class FilterListRoute extends _i16.PageRouteInfo<FilterListRouteArgs> {
   FilterListRoute({
     _i17.Key? key,
-    required dynamic filterType,
+    required String filterType,
     List<_i16.PageRouteInfo>? children,
   }) : super(
           FilterListRoute.name,
@@ -150,7 +150,7 @@ class FilterListRoute extends _i16.PageRouteInfo<FilterListRouteArgs> {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<FilterListRouteArgs>(
         orElse: () =>
-            FilterListRouteArgs(filterType: pathParams.get('filterType')),
+            FilterListRouteArgs(filterType: pathParams.getString('filterType')),
       );
       return _i4.FilterListScreen(key: args.key, filterType: args.filterType);
     },
@@ -162,7 +162,7 @@ class FilterListRouteArgs {
 
   final _i17.Key? key;
 
-  final dynamic filterType;
+  final String filterType;
 
   @override
   String toString() {
@@ -233,22 +233,26 @@ class SearchFilmWrapperRoute extends _i16.PageRouteInfo<void> {
 class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
   SearchedFilmsRoute({
     _i17.Key? key,
+    String? nameCollection,
     String? keyword,
     List<int>? countries,
     List<int>? genres,
     int? yearFrom,
     int? yearTo,
+    required String appBarTitle,
     required int page,
     List<_i16.PageRouteInfo>? children,
   }) : super(
           SearchedFilmsRoute.name,
           args: SearchedFilmsRouteArgs(
             key: key,
+            nameCollection: nameCollection,
             keyword: keyword,
             countries: countries,
             genres: genres,
             yearFrom: yearFrom,
             yearTo: yearTo,
+            appBarTitle: appBarTitle,
             page: page,
           ),
           initialChildren: children,
@@ -262,11 +266,13 @@ class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
       final args = data.argsAs<SearchedFilmsRouteArgs>();
       return _i8.SearchedFilmsScreen(
         key: args.key,
+        nameCollection: args.nameCollection,
         keyword: args.keyword,
         countries: args.countries,
         genres: args.genres,
         yearFrom: args.yearFrom,
         yearTo: args.yearTo,
+        appBarTitle: args.appBarTitle,
         page: args.page,
       );
     },
@@ -276,15 +282,19 @@ class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
 class SearchedFilmsRouteArgs {
   const SearchedFilmsRouteArgs({
     this.key,
+    this.nameCollection,
     this.keyword,
     this.countries,
     this.genres,
     this.yearFrom,
     this.yearTo,
+    required this.appBarTitle,
     required this.page,
   });
 
   final _i17.Key? key;
+
+  final String? nameCollection;
 
   final String? keyword;
 
@@ -296,11 +306,13 @@ class SearchedFilmsRouteArgs {
 
   final int? yearTo;
 
+  final String appBarTitle;
+
   final int page;
 
   @override
   String toString() {
-    return 'SearchedFilmsRouteArgs{key: $key, keyword: $keyword, countries: $countries, genres: $genres, yearFrom: $yearFrom, yearTo: $yearTo, page: $page}';
+    return 'SearchedFilmsRouteArgs{key: $key, nameCollection: $nameCollection, keyword: $keyword, countries: $countries, genres: $genres, yearFrom: $yearFrom, yearTo: $yearTo, appBarTitle: $appBarTitle, page: $page}';
   }
 
   @override
@@ -308,22 +320,26 @@ class SearchedFilmsRouteArgs {
     if (identical(this, other)) return true;
     if (other is! SearchedFilmsRouteArgs) return false;
     return key == other.key &&
+        nameCollection == other.nameCollection &&
         keyword == other.keyword &&
         const _i18.ListEquality<int>().equals(countries, other.countries) &&
         const _i18.ListEquality<int>().equals(genres, other.genres) &&
         yearFrom == other.yearFrom &&
         yearTo == other.yearTo &&
+        appBarTitle == other.appBarTitle &&
         page == other.page;
   }
 
   @override
   int get hashCode =>
       key.hashCode ^
+      nameCollection.hashCode ^
       keyword.hashCode ^
       const _i18.ListEquality<int>().hash(countries) ^
       const _i18.ListEquality<int>().hash(genres) ^
       yearFrom.hashCode ^
       yearTo.hashCode ^
+      appBarTitle.hashCode ^
       page.hashCode;
 }
 

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,20 +8,24 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/sea
 
 @RoutePage()
 class SearchedFilmsScreen extends StatefulWidget {
+  final String? nameCollection;
   final String? keyword;
   final List<int>? countries;
   final List<int>? genres;
   final int? yearFrom;
   final int? yearTo;
+  final String appBarTitle;
   final int page;
   
-  SearchedFilmsScreen({
+  const SearchedFilmsScreen({
     super.key,
+    this.nameCollection,
     this.keyword,
     this.countries,
     this.genres,
     this.yearFrom,
     this.yearTo,
+    required this.appBarTitle,
     required this.page
   });
 
@@ -39,14 +41,22 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
   @override
   void initState() {
     super.initState();
-    _searchedFilmsBloc.add(DisplaySearchedFilms(
+    if(widget.nameCollection != null){
+      _searchedFilmsBloc.add(
+        DisplaySearchedCollectionFilms(
+          nameCollection: widget.nameCollection!, 
+          page: 1
+      ));
+    } else{
+      _searchedFilmsBloc.add(DisplaySearchedFilterFilms(
         keyword: widget.keyword,
         countries: widget.countries,
         genres: widget.genres,
         yearFrom: widget.yearFrom,
         yearTo: widget.yearTo,
         page: widget.page
-    ));
+      ));
+    }
   }
 
   @override
@@ -54,7 +64,10 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: Text(widget.keyword ?? "", style: TextStyle(color: Colors.white)),
+          title: Text(widget.appBarTitle, style: TextStyle(
+            color: Colors.white,
+            overflow: TextOverflow.ellipsis
+          )),
         ),
         body: SafeArea(
           child: Padding(
@@ -66,7 +79,7 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      _searchedFilmsBloc.add(DisplaySearchedFilms(
+                      _searchedFilmsBloc.add(DisplaySearchedFilterFilms(
                         keyword: widget.keyword,
                         countries: widget.countries,
                         genres: widget.genres,
@@ -90,7 +103,7 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Expanded(child: _buildFilterFilms(state.filterFilms)),
+                              Expanded(child: _buildFilterFilms(state.searchedFilms)),
                             ],
                           );
                         }
@@ -142,18 +155,11 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
                           filterFilms[index].nameOriginal == null ? "-" : filterFilms[index].nameOriginal.toString(),
                           //style: CustomTextStyles.m3BodySmall(),
                         ),
-                        // SizedBox(height: 10.h),
-                        // Text(
-                        //   countries!.isEmpty ? "$year" : "${getCountriesValue(countries!)}, $year",
-                        //   style: CustomTextStyles.m3BodySmall(),
-                        // ),
-                        // SizedBox(height: 10.h),
-                        // isEmpty == true
-                        // ? Container(color: AppColors.secondaryThemeGrey)
-                        // : Text(
-                        //   genres == null ? "Нет данных" : getGenresValue(genres!),
-                        //   style: CustomTextStyles.m3BodySmall(),
-                        // )
+                        SizedBox(height: 10.h),
+                        Text(
+                          filterFilms[index].countries!.isEmpty ? "${filterFilms[index].year}" : "${filterFilms[index].countries.toString()}, ${filterFilms[index].year}",
+                        ),
+                        SizedBox(height: 10.h),
                       ]
                     ),
                   )

@@ -29,7 +29,7 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
   }
 
   void onSearchSubmitted(String keyword){
-    context.router.push(SearchedFilmsRoute(keyword: keyword, page: 1));
+    context.router.push(SearchedFilmsRoute(keyword: keyword, page: 1, appBarTitle: "Поиск: $keyword"));
   }
 
   void onFilterSubmitted(){
@@ -96,9 +96,12 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
                 children: [
                   Text(filmCollectionsNamesList[index]),
                   IconButton(
-                      // TODO: Добавить переход на экран SearchedFilms
                       onPressed: () {
-                        context.router.push(SearchedFilmsRoute(page: 1));
+                        context.router.push(SearchedFilmsRoute(
+                          nameCollection: filmCollectionsNamesList[index],
+                          page: 1, 
+                          appBarTitle: filmCollectionsNamesList[index]
+                        ));
                       },
                       icon: Icon(Icons.arrow_forward, color: Colors.purple))
                 ],

@@ -9,6 +9,7 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_repository.da
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/authentication_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/display_film_collections_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/search_collection_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_filter_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/filter_film/filter_film_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
@@ -38,10 +39,11 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => AuthenticationUseCase(userRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => DisplayFilmCollectionsUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => SearchFilterFilmsUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
+    getIt.registerLazySingleton(() => SearchCollectionFilmsUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
 
     // Blocs
     getIt.registerFactory(() => AuthenticationBloc(authenticationUseCase: getIt()));
     getIt.registerFactory(() => SearchFilmsBloc(displayFilmCollectionsUseCase: getIt()));
-    getIt.registerFactory(() => SearchedFilmsBloc(searchFilterFilmsUseCase: getIt()));
+    getIt.registerFactory(() => SearchedFilmsBloc(searchFilterFilmsUseCase: getIt(), searchCollectionFilmsUseCase: getIt()));
     getIt.registerFactory(() => FilterFilmBloc());
 }

@@ -39,6 +39,7 @@ dev_dependencies:
   json_serializable: any
   #auto_route_generator: any
   hive_generator: ^2.0.1
+  #flutter_hive_generator_fixed: ^0.0.3
 
   flutter_test:
     sdk: flutter

@@ -128,7 +128,9 @@ class _FilterFilmScreenState extends State<FilterFilmScreen> {
                               keyword: null,
                               countries: state.country == null ? null : List.filled(1, state.country!),
                               genres: state.genre == null ? null : List.filled(1, state.genre!),
-                              page: 1));
+                              page: 1,
+                              appBarTitle: "Результаты"
+                              ));
                         },
                         child: Text("Показать",
                             style: TextStyle(color: Colors.white)),

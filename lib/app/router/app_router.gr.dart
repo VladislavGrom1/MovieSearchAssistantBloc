@@ -65,7 +65,7 @@ class FilmInformationRoute
     extends _i16.PageRouteInfo<FilmInformationRouteArgs> {
   FilmInformationRoute({
     _i17.Key? key,
-    required String filmId,
+    required int filmId,
     List<_i16.PageRouteInfo>? children,
   }) : super(
           FilmInformationRoute.name,
@@ -82,7 +82,7 @@ class FilmInformationRoute
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<FilmInformationRouteArgs>(
         orElse: () =>
-            FilmInformationRouteArgs(filmId: pathParams.getString('filmId')),
+            FilmInformationRouteArgs(filmId: pathParams.getInt('filmId')),
       );
       return _i2.FilmInformationScreen(key: args.key, filmId: args.filmId);
     },
@@ -94,7 +94,7 @@ class FilmInformationRouteArgs {
 
   final _i17.Key? key;
 
-  final String filmId;
+  final int filmId;
 
   @override
   String toString() {

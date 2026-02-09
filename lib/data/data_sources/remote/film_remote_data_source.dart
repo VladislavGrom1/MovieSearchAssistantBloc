@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:generated/generated.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_card_model.dart';
+import 'package:movie_search_assistant_bloc/data/models/film_information_model.dart';
 
 class FilmRemoteDataSource {
   final Dio dio;
@@ -48,6 +49,23 @@ class FilmRemoteDataSource {
           filterFilms.add(FilmCardModel.fromFilmSearchByFiltersResponseItems(film));
         }
         return filterFilms;
+      }
+      return null;
+    } on DioException catch(e){
+      throw RemoteDataSourceException(e.type, e.response?.statusCode);
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  Future<FilmInformationModel?> getFilmInformation(int idFilm) async{
+    FilmsApi filmsApi = FilmsApi(dio, standardSerializers);
+    try{
+      Response<Film> response = await filmsApi.apiV22FilmsIdGet(
+        id: idFilm
+      );
+      if(response.data != null){
+        return FilmInformationModel.fromFilm(response.data!);
       }
       return null;
     } on DioException catch(e){

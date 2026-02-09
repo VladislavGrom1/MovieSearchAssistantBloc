@@ -20,7 +20,7 @@ class WillWatchCollectionScreen extends StatelessWidget {
             SizedBox(height: 10.h),
             TextButton(
               onPressed: () {
-                context.router.push(FilmInformationRoute(filmId: "1"));
+                context.router.push(FilmInformationRoute(filmId: 1));
             }, 
             child: Text("Посмотреть информацию о фильме (1)", style: TextStyle(color: Colors.white))
             )

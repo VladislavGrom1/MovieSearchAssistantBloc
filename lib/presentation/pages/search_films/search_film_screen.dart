@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -128,9 +130,13 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
           return InkWell(
-            // TODO: Добавить переход на экран FilmInformation
             onTap: () {
-              context.router.push(FilmInformationRoute(filmId: "0"));
+              if(filmCardEntityList[index].kinopoiskId != null){
+                context.router.push(FilmInformationRoute(filmId: filmCardEntityList[index].kinopoiskId!));
+              } else{
+                // TODO: Реализовать отображение Toast
+                log("kinoposikId == null");
+              }
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

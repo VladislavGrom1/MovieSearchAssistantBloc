@@ -7,12 +7,12 @@ import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 
-class DisplayFilmCollectionsUseCase {
+class GetFilmCollectionsUseCase {
   final UserRepository userRepository;
   final FilmRepository filmRepository;
   final DioApiClient apiClient;
 
-  DisplayFilmCollectionsUseCase({
+  GetFilmCollectionsUseCase({
     required this.userRepository,
     required this.filmRepository, 
     required this.apiClient

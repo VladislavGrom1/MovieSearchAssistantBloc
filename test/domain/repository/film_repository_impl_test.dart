@@ -5,9 +5,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/remote/film_remote_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_card_model.dart';
+import 'package:movie_search_assistant_bloc/data/models/film_images_model.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_information_model.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/film_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_card_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_information_entity.dart';
 
 class MockFilmRemoteDataSource extends Mock implements FilmRemoteDataSource{}
@@ -15,6 +17,8 @@ class FakeFilmCardModel extends Fake implements FilmCardModel {}
 class FakeFilmCardEntity extends Fake implements FilmCardEntity {}
 class FakeFilmInformationModel extends Fake implements FilmInformationModel {}
 class FakeFilmInformationEntity extends Fake implements FilmInformationEntity {}
+class FakeFilmImagesModel extends Fake implements FilmImagesModel {}
+class FakeFilmImagesEntity extends Fake implements FilmImagesEntity {}
 
 
 FilmCardModel _buildFilmCardModel({
@@ -205,6 +209,34 @@ FilmInformationEntity _buildFilmInformationEntity({
   serial: serial
 );
 
+FilmImagesModel _buildFilmImagesModel({
+  List<String> imageUrls = const [
+    "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/1fee8dfa-7c3f-412a-aa1c-f3d2700d2e85/orig",
+    "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/4e394795-b31d-451b-9e04-989bf813a050/orig"
+  ],
+  List<String> previewUrls = const [
+    "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/1fee8dfa-7c3f-412a-aa1c-f3d2700d2e85/300x",
+    "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/4e394795-b31d-451b-9e04-989bf813a050/300x"
+  ]
+}) => FilmImagesModel(
+  imageUrls: imageUrls,
+  previewUrls: previewUrls
+);
+
+FilmImagesEntity _buildFilmImagesEntity({
+  List<String> imageUrls = const [
+    "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/1fee8dfa-7c3f-412a-aa1c-f3d2700d2e85/orig",
+    "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/4e394795-b31d-451b-9e04-989bf813a050/orig"
+  ],
+  List<String> previewUrls = const [
+    "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/1fee8dfa-7c3f-412a-aa1c-f3d2700d2e85/300x",
+    "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/4e394795-b31d-451b-9e04-989bf813a050/300x"
+  ]
+}) => FilmImagesEntity(
+  imageUrls: imageUrls,
+  previewUrls: previewUrls 
+);
+
 void main(){
   late FilmRepositoryImpl filmRepositoryImpl;
   late MockFilmRemoteDataSource mockFilmRemoteDataSource;
@@ -214,6 +246,8 @@ void main(){
     registerFallbackValue(FakeFilmCardEntity());
     registerFallbackValue(FakeFilmInformationModel());
     registerFallbackValue(FakeFilmInformationEntity());
+    registerFallbackValue(FakeFilmImagesModel());
+    registerFallbackValue(FakeFilmImagesEntity());
   });
 
   setUp(() {
@@ -301,6 +335,47 @@ void main(){
     test('should rethrow Exception when remote data source throws Exception', () async {
       when(() => mockFilmRemoteDataSource.getFilmInformation(idFilm)).thenThrow(Exception());
       expect(() => filmRepositoryImpl.getFilmInformation(idFilm), throwsA(isA<Exception>()));
+    });    
+    
+  });
+
+  group("getFilmImages", () {
+    const idFilm = 301;
+    final testFilmImagesModel = _buildFilmImagesModel();
+    final testFilmImagesEntity = _buildFilmImagesEntity();
+
+    test('should return FilmImagesEntity when remote data source returns FilmImagesModel', () async {
+      when(() => mockFilmRemoteDataSource.getFilmImageUrls(idFilm)).thenAnswer((_) async => testFilmImagesModel);
+      final result = await filmRepositoryImpl.getFilmImages(idFilm);
+      expect(result, equals(testFilmImagesEntity));
+      verify(() => mockFilmRemoteDataSource.getFilmImageUrls(idFilm)).called(1);
+    });
+
+    test('should return NULL when remote data source returns NULL', () async {
+      when(() => mockFilmRemoteDataSource.getFilmImageUrls(idFilm)).thenAnswer((_) async => null);
+      final result = await filmRepositoryImpl.getFilmImages(idFilm);
+      expect(result, isNull);
+      verify(() => mockFilmRemoteDataSource.getFilmImageUrls(idFilm)).called(1);
+    });
+
+    test('should rethrow RemoteDataSourceException when remote data source throws RemoteDataSourceException', () async {
+      when(() => mockFilmRemoteDataSource.getFilmImageUrls(idFilm)).thenThrow(RemoteDataSourceException(
+        DioExceptionType.connectionError, 
+        HttpStatus.connectionClosedWithoutResponse
+      ));
+      expect(() => filmRepositoryImpl.getFilmImages(idFilm), throwsA(isA<RemoteDataSourceException>()));
+    });
+
+    // test('should rethrow LocalDataSourceException when remote data source throws LocalDataSourceException', () async {
+    //   when(() => mockFilmRemoteDataSource.getFilmInformation(idFilm)).thenThrow(LocalDataSourceException(
+    //     message: "Error"
+    //   ));
+    //   expect(() => filmRepositoryImpl.getFilmInformation(idFilm), throwsA(isA<RemoteDataSourceException>()));
+    // });
+
+    test('should rethrow Exception when remote data source throws Exception', () async {
+      when(() => mockFilmRemoteDataSource.getFilmImageUrls(idFilm)).thenThrow(Exception());
+      expect(() => filmRepositoryImpl.getFilmImages(idFilm), throwsA(isA<Exception>()));
     });    
     
   });

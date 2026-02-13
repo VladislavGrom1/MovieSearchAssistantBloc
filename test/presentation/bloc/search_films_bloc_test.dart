@@ -7,10 +7,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_card_entity.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/display_film_collections_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_film_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 
-class MockDisplayFilmCollectionsUseCase extends Mock implements DisplayFilmCollectionsUseCase {}
+class MockDisplayFilmCollectionsUseCase extends Mock implements GetFilmCollectionsUseCase {}
 
 FilmCardEntity _buildFilmCardEntity({
   int? kinopoiskId = 0,

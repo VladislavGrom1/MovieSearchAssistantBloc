@@ -13,10 +13,15 @@ final class FilmInformatinonLoading extends FilmInformationState {}
 
 final class FilmInformationLoadedSuccessful extends FilmInformationState {
   final FilmInformationEntity filmInformation;
-  const FilmInformationLoadedSuccessful({required this.filmInformation});
+  final FilmImagesEntity? filmImages;
+  
+  const FilmInformationLoadedSuccessful({
+    required this.filmInformation,
+    required this.filmImages
+  });
 
   @override
-  List<Object> get props => [filmInformation];
+  List<Object> get props => [filmInformation, if (filmImages != null) filmImages!];
 }
 
 final class FilmInformationLoadedFailure extends FilmInformationState{

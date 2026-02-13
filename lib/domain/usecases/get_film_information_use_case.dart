@@ -6,16 +6,18 @@ import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 
-class DisplayFilmInformationUseCase {
+class GetFilmInformationUseCase {
   final UserRepository userRepository;
   final FilmRepository filmRepository;
   final DioApiClient apiClient;
 
-  DisplayFilmInformationUseCase({
+  GetFilmInformationUseCase({
     required this.userRepository,
     required this.filmRepository,
     required this.apiClient
   });
+
+  // TODO: Подумать, возвращать ли информацию о фильмах с фото или отдельный use case сделать
 
   Future<FilmInformationEntity?> call(int idFilm) async{
     try{
@@ -23,6 +25,7 @@ class DisplayFilmInformationUseCase {
       if(userEntity != null){
         apiClient.updateApiKeyHeaders(userEntity.apiKey!);
         FilmInformationEntity? filmInformationEntity = await filmRepository.getFilmInformation(idFilm);
+
         return filmInformationEntity;
       } 
       return null;

@@ -1,20 +1,25 @@
 import 'package:generated/generated.dart';
+import 'package:hive/hive.dart';
 
-class FilmCardModel {
-  int? kinopoiskId;
-  String? nameRu;
-  String? nameEn;
-  String? nameOriginal;
-  List<String>? countries;
-  List<String>? genres;
-  num? ratingKinopoisk;
-  num? ratingImbd;
-  int? year;
-  String? type;
-  String? posterUrl;
-  String? posterUrlPreview;
+part 'film_base_model.g.dart';
 
-  FilmCardModel({
+@HiveType(typeId: 1)
+class FilmBaseModel {
+  @HiveField(0) int? kinopoiskId;
+  @HiveField(1) String? nameRu;
+  @HiveField(2) String? nameEn;
+  @HiveField(3) String? nameOriginal;
+  @HiveField(4) List<String>? countries;
+  @HiveField(5) List<String>? genres;
+  @HiveField(6) num? ratingKinopoisk;
+  @HiveField(7) num? ratingImbd;
+  @HiveField(8) int? year;
+  @HiveField(9) String? type;
+  @HiveField(10) String? posterUrl;
+  @HiveField(11) String? posterUrlPreview;
+  @HiveField(12) bool? isSaved;
+
+  FilmBaseModel({
     this.kinopoiskId,
     this.nameRu,
     this.nameEn,
@@ -26,11 +31,12 @@ class FilmCardModel {
     this.year,
     this.type,
     this.posterUrl,
-    this.posterUrlPreview
+    this.posterUrlPreview,
+    this.isSaved
   });
 
-  factory FilmCardModel.fromFilmCollectionResponseItems(FilmCollectionResponseItems film){
-    return FilmCardModel(
+  factory FilmBaseModel.fromFilmCollectionResponseItems(FilmCollectionResponseItems film){
+    return FilmBaseModel(
       kinopoiskId: film.kinopoiskId,
       nameRu: film.nameRu,
       nameEn: film.nameEn,
@@ -46,8 +52,8 @@ class FilmCardModel {
     );
   }
 
-  factory FilmCardModel.fromFilmSearchByFiltersResponseItems(FilmSearchByFiltersResponseItems film){
-    return FilmCardModel(
+  factory FilmBaseModel.fromFilmSearchByFiltersResponseItems(FilmSearchByFiltersResponseItems film){
+    return FilmBaseModel(
       kinopoiskId: film.kinopoiskId,
       nameRu: film.nameRu,
       nameEn: film.nameEn,

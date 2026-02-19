@@ -4,17 +4,17 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:generated/generated.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
-import 'package:movie_search_assistant_bloc/data/models/film_card_model.dart';
+import 'package:movie_search_assistant_bloc/data/models/film_base_model.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_images_model.dart';
-import 'package:movie_search_assistant_bloc/data/models/film_information_model.dart';
+import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
 
 class FilmRemoteDataSource {
   final Dio dio;
   FilmRemoteDataSource({required this.dio});
 
-  Future<List<FilmCardModel>?> getCollectionFilms(String collectionName, int page) async {
+  Future<List<FilmBaseModel>?> getCollectionFilms(String collectionName, int page) async {
     FilmsApi filmsApi = FilmsApi(dio, standardSerializers);
-    List<FilmCardModel> collectionFilms = [];
+    List<FilmBaseModel> collectionFilms = [];
     try{
       Response<FilmCollectionResponse> response = await filmsApi.apiV22FilmsCollectionsGet(
         type: collectionName,
@@ -22,7 +22,7 @@ class FilmRemoteDataSource {
       );
       if(response.data != null){
         for(var film in response.data!.items){
-          collectionFilms.add(FilmCardModel.fromFilmCollectionResponseItems(film));
+          collectionFilms.add(FilmBaseModel.fromFilmCollectionResponseItems(film));
         }
         return collectionFilms;
       }
@@ -34,9 +34,9 @@ class FilmRemoteDataSource {
     }
   }
 
-  Future<List<FilmCardModel>?> getFilterFilms(String? keyword, BuiltList<int>? builtCountries, BuiltList<int>? builtGenres, int? yearFrom, int? yearTo, int page) async{
+  Future<List<FilmBaseModel>?> getFilterFilms(String? keyword, BuiltList<int>? builtCountries, BuiltList<int>? builtGenres, int? yearFrom, int? yearTo, int page) async{
     FilmsApi filmsApi = FilmsApi(dio, standardSerializers);
-    List<FilmCardModel> filterFilms = [];
+    List<FilmBaseModel> filterFilms = [];
     try{
       Response<FilmSearchByFiltersResponse?> response = await filmsApi.apiV22FilmsGet(
         keyword: keyword,
@@ -48,7 +48,7 @@ class FilmRemoteDataSource {
       );
       if(response.data != null){
         for(var film in response.data!.items){
-          filterFilms.add(FilmCardModel.fromFilmSearchByFiltersResponseItems(film));
+          filterFilms.add(FilmBaseModel.fromFilmSearchByFiltersResponseItems(film));
         }
         return filterFilms;
       }
@@ -60,14 +60,14 @@ class FilmRemoteDataSource {
     }
   }
 
-  Future<FilmInformationModel?> getFilmInformation(int idFilm) async{
+  Future<FilmDetailModel?> getFilmInformation(int idFilm) async{
     FilmsApi filmsApi = FilmsApi(dio, standardSerializers);
     try{
       Response<Film> response = await filmsApi.apiV22FilmsIdGet(
         id: idFilm
       );
       if(response.data != null){
-        return FilmInformationModel.fromFilm(response.data!);
+        return FilmDetailModel.fromFilm(response.data!);
       }
       return null;
     } on DioException catch(e){

@@ -12,7 +12,7 @@ final class SearchedFilmsInitial extends SearchedFilmsState {}
 final class SearchedFilmsLoading extends SearchedFilmsState{}
 
 final class SearchedFilmsLoadedSuccessful extends SearchedFilmsState{
-  final List<FilmCardEntity> searchedFilms;
+  final List<FilmEntity> searchedFilms;
   final bool isLoadingMore;
   final bool hasReachedMax;
 
@@ -23,7 +23,7 @@ final class SearchedFilmsLoadedSuccessful extends SearchedFilmsState{
   });
 
   SearchedFilmsLoadedSuccessful copyWith({
-    List<FilmCardEntity>? searchedFilms,
+    List<FilmEntity>? searchedFilms,
     bool? isLoadingMore,
     bool? hasReachedMax,
   }) {

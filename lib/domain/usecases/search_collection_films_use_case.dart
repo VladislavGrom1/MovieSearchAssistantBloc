@@ -1,7 +1,7 @@
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/film_card_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
@@ -17,8 +17,8 @@ class SearchCollectionFilmsUseCase {
     required this.apiClient
   });
 
-  Future<List<FilmCardEntity>?> call(String collectionName, int page) async{
-    List<FilmCardEntity>? filmCollectionsMap = [];
+  Future<List<FilmEntity>?> call(String collectionName, int page) async{
+    List<FilmEntity>? filmCollectionsMap = [];
     try{
       UserEntity? userEntity = await userRepository.getUserApiKeyInfoFromStorage();
       if(userEntity != null){

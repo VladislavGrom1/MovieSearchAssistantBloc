@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/film_information_entity.dart';
 
 class FilmInformationWidget extends StatelessWidget {
   const FilmInformationWidget({
     super.key,
     required this.film,
-    required this.images
+    required this.images,
+    required this.onSavePressed,
+    required this.onRemovePressed
   });
 
-  final FilmInformationEntity film;
+  final FilmEntity film;
   final FilmImagesEntity? images;
+  final VoidCallback onSavePressed;
+  final VoidCallback onRemovePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +28,22 @@ class FilmInformationWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  TextButton(
+                    onPressed: onSavePressed,
+                    child: Text(
+                      "Сохранить фильм",
+                      style: TextStyle(color: Colors.purple),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  TextButton(
+                    onPressed: onRemovePressed,
+                    child: Text(
+                      "Удалить фильм",
+                      style: TextStyle(color: Colors.purple),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
                   Text(titleText),
                   SizedBox(height: 10.h),
                   ..._nameOriginal(film.nameOriginal),
@@ -39,9 +59,9 @@ class FilmInformationWidget extends StatelessWidget {
                   SizedBox(height: 10.h),
                   _filmRatingAndReviewCount("Рейтинг KP", film.ratingKinopoisk, film.ratingKinopoiskVoteCount),
                   SizedBox(height: 10.h),
-                  _filmRatingAndReviewCount("Рейтинг IMDB", film.ratingImdb, film.ratingImdbVoteCount),
+                  _filmRatingAndReviewCount("Рейтинг IMDB", film.ratingImbd, film.ratingImdbVoteCount),
                   SizedBox(height: 10.h),
-                  Text("${images?.imageUrls.toString()}") 
+                  Text("${images?.imageUrls.toString()}")
                 ]))
       ]),
     ]);

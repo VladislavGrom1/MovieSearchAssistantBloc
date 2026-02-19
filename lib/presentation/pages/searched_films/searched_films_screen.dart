@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
 
@@ -170,8 +173,14 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
           final searchedFilm = searchedFilms[index];
 
           return InkWell(
-            // TODO: Переход на экран FilmScreen
-            onTap: () {},
+            onTap: () {
+              if(searchedFilm.kinopoiskId != null){
+                context.router.push(FilmInformationRoute(filmId: searchedFilm.kinopoiskId!));
+              } else{
+                // TODO: Реализовать отображение Toast
+                log("kinoposikId == null");
+              }
+            },
             child: Card(
               color: Colors.grey,
               child: Row(
@@ -206,7 +215,7 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
                         ),
                         SizedBox(height: 10.h),
                         Text(
-                          searchedFilms[index].countries!.isEmpty 
+                          searchedFilm.countries!.isEmpty 
                           ? "${searchedFilm.year}" 
                           : "${searchedFilm.countries.toString()}, ${searchedFilm.year}",
                         ),

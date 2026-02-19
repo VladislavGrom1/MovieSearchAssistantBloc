@@ -11,14 +11,24 @@ final class FilmInformationInitial extends FilmInformationState {}
 
 final class FilmInformatinonLoading extends FilmInformationState {}
 
-final class FilmInformationLoadedSuccessful extends FilmInformationState {
-  final FilmInformationEntity filmInformation;
+final class FilmInformationLoaded extends FilmInformationState {
+  final FilmEntity filmInformation;
   final FilmImagesEntity? filmImages;
   
-  const FilmInformationLoadedSuccessful({
+  const FilmInformationLoaded({
     required this.filmInformation,
-    required this.filmImages
+    required this.filmImages,
   });
+
+  FilmInformationLoaded copyWith({
+    FilmEntity? filmInformation,
+    FilmImagesEntity? filmImages,
+  }) {
+    return FilmInformationLoaded(
+      filmInformation: filmInformation ?? this.filmInformation,
+      filmImages: filmImages ?? this.filmImages,
+    );
+  }
 
   @override
   List<Object> get props => [filmInformation, if (filmImages != null) filmImages!];
@@ -33,3 +43,26 @@ final class FilmInformationLoadedFailure extends FilmInformationState{
   @override
   List<Object> get props => [exceptionType, if (statusCode != null) statusCode!];
 }
+
+// final class FilmSavedSuccesful extends FilmInformationLoaded{
+//    const FilmSavedSuccesful({
+//     required super.filmInformation,
+//     super.filmImages
+//    });
+
+//   @override
+//   List<Object> get props => [super.props];
+// }
+
+// final class FilmSavedFailure extends FilmInformationLoaded{
+//   final String message;
+
+//   const FilmSavedFailure({
+//     required super.filmInformation,
+//     super.filmImages,
+//     required this.message
+//   });
+
+//   @override
+//   List<Object> get props => [super.props, message];
+// }

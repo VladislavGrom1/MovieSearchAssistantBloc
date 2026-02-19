@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/film_card_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_collection_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_filter_films_use_case.dart';
 
@@ -41,7 +41,7 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
     );
 
     try{
-      List<FilmCardEntity>? filterFilms = await searchFilterFilmsUseCase.call(
+      List<FilmEntity>? filterFilms = await searchFilterFilmsUseCase.call(
         event.keyword, 
         event.countries, 
         event.genres, 
@@ -49,7 +49,7 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
         event.yearTo, 
         event.page
       );
-      if(filterFilms != null){
+      if(filterFilms != null && filterFilms.isNotEmpty){
         emit(SearchedFilmsLoadedSuccessful(searchedFilms: filterFilms));
       } else{
         emit(SearchedFilmsLoadedFailure(exceptionType: "По запросу ничего не найдено"));
@@ -70,7 +70,7 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
     hasReachedMax = false;
 
     try{
-      List<FilmCardEntity>? collectionFilms = await searchCollectionFilmsUseCase.call(
+      List<FilmEntity>? collectionFilms = await searchCollectionFilmsUseCase.call(
         event.nameCollection,
         event.page,
       );

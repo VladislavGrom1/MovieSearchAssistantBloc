@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/film_card_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/search_films/widgets/custom_search_bar.dart';
@@ -88,7 +88,7 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
   }
 
   Widget _buildFilmCollections(
-      Map<String, List<FilmCardEntity>?>? filmCollectionsMap) {
+      Map<String, List<FilmEntity>?>? filmCollectionsMap) {
     final filmCollectionsNamesList = FilmCollectionNames.filmCollectionNames;
     return ListView.separated(
         itemBuilder: (context, index) {
@@ -121,9 +121,9 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
   }
 
   Widget _buildFilmCollection(
-      Map<String, List<FilmCardEntity>?>? filmCollectionsMap,
+      Map<String, List<FilmEntity>?>? filmCollectionsMap,
       String filmCollectionsName) {
-    List<FilmCardEntity> filmCardEntityList =
+    List<FilmEntity> filmEntityList =
         filmCollectionsMap![filmCollectionsName]!;
 
     return ListView.separated(
@@ -131,8 +131,8 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {
-              if(filmCardEntityList[index].kinopoiskId != null){
-                context.router.push(FilmInformationRoute(filmId: filmCardEntityList[index].kinopoiskId!));
+              if(filmEntityList[index].kinopoiskId != null){
+                context.router.push(FilmInformationRoute(filmId: filmEntityList[index].kinopoiskId!));
               } else{
                 // TODO: Реализовать отображение Toast
                 log("kinoposikId == null");
@@ -152,7 +152,7 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
                 SizedBox(
                   width: 96.w,
                   child: Text(
-                    filmCardEntityList[index].nameRu!,
+                    filmEntityList[index].nameRu!,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 3,
                     style: TextStyle(

@@ -12,3 +12,15 @@ class DisplayFilmInformationEvent extends FilmInformationEvent{
 
   const DisplayFilmInformationEvent({required this.idFilm});
 }
+
+class SaveFilmEvent extends FilmInformationEvent{
+  final FilmEntity film;
+
+  const SaveFilmEvent({required this.film});
+}
+
+class RemoveFilmEvent extends FilmInformationEvent{
+  final FilmEntity film;
+
+  const RemoveFilmEvent({required this.film});
+}

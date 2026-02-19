@@ -6,19 +6,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/film_card_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 
 class MockDisplayFilmCollectionsUseCase extends Mock implements GetFilmCollectionsUseCase {}
 
-FilmCardEntity _buildFilmCardEntity({
+FilmEntity _buildFilmCardEntity({
   int? kinopoiskId = 0,
   String? nameRu = "Фильм №1",
   String? nameEn = "Film №1",
   String? nameOriginal = "Film №1",
   num? ratingKinopoisk = 7.9
-}) => FilmCardEntity(
+}) => FilmEntity(
   kinopoiskId: kinopoiskId,
   nameRu: nameRu,
   nameEn: nameEn,
@@ -29,7 +29,7 @@ FilmCardEntity _buildFilmCardEntity({
 void main(){
   group("SearchFilmsBloc", () {
 
-    final Map<String, List<FilmCardEntity>?> testfilmCardEntityList = {
+    final Map<String, List<FilmEntity>?> testfilmCardEntityList = {
       FilmCollectionNames.topPopularMovies: List.filled(2, _buildFilmCardEntity()),
       FilmCollectionNames.popularSeries: List.filled(2, _buildFilmCardEntity()),
       FilmCollectionNames.top250movies: List.filled(2, _buildFilmCardEntity()),

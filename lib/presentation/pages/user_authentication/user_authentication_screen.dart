@@ -23,42 +23,47 @@ class _UserAuthenticationScreenState extends State<UserAuthenticationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
-        body: BlocListener<AuthenticationBloc, AuthenticationState>(
-            bloc: _authBloc,
-            listener: (context, state) {
-              if (state is AuthenticationSuccess) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text("Успешный вход")));
-                context.router.replace(HomeRoute());
-              } else if (state is AuthenticationFailure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Не удалось выполнить вход: ${state.exceptionType}, ${state.statusCode}")));
-              }
-            },
-            child: Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "UserAuthentication",
-                    style: TextStyle(color: Colors.white),
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(left: 20.w, right: 20.w),
+            child: BlocListener<AuthenticationBloc, AuthenticationState>(
+                bloc: _authBloc,
+                listener: (context, state) {
+                  if (state is AuthenticationSuccess) {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text("Успешный вход")));
+                    context.router.replace(HomeRoute());
+                  } else if (state is AuthenticationFailure) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Не удалось выполнить вход: ${state.exceptionType}, ${state.statusCode}")));
+                  }
+                },
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "UserAuthentication",
+                        style: TextStyle(color: Colors.purple),
+                      ),
+                      SizedBox(height: 20.h),
+                      TextFormField(controller: _textEditingController),
+                      SizedBox(height: 20.h),
+                      TextButton(
+                        onPressed: () {
+                          _authBloc.add(TryAuthenticationEvent(
+                              apiKey: _textEditingController.text));
+                        },
+                        child: Text(
+                          "Перейти на SearchFilmScreen",
+                          style: TextStyle(color: Colors.purple),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 20.h),
-                  TextFormField(controller: _textEditingController),
-                  SizedBox(height: 20.h),
-                  TextButton(
-                    onPressed: () {
-                      _authBloc.add(TryAuthenticationEvent(
-                          apiKey: _textEditingController.text));
-                    },
-                    child: Text(
-                      "Перейти на SearchFilmScreen",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            )));
+                )),
+          ),
+        ));
   }
 }

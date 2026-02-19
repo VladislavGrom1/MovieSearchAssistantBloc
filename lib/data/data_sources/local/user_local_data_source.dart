@@ -5,13 +5,6 @@ import 'package:movie_search_assistant_bloc/data/models/user_model.dart';
 
 class UserLocalDataSource {
 
-  Future<void> init() async{
-    await Hive.initFlutter();
-    Hive.registerAdapter(UserModelAdapter());
-    //await Hive.deleteBoxFromDisk(HiveStorageKeys.userModelKeyBox);
-    await Hive.openBox<UserModel>(HiveStorageKeys.userModelKeyBox);
-  }
-    
   UserModel? getUserApiKeyInfo() {
     UserModel? userApiKeyInfo;
     try{

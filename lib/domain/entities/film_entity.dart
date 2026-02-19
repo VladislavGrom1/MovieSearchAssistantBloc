@@ -1,0 +1,287 @@
+
+import 'package:equatable/equatable.dart';
+import 'package:movie_search_assistant_bloc/data/models/film_base_model.dart';
+import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
+
+class FilmEntity extends Equatable {
+  // FilmBaseInformation
+  final int? kinopoiskId;
+  final String? nameRu;
+  final String? nameEn;
+  final String? nameOriginal;
+  final List<String>? countries;
+  final List<String>? genres;
+  final num? ratingKinopoisk;
+  final num? ratingImbd;
+  final int? year;
+  final String? type;
+  final String? posterUrl;
+  final String? posterUrlPreview;
+  final bool? isSaved; 
+  // FilmDetailInformation
+  final String? kinopoiskHDId;
+  final String? imdbId;
+  final String? coverUrl;
+  final String? logoUrl;
+  final int? reviewsCount;
+  final num? ratingGoodReview;
+  final int? ratingGoodReviewVoteCount;
+  final int? ratingKinopoiskVoteCount;
+  final int? ratingImdbVoteCount;
+  final num? ratingFilmCritics;
+  final int? ratingFilmCriticsVoteCount;
+  final num? ratingAwait;
+  final int? ratingAwaitCount;
+  final num? ratingRfCritics;
+  final int? ratingRfCriticsVoteCount;
+  final String? webUrl;
+  final int? filmLength;
+  final String? slogan;
+  final String? description;
+  final String? shortDescription;
+  final String? editorAnnotation;
+  final bool? isTicketsAvailable;
+  final String? productionStatus;
+  final String? ratingMpaa;
+  final String? ratingAgeLimits;
+  final bool? hasImax;
+  final bool? has3D;
+  final String? lastSync;
+  final int? startYear;
+  final int? endYear;
+  final bool? serial;
+  final bool? shortFilm;
+  final bool? completed;
+
+  const FilmEntity({
+    // FilmBaseInformation
+    this.kinopoiskId,
+    this.nameRu,
+    this.nameEn,
+    this.nameOriginal,
+    this.countries,
+    this.genres,
+    this.ratingKinopoisk,
+    this.ratingImbd,
+    this.year,
+    this.type,
+    this.posterUrl,
+    this.posterUrlPreview,
+    this.isSaved,
+    // FilmDetailInformation
+    this.kinopoiskHDId,
+    this.imdbId,
+    this.coverUrl,
+    this.logoUrl,
+    this.reviewsCount,
+    this.ratingGoodReview,
+    this.ratingGoodReviewVoteCount,
+    this.ratingKinopoiskVoteCount,
+    this.ratingImdbVoteCount,
+    this.ratingFilmCritics,
+    this.ratingFilmCriticsVoteCount,
+    this.ratingAwait,
+    this.ratingAwaitCount,
+    this.ratingRfCritics,
+    this.ratingRfCriticsVoteCount,
+    this.webUrl,
+    this.filmLength,
+    this.slogan,
+    this.description,
+    this.shortDescription,
+    this.editorAnnotation,
+    this.isTicketsAvailable,
+    this.productionStatus,
+    this.ratingMpaa,
+    this.ratingAgeLimits,
+    this.hasImax,
+    this.has3D,
+    this.lastSync,
+    this.startYear,
+    this.endYear,
+    this.serial,
+    this.shortFilm,
+    this.completed,
+  });
+
+  factory FilmEntity.fromFilmBaseModel(FilmBaseModel filmBaseModel){
+    return FilmEntity(
+      // FilmBaseInformation
+      kinopoiskId: filmBaseModel.kinopoiskId,
+      nameRu: filmBaseModel.nameRu,
+      nameEn: filmBaseModel.nameEn,
+      nameOriginal: filmBaseModel.nameOriginal,
+      countries: filmBaseModel.countries,
+      genres: filmBaseModel.genres,
+      ratingKinopoisk: filmBaseModel.ratingKinopoisk,
+      ratingImbd: filmBaseModel.ratingImbd,
+      year: filmBaseModel.year,
+      type: filmBaseModel.type,
+      posterUrl: filmBaseModel.posterUrl,
+      posterUrlPreview: filmBaseModel.posterUrlPreview,
+      isSaved: filmBaseModel.isSaved
+    );
+  }
+
+  factory FilmEntity.fromFilmDetailModel(FilmDetailModel filmDetailModel){
+    return FilmEntity(
+      // FilmBaseInformation
+      kinopoiskId: filmDetailModel.filmBaseModel.kinopoiskId,
+      nameRu: filmDetailModel.filmBaseModel.nameRu,
+      nameEn: filmDetailModel.filmBaseModel.nameEn,
+      nameOriginal: filmDetailModel.filmBaseModel.nameOriginal,
+      countries: filmDetailModel.filmBaseModel.countries,
+      genres: filmDetailModel.filmBaseModel.genres,
+      ratingKinopoisk: filmDetailModel.filmBaseModel.ratingKinopoisk,
+      ratingImbd: filmDetailModel.filmBaseModel.ratingImbd,
+      year: filmDetailModel.filmBaseModel.year,
+      type: filmDetailModel.filmBaseModel.type,
+      posterUrl: filmDetailModel.filmBaseModel.posterUrl,
+      posterUrlPreview: filmDetailModel.filmBaseModel.posterUrlPreview,
+      isSaved: filmDetailModel.filmBaseModel.isSaved,
+      // FilmDetailInformation
+      kinopoiskHDId: filmDetailModel.kinopoiskHDId,
+      imdbId: filmDetailModel.imdbId,
+      coverUrl: filmDetailModel.coverUrl,
+      logoUrl: filmDetailModel.logoUrl,
+      reviewsCount: filmDetailModel.reviewsCount,
+      ratingGoodReview: filmDetailModel.ratingGoodReview,
+      ratingGoodReviewVoteCount: filmDetailModel.ratingGoodReviewVoteCount,
+      ratingKinopoiskVoteCount: filmDetailModel.ratingKinopoiskVoteCount,
+      ratingImdbVoteCount: filmDetailModel.ratingImdbVoteCount,
+      ratingFilmCritics: filmDetailModel.ratingFilmCritics,
+      ratingFilmCriticsVoteCount: filmDetailModel.ratingFilmCriticsVoteCount,
+      ratingAwait: filmDetailModel.ratingAwait,
+      ratingAwaitCount: filmDetailModel.ratingAwaitCount,
+      ratingRfCritics: filmDetailModel.ratingRfCritics,
+      ratingRfCriticsVoteCount: filmDetailModel.ratingRfCriticsVoteCount,
+      webUrl: filmDetailModel.webUrl,
+      filmLength: filmDetailModel.filmLength,
+      slogan: filmDetailModel.slogan,
+      description: filmDetailModel.description,
+      shortDescription: filmDetailModel.shortDescription,
+      editorAnnotation: filmDetailModel.editorAnnotation,
+      isTicketsAvailable: filmDetailModel.isTicketsAvailable,
+      productionStatus: filmDetailModel.productionStatus,
+      ratingMpaa: filmDetailModel.ratingMpaa,
+      ratingAgeLimits: filmDetailModel.ratingAgeLimits,
+      hasImax: filmDetailModel.hasImax,
+      has3D: filmDetailModel.has3D,
+      lastSync: filmDetailModel.lastSync,
+      startYear: filmDetailModel.startYear,
+      endYear: filmDetailModel.endYear,
+      serial: filmDetailModel.serial,
+      shortFilm: filmDetailModel.shortFilm,
+      completed: filmDetailModel.completed,
+    );
+  }
+
+  FilmEntity copyWith({
+    bool? isSaved,
+  }) {
+    return FilmEntity(
+      // FilmBaseInformation
+      kinopoiskId: kinopoiskId,
+      nameRu: nameRu,
+      nameEn: nameEn,
+      nameOriginal: nameOriginal,
+      countries: countries,
+      genres: genres,
+      ratingKinopoisk: ratingKinopoisk,
+      ratingImbd: ratingImbd,
+      year: year,
+      type: type,
+      posterUrl: posterUrl,
+      posterUrlPreview: posterUrlPreview,
+      isSaved: isSaved ?? this.isSaved,
+      // FilmDetailInformation
+      kinopoiskHDId: kinopoiskHDId,
+      imdbId: imdbId,
+      coverUrl: coverUrl,
+      logoUrl: logoUrl,
+      reviewsCount: reviewsCount,
+      ratingGoodReview: ratingGoodReview,
+      ratingGoodReviewVoteCount: ratingGoodReviewVoteCount,
+      ratingKinopoiskVoteCount: ratingKinopoiskVoteCount,
+      ratingImdbVoteCount: ratingImdbVoteCount,
+      ratingFilmCritics: ratingFilmCritics,
+      ratingFilmCriticsVoteCount: ratingFilmCriticsVoteCount,
+      ratingAwait: ratingAwait,
+      ratingAwaitCount: ratingAwaitCount,
+      ratingRfCritics: ratingRfCritics,
+      ratingRfCriticsVoteCount: ratingRfCriticsVoteCount,
+      webUrl: webUrl,
+      filmLength: filmLength,
+      slogan: slogan,
+      description: description,
+      shortDescription: shortDescription,
+      editorAnnotation: editorAnnotation,
+      isTicketsAvailable: isTicketsAvailable,
+      productionStatus: productionStatus,
+      ratingMpaa: ratingMpaa,
+      ratingAgeLimits: ratingAgeLimits,
+      hasImax: hasImax,
+      has3D: has3D,
+      lastSync: lastSync,
+      startYear: startYear,
+      endYear: endYear,
+      serial: serial,
+      shortFilm: shortFilm,
+      completed: completed,
+    );
+  }
+
+
+
+  @override
+  List<Object?> get props => [
+    // FilmBaseInformation
+    kinopoiskId, 
+    nameRu, 
+    nameEn, 
+    nameOriginal,
+    countries,
+    genres,
+    ratingKinopoisk,
+    ratingImbd,
+    year,
+    type,
+    posterUrl,
+    posterUrlPreview,
+    isSaved,
+    // FilmDetailInformation
+    kinopoiskHDId,
+    imdbId,
+    coverUrl,
+    logoUrl,
+    reviewsCount,
+    ratingGoodReview,
+    ratingGoodReviewVoteCount,
+    ratingKinopoiskVoteCount,
+    ratingImdbVoteCount,
+    ratingFilmCritics,
+    ratingFilmCriticsVoteCount,
+    ratingAwait,
+    ratingAwaitCount,
+    ratingRfCritics,
+    ratingRfCriticsVoteCount,
+    webUrl,
+    filmLength,
+    slogan,
+    description,
+    shortDescription,
+    editorAnnotation,
+    isTicketsAvailable,
+    productionStatus,
+    ratingMpaa,
+    ratingAgeLimits,
+    hasImax,
+    has3D,
+    lastSync,
+    startYear,
+    endYear,
+    serial,
+    shortFilm,
+    completed
+  ];
+}

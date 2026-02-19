@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/film_card_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_collections_use_case.dart';
 
 part 'search_films_event.dart';
@@ -18,7 +18,7 @@ class SearchFilmsBloc extends Bloc<SearchFilmsEvent, SearchFilmsState> {
   Future<void> _displayFilmCollections(SearchFilmsEvent event, Emitter emit) async{
     emit(SearchFilmsLoading());
     try{
-      final Map<String, List<FilmCardEntity>?>? filmCollectionsMap = await displayFilmCollectionsUseCase.call(FilmCollectionNames.filmCollectionNames);
+      final Map<String, List<FilmEntity>?>? filmCollectionsMap = await displayFilmCollectionsUseCase.call(FilmCollectionNames.filmCollectionNames);
       if(filmCollectionsMap != null){
         emit(CollectionsFilmsLoadedSuccessful(filmCollectionsMap: filmCollectionsMap));
       } else{

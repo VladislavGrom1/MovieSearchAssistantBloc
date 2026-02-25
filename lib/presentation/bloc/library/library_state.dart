@@ -1,23 +1,23 @@
-part of 'will_watch_collection_bloc.dart';
+part of 'library_bloc.dart';
 
-sealed class WillWatchCollectionState extends Equatable {
-  const WillWatchCollectionState();
+sealed class LibraryState extends Equatable {
+  const LibraryState();
   
   @override
   List<Object> get props => [];
 }
 
-final class WillWatchCollectionInitial extends WillWatchCollectionState {}
+final class LibraryInitial extends LibraryState {}
 
-final class SavedFilmsLoading extends WillWatchCollectionState{}
+final class SavedFilmsLoading extends LibraryState{}
 
-final class SavedFilmsLoadedSuccessful extends WillWatchCollectionState{
-  final List<FilmDetailModel> savedFilms;
+final class SavedFilmsLoadedSuccessful extends LibraryState{
+  final List<FilmEntity> savedFilms;
 
   const SavedFilmsLoadedSuccessful({required this.savedFilms});
 
   SavedFilmsLoadedSuccessful copyWith({
-    List<FilmDetailModel>? savedFilms
+    List<FilmEntity>? savedFilms
   }) {
     return SavedFilmsLoadedSuccessful(
       savedFilms: savedFilms ?? this.savedFilms
@@ -28,7 +28,7 @@ final class SavedFilmsLoadedSuccessful extends WillWatchCollectionState{
   List<Object> get props => [savedFilms];
 }
 
-final class SavedFilmsLoadedFailure extends WillWatchCollectionState{
+final class SavedFilmsLoadedFailure extends LibraryState{
   final String exceptionType;
   final int? statusCode;
   

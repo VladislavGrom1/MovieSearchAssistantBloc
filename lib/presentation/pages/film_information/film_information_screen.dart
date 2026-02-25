@@ -28,11 +28,11 @@ class _FilmInformationScreenState extends State<FilmInformationScreen> {
     _filmInformationBloc.add(DisplayFilmInformationEvent(idFilm: widget.filmId));
   }
 
-  void onSavePressed(FilmEntity film){
+  void onSaveInLibraryPressed(FilmEntity film){
     _filmInformationBloc.add(SaveFilmEvent(film: film));
   }
 
-  void onRemovePressed(FilmEntity film){
+  void onRemoveFromLibraryPressed(FilmEntity film){
     _filmInformationBloc.add(RemoveFilmEvent(film: film));
   }
 
@@ -85,8 +85,8 @@ class _FilmInformationScreenState extends State<FilmInformationScreen> {
                   return FilmInformationWidget(
                     film: film, 
                     images: images, 
-                    onSavePressed: () => onSavePressed(film),
-                    onRemovePressed: () => onRemovePressed(film),
+                    onSaveInLibraryPressed: () => onSaveInLibraryPressed(film),
+                    onRemoveFromLibraryPressed: () => onRemoveFromLibraryPressed(film),
                   );
                 }
                 return SizedBox();

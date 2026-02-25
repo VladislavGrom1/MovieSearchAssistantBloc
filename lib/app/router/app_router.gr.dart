@@ -16,9 +16,9 @@ import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/search_fi
     as _i7;
 import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/user_profile/user_profile_wrapper_screen.dart'
     as _i11;
-import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/watched_collection/watched_collection_wrapper_screen.dart'
+import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/collections/collections_wrapper_screen.dart'
     as _i13;
-import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/will_watch_collection/will_watch_collection_wrapper_screen.dart'
+import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/library/library_wrapper_screen.dart'
     as _i15;
 import 'package:movie_search_assistant_bloc/presentation/pages/change_api_key/change_api_key_screen.dart'
     as _i1;
@@ -38,9 +38,9 @@ import 'package:movie_search_assistant_bloc/presentation/pages/user_authenticati
     as _i9;
 import 'package:movie_search_assistant_bloc/presentation/pages/user_profile/user_profile_screen.dart'
     as _i10;
-import 'package:movie_search_assistant_bloc/presentation/pages/watched_collection/watched_collection_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/collections/collections_screen.dart'
     as _i12;
-import 'package:movie_search_assistant_bloc/presentation/pages/will_watch_collection/will_watch_collection_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/library/library_screen.dart'
     as _i14;
 
 /// generated route for
@@ -384,26 +384,26 @@ class UserProfileWrapperRoute extends _i16.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i12.WatchedCollectionScreen]
-class WatchedCollectionRoute extends _i16.PageRouteInfo<void> {
-  const WatchedCollectionRoute({List<_i16.PageRouteInfo>? children})
-      : super(WatchedCollectionRoute.name, initialChildren: children);
+/// [_i12.CollectionsScreen]
+class CollectionsRoute extends _i16.PageRouteInfo<void> {
+  const CollectionsRoute({List<_i16.PageRouteInfo>? children})
+      : super(CollectionsRoute.name, initialChildren: children);
 
   static const String name = 'WatchedCollectionRoute';
 
   static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
-      return const _i12.WatchedCollectionScreen();
+      return const _i12.CollectionsScreen();
     },
   );
 }
 
 /// generated route for
 /// [_i13.WatchedCollectionWrapperScreen]
-class WatchedCollectionWrapperRoute extends _i16.PageRouteInfo<void> {
-  const WatchedCollectionWrapperRoute({List<_i16.PageRouteInfo>? children})
-      : super(WatchedCollectionWrapperRoute.name, initialChildren: children);
+class CollectionsWrapperRoute extends _i16.PageRouteInfo<void> {
+  const CollectionsWrapperRoute({List<_i16.PageRouteInfo>? children})
+      : super(CollectionsWrapperRoute.name, initialChildren: children);
 
   static const String name = 'WatchedCollectionWrapperRoute';
 
@@ -418,26 +418,26 @@ class WatchedCollectionWrapperRoute extends _i16.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i14.WillWatchCollectionScreen]
-class WillWatchCollectionRoute extends _i16.PageRouteInfo<void> {
-  const WillWatchCollectionRoute({List<_i16.PageRouteInfo>? children})
-      : super(WillWatchCollectionRoute.name, initialChildren: children);
+/// [_i14.LibraryScreen]
+class LibraryRoute extends _i16.PageRouteInfo<void> {
+  const LibraryRoute({List<_i16.PageRouteInfo>? children})
+      : super(LibraryRoute.name, initialChildren: children);
 
   static const String name = 'WillWatchCollectionRoute';
 
   static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
-      return const _i14.WillWatchCollectionScreen();
+      return const _i14.LibraryScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i15.WillWatchCollectionWrapperScreen]
-class WillWatchCollectionWrapperRoute extends _i16.PageRouteInfo<void> {
-  const WillWatchCollectionWrapperRoute({List<_i16.PageRouteInfo>? children})
-      : super(WillWatchCollectionWrapperRoute.name, initialChildren: children);
+/// [_i15.LibraryWrapperScreen]
+class LibraryWrapperRoute extends _i16.PageRouteInfo<void> {
+  const LibraryWrapperRoute({List<_i16.PageRouteInfo>? children})
+      : super(LibraryWrapperRoute.name, initialChildren: children);
 
   static const String name = 'WillWatchCollectionWrapperRoute';
 
@@ -445,7 +445,7 @@ class WillWatchCollectionWrapperRoute extends _i16.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i16.WrappedRoute(
-        child: const _i15.WillWatchCollectionWrapperScreen(),
+        child: const _i15.LibraryWrapperScreen(),
       );
     },
   );

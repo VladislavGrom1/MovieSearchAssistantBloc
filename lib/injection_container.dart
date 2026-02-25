@@ -1,30 +1,37 @@
 import 'package:get_it/get_it.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
+import 'package:movie_search_assistant_bloc/data/data_sources/local/collection_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/flim_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/hive_init.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/user_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/remote/film_remote_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/remote/user_remote_data_source.dart';
+import 'package:movie_search_assistant_bloc/data/repository_impl/collections_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/film_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/user_repository_impl.dart';
+import 'package:movie_search_assistant_bloc/domain/repository/collection_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/add_film_in_user_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/add_film_in_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/authentication_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/create_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_images_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_information_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_saved_films_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_user_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/remove_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_collection_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_filter_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_saved_films_use_case.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/filter_film/filter_film_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
-import 'package:movie_search_assistant_bloc/presentation/bloc/will_watch_collection/will_watch_collection_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/library/library_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -35,6 +42,7 @@ Future<void> initializeDependencies() async {
     // LocalDataSources
     getIt.registerLazySingleton(() => UserLocalDataSource());
     getIt.registerLazySingleton(() => FilmLocalDataSource());
+    getIt.registerLazySingleton(() => CollectionLocalDataSource());
     
     // API Client
     getIt.registerSingleton(DioApiClient());
@@ -47,6 +55,7 @@ Future<void> initializeDependencies() async {
     // Repositories
     getIt.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(userApiService: getIt(), userLocalStorage: getIt()));
     getIt.registerLazySingleton<FilmRepository>(() => FilmRepositoryImpl(filmRemoteDataSource: getIt(), filmLocalDataSource: getIt()));
+    getIt.registerLazySingleton<CollectionRepository>(() => CollectionsRepositoryImpl(collectionLocalDataSource: getIt()));
 
     // UseCases
     getIt.registerLazySingleton(() => AuthenticationUseCase(userRepository: getIt(), apiClient: getIt()));
@@ -57,8 +66,11 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => GetFilmImagesUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => GetSavedFilmsUseCase(filmRepository: getIt()));
     getIt.registerLazySingleton(() => WatchSavedFilmsUseCase(filmRepository: getIt()));
-    getIt.registerLazySingleton(() => AddFilmInUserCollectionUseCase(filmRepository: getIt()));
-    getIt.registerLazySingleton(() => RemoveFilmFromUserCollectionUseCase(filmRepository: getIt()));
+    getIt.registerLazySingleton(() => AddFilmInLibraryUseCase(filmRepository: getIt()));
+    getIt.registerLazySingleton(() => RemoveFilmFromLibraryUseCase(filmRepository: getIt()));
+    getIt.registerLazySingleton(() => GetCollectionsUseCase(collectionRepository: getIt()));
+    getIt.registerLazySingleton(() => CreateCollectionUseCase(collectionRepository: getIt()));
+    getIt.registerLazySingleton(() => RemoveCollectionUseCase(collectionRepository: getIt()));
 
     // Blocs
     getIt.registerFactory(() => AuthenticationBloc(authenticationUseCase: getIt()));
@@ -71,5 +83,14 @@ Future<void> initializeDependencies() async {
       addFilmInUserCollectionUseCase: getIt(), 
       removeFilmFromUserCollectionUseCase: getIt()
     ));
-    getIt.registerFactory(() => WillWatchCollectionBloc(getSavedFilmsUseCase: getIt(), watchSavedFilmsUseCase: getIt()));
+    getIt.registerFactory(() => LibraryBloc(
+      getSavedFilmsUseCase: getIt(), 
+      watchSavedFilmsUseCase: getIt(), 
+      removeFilmFromLibraryUseCase: getIt()
+    ));
+    getIt.registerLazySingleton(() => CollectionsBloc(
+      getCollectionsUseCase: getIt(), 
+      createCollectionUseCase: getIt(), 
+      removeCollectionUseCase: getIt()
+    ));
 }

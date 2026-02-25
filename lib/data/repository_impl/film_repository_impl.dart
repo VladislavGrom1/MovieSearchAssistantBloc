@@ -15,7 +15,7 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_repository.da
 class FilmRepositoryImpl implements FilmRepository{
   final FilmRemoteDataSource filmRemoteDataSource;
   final FilmLocalDataSource filmLocalDataSource;
-  final _savedFilmsController = StreamController<List<FilmDetailModel>>.broadcast();
+  final _savedFilmsController = StreamController<List<FilmEntity>>.broadcast();
 
   FilmRepositoryImpl({
     required this.filmRemoteDataSource,
@@ -30,8 +30,8 @@ class FilmRepositoryImpl implements FilmRepository{
       List<FilmBaseModel>? filmBaseModels = await filmRemoteDataSource.getCollectionFilms(collectionName, page);
       if(filmBaseModels != null){
         for(var filmBaseModel in filmBaseModels){
-          filmBaseModel.isSaved = await filmIsSaved(filmBaseModel.kinopoiskId!);
-          collectionFilmsEntity.add(FilmEntity.fromFilmBaseModel(filmBaseModel));
+          final filmBaseModelWithUserData = await initUserData(filmBaseModel);
+          collectionFilmsEntity.add(FilmEntity.fromFilmBaseModel(filmBaseModelWithUserData));
         }
         return collectionFilmsEntity;
       }
@@ -52,8 +52,8 @@ class FilmRepositoryImpl implements FilmRepository{
       List<FilmBaseModel>? filmBaseModels = await filmRemoteDataSource.getFilterFilms(keyword, builtCountries, builtGenres, yearFrom, yearTo, page);
       if(filmBaseModels != null){
         for(var filmBaseModel in filmBaseModels){
-          filmBaseModel.isSaved = await filmIsSaved(filmBaseModel.kinopoiskId!);
-          filterFilmsEntity.add(FilmEntity.fromFilmBaseModel(filmBaseModel));
+          final filmBaseModelWithUserData = await initUserData(filmBaseModel);
+          filterFilmsEntity.add(FilmEntity.fromFilmBaseModel(filmBaseModelWithUserData));
         }
         return filterFilmsEntity;
       }
@@ -81,7 +81,7 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
-  Stream<List<FilmDetailModel>> watchSavedFilms(){
+  Stream<List<FilmEntity>> watchSavedFilms(){
     return _savedFilmsController.stream;
   }
 
@@ -102,10 +102,13 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
-  Future<FilmDetailModel?> getFilmFromLocalDataSource(int idFilm) async{
+  Future<FilmEntity?> getFilmFromLocalDataSource(int idFilm) async{
     try{
       FilmDetailModel? savedFilm = await filmLocalDataSource.getFilm(idFilm);
-      return savedFilm;
+      if(savedFilm != null){
+        return FilmEntity.fromFilmDetailModel(savedFilm);
+      }
+      return null;
     } on LocalDataSourceException{
       rethrow;
     } catch(e){
@@ -114,10 +117,17 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
-  Future<List<FilmDetailModel>?> getAllFilmsFromLocalDataSource() async{
+  Future<List<FilmEntity>?> getAllFilmsFromLocalDataSource() async{
     try{
-      List<FilmDetailModel>? savedFilms = await filmLocalDataSource.getAllFilms();
-      return savedFilms;
+      List<FilmEntity> savedFilmsEntity = [];
+      List<FilmDetailModel>? savedFilmsModel = await filmLocalDataSource.getAllFilms();
+      if(savedFilmsModel != null){
+        for(var filmModel in savedFilmsModel){
+          savedFilmsEntity.add(FilmEntity.fromFilmDetailModel(filmModel));
+        }
+        return savedFilmsEntity;
+      }
+      return null;
     } on LocalDataSourceException{
       rethrow;
     } catch(e){
@@ -168,15 +178,18 @@ class FilmRepositoryImpl implements FilmRepository{
     }
   }
 
+  // TODO: Модель подправлена, можно создавать Model для коллекций, нужно подправить функцию добавления фильмов, чтобы присваивался tag коллекции
+
   @override
-  Future<bool> filmIsSaved(int idFilm) async {
-    try{
-      return await filmLocalDataSource.filmIsSaved(idFilm);
-    } on LocalDataSourceException{
-      rethrow;
-    } catch(e){
-      rethrow;
+  Future<FilmBaseModel> initUserData(FilmBaseModel filmBaseModel) async {
+    Map<String, dynamic>? userDataAboutFilm = await filmLocalDataSource.getUserDataAboutFilm(filmBaseModel.kinopoiskId!);
+    if(userDataAboutFilm != null){
+      filmBaseModel.collectionTag = userDataAboutFilm["collectionTag"];
+      filmBaseModel.userComment = userDataAboutFilm["userComment"];
+      filmBaseModel.userRating = userDataAboutFilm["userRating"];
+      return filmBaseModel;
     }
+    return filmBaseModel;
   }
 
   void dispose() {

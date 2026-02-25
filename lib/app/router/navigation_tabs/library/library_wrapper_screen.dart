@@ -2,8 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 @RoutePage()
-class WillWatchCollectionWrapperScreen extends StatelessWidget implements AutoRouteWrapper {
-  const WillWatchCollectionWrapperScreen({super.key});
+class LibraryWrapperScreen extends StatelessWidget implements AutoRouteWrapper {
+  const LibraryWrapperScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

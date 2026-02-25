@@ -17,7 +17,9 @@ class FilmBaseModel {
   @HiveField(9) String? type;
   @HiveField(10) String? posterUrl;
   @HiveField(11) String? posterUrlPreview;
-  @HiveField(12) bool? isSaved;
+  @HiveField(12) String? collectionTag;
+  @HiveField(13) String? userComment;
+  @HiveField(14) double? userRating;
 
   FilmBaseModel({
     this.kinopoiskId,
@@ -32,7 +34,9 @@ class FilmBaseModel {
     this.type,
     this.posterUrl,
     this.posterUrlPreview,
-    this.isSaved
+    this.collectionTag,
+    this.userComment,
+    this.userRating
   });
 
   factory FilmBaseModel.fromFilmCollectionResponseItems(FilmCollectionResponseItems film){
@@ -48,7 +52,7 @@ class FilmBaseModel {
       year: film.year,
       type: film.type?.name,
       posterUrl: film.posterUrl,
-      posterUrlPreview: film.posterUrlPreview
+      posterUrlPreview: film.posterUrlPreview,
     );
   }
 

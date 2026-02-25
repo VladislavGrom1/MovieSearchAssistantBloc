@@ -17,7 +17,9 @@ class FilmEntity extends Equatable {
   final String? type;
   final String? posterUrl;
   final String? posterUrlPreview;
-  final bool? isSaved; 
+  final String? collectionTag;
+  final String? userComment;
+  final double? userRating;
   // FilmDetailInformation
   final String? kinopoiskHDId;
   final String? imdbId;
@@ -67,7 +69,9 @@ class FilmEntity extends Equatable {
     this.type,
     this.posterUrl,
     this.posterUrlPreview,
-    this.isSaved,
+    this.collectionTag,
+    this.userComment,
+    this.userRating,
     // FilmDetailInformation
     this.kinopoiskHDId,
     this.imdbId,
@@ -119,7 +123,9 @@ class FilmEntity extends Equatable {
       type: filmBaseModel.type,
       posterUrl: filmBaseModel.posterUrl,
       posterUrlPreview: filmBaseModel.posterUrlPreview,
-      isSaved: filmBaseModel.isSaved
+      collectionTag: filmBaseModel.collectionTag,
+      userComment: filmBaseModel.userComment,
+      userRating: filmBaseModel.userRating
     );
   }
 
@@ -138,7 +144,9 @@ class FilmEntity extends Equatable {
       type: filmDetailModel.filmBaseModel.type,
       posterUrl: filmDetailModel.filmBaseModel.posterUrl,
       posterUrlPreview: filmDetailModel.filmBaseModel.posterUrlPreview,
-      isSaved: filmDetailModel.filmBaseModel.isSaved,
+      collectionTag: filmDetailModel.filmBaseModel.collectionTag,
+      userComment: filmDetailModel.filmBaseModel.userComment,
+      userRating: filmDetailModel.filmBaseModel.userRating,
       // FilmDetailInformation
       kinopoiskHDId: filmDetailModel.kinopoiskHDId,
       imdbId: filmDetailModel.imdbId,
@@ -193,7 +201,9 @@ class FilmEntity extends Equatable {
       type: type,
       posterUrl: posterUrl,
       posterUrlPreview: posterUrlPreview,
-      isSaved: isSaved ?? this.isSaved,
+      collectionTag: collectionTag,
+      userComment: userComment,
+      userRating: userRating,
       // FilmDetailInformation
       kinopoiskHDId: kinopoiskHDId,
       imdbId: imdbId,
@@ -248,7 +258,9 @@ class FilmEntity extends Equatable {
     type,
     posterUrl,
     posterUrlPreview,
-    isSaved,
+    collectionTag,
+    userComment,
+    userRating,
     // FilmDetailInformation
     kinopoiskHDId,
     imdbId,

@@ -63,12 +63,19 @@ class FilmLocalDataSource{
     }
   }
 
-  Future<bool> filmIsSaved(int idFilm) async {
+  Future<Map<String, dynamic>?> getUserDataAboutFilm(int idFilm) async {
+    Map<String, dynamic> userDataAboutFilm = {};
     try{
-      final storageBox = Hive.box<FilmDetailModel>(HiveStorageKeys.filmDetailModelKeyBox);
-      return storageBox.containsKey(idFilm.toString());
-    } on HiveError catch(e){
-      throw LocalDataSourceException(message: e.message);
+      final film = await getFilm(idFilm);
+      if(film != null){
+        userDataAboutFilm['collectionTag'] = film.filmBaseModel.collectionTag;
+        userDataAboutFilm['userComment'] = film.filmBaseModel.userComment;
+        userDataAboutFilm['userRating'] = film.filmBaseModel.userRating;
+        return userDataAboutFilm;
+      }
+      return null;
+    } on LocalDataSourceException {
+      rethrow;
     } catch(e){
       rethrow;
     }

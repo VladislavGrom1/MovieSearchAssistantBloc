@@ -4,10 +4,10 @@ import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exc
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/add_film_in_user_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/add_film_in_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_images_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_information_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_user_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_library_use_case.dart';
 
 part 'film_information_event.dart';
 part 'film_information_state.dart';
@@ -15,8 +15,8 @@ part 'film_information_state.dart';
 class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationState> {
   final GetFilmInformationUseCase getFilmInformationUseCase;
   final GetFilmImagesUseCase getFilmImagesUseCase;
-  final AddFilmInUserCollectionUseCase addFilmInUserCollectionUseCase;
-  final RemoveFilmFromUserCollectionUseCase removeFilmFromUserCollectionUseCase;
+  final AddFilmInLibraryUseCase addFilmInUserCollectionUseCase;
+  final RemoveFilmFromLibraryUseCase removeFilmFromUserCollectionUseCase;
   FilmInformationBloc({
     required this.getFilmInformationUseCase,
     required this.getFilmImagesUseCase,

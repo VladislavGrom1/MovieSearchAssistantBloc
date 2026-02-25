@@ -1,4 +1,5 @@
 
+import 'package:movie_search_assistant_bloc/data/models/film_base_model.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
@@ -15,13 +16,13 @@ abstract class FilmRepository {
 
   Future<void> addFilmInLocalDataSource(FilmDetailModel film);
 
-  Stream<List<FilmDetailModel>> watchSavedFilms();
+  Stream<List<FilmEntity>> watchSavedFilms();
+    
+  Future<FilmBaseModel?> initUserData(FilmBaseModel film);
 
-  Future<bool> filmIsSaved(int idFilm);
+  Future<FilmEntity?> getFilmFromLocalDataSource(int idFilm);
 
-  Future<FilmDetailModel?> getFilmFromLocalDataSource(int idFilm);
-
-  Future<List<FilmDetailModel>?> getAllFilmsFromLocalDataSource();
+  Future<List<FilmEntity>?> getAllFilmsFromLocalDataSource();
 
   Future<void> removeFilmFromLocalDataSource(int idFilm);
 

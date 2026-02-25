@@ -1,4 +1,4 @@
-import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 
 class WatchSavedFilmsUseCase {
@@ -6,7 +6,7 @@ class WatchSavedFilmsUseCase {
 
   WatchSavedFilmsUseCase({required this.filmRepository});
 
-  Stream<List<FilmDetailModel>> call() {
+  Stream<List<FilmEntity>> call() {
     return filmRepository.watchSavedFilms();
   }
 }

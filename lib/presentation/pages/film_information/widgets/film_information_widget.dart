@@ -8,14 +8,14 @@ class FilmInformationWidget extends StatelessWidget {
     super.key,
     required this.film,
     required this.images,
-    required this.onSavePressed,
-    required this.onRemovePressed
+    required this.onSaveInLibraryPressed,
+    required this.onRemoveFromLibraryPressed
   });
 
   final FilmEntity film;
   final FilmImagesEntity? images;
-  final VoidCallback onSavePressed;
-  final VoidCallback onRemovePressed;
+  final VoidCallback onSaveInLibraryPressed;
+  final VoidCallback onRemoveFromLibraryPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -29,17 +29,25 @@ class FilmInformationWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextButton(
-                    onPressed: onSavePressed,
+                    onPressed: onSaveInLibraryPressed,
                     child: Text(
-                      "Сохранить фильм",
+                      "Сохранить фильм в библиотеку",
                       style: TextStyle(color: Colors.purple),
                     ),
                   ),
                   SizedBox(height: 10.h),
                   TextButton(
-                    onPressed: onRemovePressed,
+                    onPressed: onSaveInLibraryPressed,
                     child: Text(
-                      "Удалить фильм",
+                      "Добавить фильм в коллекцию",
+                      style: TextStyle(color: Colors.purple),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  TextButton(
+                    onPressed: onRemoveFromLibraryPressed,
+                    child: Text(
+                      "Удалить фильм из библиотеки",
                       style: TextStyle(color: Colors.purple),
                     ),
                   ),

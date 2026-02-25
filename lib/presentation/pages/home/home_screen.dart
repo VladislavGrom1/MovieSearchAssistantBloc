@@ -11,8 +11,8 @@ class HomeScreen extends StatelessWidget {
     return AutoTabsRouter(
       routes: [
           SearchFilmWrapperRoute(),
-          WillWatchCollectionRoute(),
-          WatchedCollectionRoute(),
+          LibraryRoute(),
+          CollectionsRoute(),
           UserProfileRoute()
         ],
       builder: (context, child) {
@@ -34,12 +34,12 @@ class HomeScreen extends StatelessWidget {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.play_arrow),
-                label: "Буду смотреть",
+                label: "Библиотека",
                 backgroundColor: Colors.black
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.library_books_outlined),
-                label: "Просмотрено",
+                label: "Коллекции",
                 backgroundColor: Colors.black
               ),
               BottomNavigationBarItem(

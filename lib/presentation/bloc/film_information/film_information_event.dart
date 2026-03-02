@@ -11,16 +11,34 @@ class DisplayFilmInformationEvent extends FilmInformationEvent{
   final int idFilm;
 
   const DisplayFilmInformationEvent({required this.idFilm});
+
+  @override
+  List<Object> get props => [idFilm];
 }
 
-class SaveFilmEvent extends FilmInformationEvent{
-  final FilmEntity film;
+class AddFilmInCollectionEvent extends FilmInformationEvent {
+  final String collectionId;
 
-  const SaveFilmEvent({required this.film});
+  const AddFilmInCollectionEvent({required this.collectionId});
+
+  @override
+  List<Object> get props => [collectionId];
 }
 
-class RemoveFilmEvent extends FilmInformationEvent{
-  final FilmEntity film;
+class RemoveFilmFromCollectionEvent extends FilmInformationEvent {
+  final String collectionId;
 
-  const RemoveFilmEvent({required this.film});
+  const RemoveFilmFromCollectionEvent({required this.collectionId});
+
+  @override
+  List<Object> get props => [collectionId];
+}
+
+class OnSavedCollectionsUpdated extends FilmInformationEvent {
+  final List<CollectionEntity> collections;
+
+  const OnSavedCollectionsUpdated({required this.collections});
+
+  @override
+  List<Object> get props => [collections];
 }

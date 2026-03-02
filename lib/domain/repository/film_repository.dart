@@ -17,8 +17,10 @@ abstract class FilmRepository {
   Future<void> addFilmInLocalDataSource(FilmDetailModel film);
 
   Stream<List<FilmEntity>> watchSavedFilms();
+
+  Future<FilmBaseModel> initUserDataForFilmBaseModel(FilmBaseModel filmBaseModel);
     
-  Future<FilmBaseModel?> initUserData(FilmBaseModel film);
+  Future<FilmDetailModel> initUserDataForFilmDetailModel(FilmDetailModel filmDetailModel);
 
   Future<FilmEntity?> getFilmFromLocalDataSource(int idFilm);
 

@@ -30,7 +30,7 @@ class FilmRepositoryImpl implements FilmRepository{
       List<FilmBaseModel>? filmBaseModels = await filmRemoteDataSource.getCollectionFilms(collectionName, page);
       if(filmBaseModels != null){
         for(var filmBaseModel in filmBaseModels){
-          final filmBaseModelWithUserData = await initUserData(filmBaseModel);
+          final filmBaseModelWithUserData = await initUserDataForFilmBaseModel(filmBaseModel);
           collectionFilmsEntity.add(FilmEntity.fromFilmBaseModel(filmBaseModelWithUserData));
         }
         return collectionFilmsEntity;
@@ -52,7 +52,7 @@ class FilmRepositoryImpl implements FilmRepository{
       List<FilmBaseModel>? filmBaseModels = await filmRemoteDataSource.getFilterFilms(keyword, builtCountries, builtGenres, yearFrom, yearTo, page);
       if(filmBaseModels != null){
         for(var filmBaseModel in filmBaseModels){
-          final filmBaseModelWithUserData = await initUserData(filmBaseModel);
+          final filmBaseModelWithUserData = await initUserDataForFilmBaseModel(filmBaseModel);
           filterFilmsEntity.add(FilmEntity.fromFilmBaseModel(filmBaseModelWithUserData));
         }
         return filterFilmsEntity;
@@ -70,7 +70,8 @@ class FilmRepositoryImpl implements FilmRepository{
     try{
       FilmDetailModel? filmDetailModel = await filmRemoteDataSource.getFilmInformation(idFilm);
       if(filmDetailModel != null){
-        return FilmEntity.fromFilmDetailModel(filmDetailModel);
+        final filmDetailModelWithUserData = await initUserDataForFilmDetailModel(filmDetailModel);
+        return FilmEntity.fromFilmDetailModel(filmDetailModelWithUserData);
       } 
       return null;
     } on RemoteDataSourceException{
@@ -178,18 +179,26 @@ class FilmRepositoryImpl implements FilmRepository{
     }
   }
 
-  // TODO: Модель подправлена, можно создавать Model для коллекций, нужно подправить функцию добавления фильмов, чтобы присваивался tag коллекции
-
   @override
-  Future<FilmBaseModel> initUserData(FilmBaseModel filmBaseModel) async {
+  Future<FilmBaseModel> initUserDataForFilmBaseModel(FilmBaseModel filmBaseModel) async {
     Map<String, dynamic>? userDataAboutFilm = await filmLocalDataSource.getUserDataAboutFilm(filmBaseModel.kinopoiskId!);
     if(userDataAboutFilm != null){
-      filmBaseModel.collectionTag = userDataAboutFilm["collectionTag"];
+      filmBaseModel.collectionIds = userDataAboutFilm["collectionTag"];
       filmBaseModel.userComment = userDataAboutFilm["userComment"];
       filmBaseModel.userRating = userDataAboutFilm["userRating"];
-      return filmBaseModel;
     }
     return filmBaseModel;
+  }
+
+  @override
+  Future<FilmDetailModel> initUserDataForFilmDetailModel(FilmDetailModel filmDetailModel) async {
+    Map<String, dynamic>? userDataAboutFilm = await filmLocalDataSource.getUserDataAboutFilm(filmDetailModel.filmBaseModel.kinopoiskId!);
+    if(userDataAboutFilm != null){
+      filmDetailModel.filmBaseModel.collectionIds = userDataAboutFilm["collectionTag"];
+      filmDetailModel.filmBaseModel.userComment = userDataAboutFilm["userComment"];
+      filmDetailModel.filmBaseModel.userRating = userDataAboutFilm["userRating"];
+    }
+    return filmDetailModel;
   }
 
   void dispose() {

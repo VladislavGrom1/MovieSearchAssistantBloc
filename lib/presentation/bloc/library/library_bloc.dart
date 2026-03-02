@@ -34,11 +34,7 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
     emit(SavedFilmsLoading());
     try{
       List<FilmEntity>? savedFilms = await getSavedFilmsUseCase.call();
-      if(savedFilms != null && savedFilms.isNotEmpty){
-        emit(SavedFilmsLoadedSuccessful(savedFilms: savedFilms));
-      } else{
-        emit(SavedFilmsLoadedFailure(exceptionType: "Коллекция пустая"));
-      }
+      emit(SavedFilmsLoadedSuccessful(savedFilms: savedFilms ?? []));
     } on LocalDataSourceException catch(e){
       emit(SavedFilmsLoadedFailure(exceptionType: e.message));
     } catch(e){

@@ -1,5 +1,5 @@
-import 'dart:developer';
 
+import 'dart:async';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/collection_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/models/collection_model.dart';
@@ -8,15 +8,25 @@ import 'package:movie_search_assistant_bloc/domain/repository/collection_reposit
 
 class CollectionsRepositoryImpl implements CollectionRepository{
   final CollectionLocalDataSource collectionLocalDataSource;
+  final _savedCollectionsController = StreamController<List<CollectionEntity>>.broadcast();
 
   CollectionsRepositoryImpl({
     required this.collectionLocalDataSource
   });
 
   @override
+  Stream<List<CollectionEntity>> watchSavedCollections(){
+    return _savedCollectionsController.stream;
+  }
+
+  @override
   Future<void> addCollection(CollectionModel collection) async {
     try{
       await collectionLocalDataSource.addCollection(collection);
+      final updatedCollections = await getAllCollections();
+      if(updatedCollections != null){
+        _savedCollectionsController.add(updatedCollections);
+      }
     } on LocalDataSourceException {
       rethrow;
     } catch(e){
@@ -44,9 +54,13 @@ class CollectionsRepositoryImpl implements CollectionRepository{
   }
 
   @override
-  Future<void> removeCollection(String collectionName) async {
+  Future<void> removeCollection(String collectionId) async {
     try{
-      await collectionLocalDataSource.removeCollection(collectionName);
+      await collectionLocalDataSource.removeCollection(collectionId);
+      final updatedCollections = await getAllCollections();
+      if(updatedCollections != null){
+        _savedCollectionsController.add(updatedCollections);
+      }
     } on LocalDataSourceException {
       rethrow;
     } catch(e){
@@ -58,6 +72,10 @@ class CollectionsRepositoryImpl implements CollectionRepository{
   Future<void> removeAllCollection() async {
     try{
       await collectionLocalDataSource.removeAllCollections();
+      final updatedCollections = await getAllCollections();
+      if(updatedCollections != null){
+        _savedCollectionsController.add(updatedCollections);
+      }
     } on LocalDataSourceException {
       rethrow;
     } catch(e){
@@ -66,9 +84,9 @@ class CollectionsRepositoryImpl implements CollectionRepository{
   }
 
   @override
-  Future<bool> collectionIsExist(String collectionName) async {
+  Future<bool> collectionIsExist(String collectionId) async {
     try{
-      return await collectionLocalDataSource.collectionIsExist(collectionName);
+      return await collectionLocalDataSource.collectionIsExist(collectionId);
     } on LocalDataSourceException{
       rethrow;
     } catch(e){

@@ -29,7 +29,7 @@ class FilmBaseModelAdapter extends TypeAdapter<FilmBaseModel> {
       type: fields[9] as String?,
       posterUrl: fields[10] as String?,
       posterUrlPreview: fields[11] as String?,
-      collectionTag: fields[12] as String?,
+      collectionIds: (fields[12] as List?)?.cast<String>(),
       userComment: fields[13] as String?,
       userRating: fields[14] as double?,
     );
@@ -64,7 +64,7 @@ class FilmBaseModelAdapter extends TypeAdapter<FilmBaseModel> {
       ..writeByte(11)
       ..write(obj.posterUrlPreview)
       ..writeByte(12)
-      ..write(obj.collectionTag)
+      ..write(obj.collectionIds)
       ..writeByte(13)
       ..write(obj.userComment)
       ..writeByte(14)

@@ -37,3 +37,15 @@ final class CollectionsLoadedFailure extends CollectionsState {
   @override
   List<Object> get props => [exceptionType, if (statusCode != null) statusCode!];
 }
+
+final class CollectionUpdatedSuccessful extends CollectionsState {}
+
+final class CollectionUpdatedFailure extends CollectionsState {}
+
+final class CollectionAddedSuccessful extends CollectionsState {}
+
+final class CollectionAddedFailure extends CollectionsState {}
+
+final class CollectionRemovedSuccessful extends CollectionsState {}
+
+final class CollectionRemovedFailure extends CollectionsState {}

@@ -3,16 +3,13 @@ import 'package:movie_search_assistant_bloc/data/models/collection_model.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/collection_repository.dart';
 
-class CreateCollectionUseCase {
+class AddCollectionUseCase {
   final CollectionRepository collectionRepository;
 
-  CreateCollectionUseCase({required this.collectionRepository});
+  AddCollectionUseCase({required this.collectionRepository});
 
   Future<void> call(CollectionEntity collection) async {
     try{
-      if(await collectionRepository.collectionIsExist(collection.collectionName!)){
-        return;
-      }
       await collectionRepository.addCollection(CollectionModel.fromCollectionEntity(collection));
     } on LocalDataSourceException{
       rethrow;

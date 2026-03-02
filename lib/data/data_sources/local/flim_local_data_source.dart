@@ -1,4 +1,3 @@
-
 import 'package:hive/hive.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/hive_storage_keys.dart';
@@ -68,7 +67,7 @@ class FilmLocalDataSource{
     try{
       final film = await getFilm(idFilm);
       if(film != null){
-        userDataAboutFilm['collectionTag'] = film.filmBaseModel.collectionTag;
+        userDataAboutFilm['collectionTag'] = film.filmBaseModel.collectionIds;
         userDataAboutFilm['userComment'] = film.filmBaseModel.userComment;
         userDataAboutFilm['userRating'] = film.filmBaseModel.userRating;
         return userDataAboutFilm;

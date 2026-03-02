@@ -5,19 +5,22 @@ part 'collection_model.g.dart';
 
 @HiveType(typeId: 3)
 class CollectionModel {
-  @HiveField(0) String? collectionName;
-  @HiveField(1) DateTime? createdAt;
-  @HiveField(2) int? filmCount;
+  @HiveField(0) String? id;
+  @HiveField(1) String? name;
+  @HiveField(2) DateTime? createdAt;
+  @HiveField(3) int? filmCount;
 
   CollectionModel({
-    this.collectionName,
+    this.id,
+    this.name,
     this.createdAt,
     this.filmCount
   });
 
   factory CollectionModel.fromCollectionEntity(CollectionEntity collectionEntity){
     return CollectionModel(
-      collectionName: collectionEntity.collectionName,
+      id: collectionEntity.id,
+      name: collectionEntity.name,
       createdAt: collectionEntity.createdAt,
       filmCount: collectionEntity.filmCount
     );

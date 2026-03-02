@@ -17,7 +17,7 @@ class FilmBaseModel {
   @HiveField(9) String? type;
   @HiveField(10) String? posterUrl;
   @HiveField(11) String? posterUrlPreview;
-  @HiveField(12) String? collectionTag;
+  @HiveField(12) List<String>? collectionIds;
   @HiveField(13) String? userComment;
   @HiveField(14) double? userRating;
 
@@ -34,7 +34,7 @@ class FilmBaseModel {
     this.type,
     this.posterUrl,
     this.posterUrlPreview,
-    this.collectionTag,
+    this.collectionIds,
     this.userComment,
     this.userRating
   });

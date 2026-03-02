@@ -1,8 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/film_information/widgets/film_information_widget.dart';
 
@@ -21,19 +22,21 @@ class FilmInformationScreen extends StatefulWidget {
 
 class _FilmInformationScreenState extends State<FilmInformationScreen> {
   final _filmInformationBloc = getIt<FilmInformationBloc>();
+  final _collectionsBloc = getIt<CollectionsBloc>();
 
   @override
   void initState() {
     super.initState();
     _filmInformationBloc.add(DisplayFilmInformationEvent(idFilm: widget.filmId));
+    _collectionsBloc.add(DisplayCollections());
   }
 
-  void onSaveInLibraryPressed(FilmEntity film){
-    _filmInformationBloc.add(SaveFilmEvent(film: film));
+  void onAddFilmInCollectionPressed(String collectionId){
+    _filmInformationBloc.add(AddFilmInCollectionEvent(collectionId: collectionId));
   }
 
-  void onRemoveFromLibraryPressed(FilmEntity film){
-    _filmInformationBloc.add(RemoveFilmEvent(film: film));
+  void onRemoveFilmFromCollectionPressed(String collectionId){
+    _filmInformationBloc.add(RemoveFilmFromCollectionEvent(collectionId: collectionId));
   }
 
   @override
@@ -47,28 +50,69 @@ class _FilmInformationScreenState extends State<FilmInformationScreen> {
             child: RefreshIndicator(
           onRefresh: () async {
             _filmInformationBloc.add(DisplayFilmInformationEvent(idFilm: widget.filmId));
+            _collectionsBloc.add(DisplayCollections());
           },
-          child: BlocConsumer<FilmInformationBloc, FilmInformationState>(
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<FilmInformationBloc, FilmInformationState>(
+                bloc: _filmInformationBloc,
+                listener: (context, state) {
+                  if (state is FilmSavedSuccesful) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Фильм сохранён в коллекцию"),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    _collectionsBloc.add(DisplayCollections());
+                  }
+                  if (state is FilmRemovedSuccesful) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Фильм удалён из коллекции"),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    _collectionsBloc.add(DisplayCollections());
+                  }
+                  if (state is FilmSavedFailure) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Фильм не удалось сохранить в коллекцию"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                  if (state is FilmRemovedFailure) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Фильм не удалось удалить из коллекции"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+              ),
+              BlocListener<CollectionsBloc, CollectionsState>(
+                  bloc: _collectionsBloc,
+                  listener: (context, state) {
+                    if (state is CollectionsLoadedFailure) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Ошибка загрузки коллекций: ${state.exceptionType}"),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    }
+                  },
+                ),
+            ], 
+            child: BlocBuilder<FilmInformationBloc, FilmInformationState>(
               bloc: _filmInformationBloc,
-              listener: (BuildContext context, FilmInformationState state) {
-                // TODO: Реализовать Toast при изменении статуса фильма (Сохранён/Удалён)
-
-                // if(state is FilmSavedSuccesful){
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //     SnackBar(
-                //       content: Text("Фильм сохранён успешно"),
-                //       backgroundColor: Colors.green,
-                //     ),
-                //   );
-                // }
-                // if(state is FilmSavedFailure){
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //     SnackBar(
-                //       content: Text("Фильм не удалось сохранить"),
-                //       backgroundColor: Colors.red,
-                //     ),
-                //   );
-                // }
+              buildWhen: (previous, current) {
+                return current is FilmInformatinonLoading ||
+                  current is FilmInformationLoadedFailure ||
+                  current is FilmInformationLoadedSuccessful;
               },
               builder: (context, state) {
                 if (state is FilmInformatinonLoading) {
@@ -79,20 +123,35 @@ class _FilmInformationScreenState extends State<FilmInformationScreen> {
                   return Center(child: Text(state.exceptionType));
                 }
 
-                if (state is FilmInformationLoaded) {
+                if (state is FilmInformationLoadedSuccessful) {
                   final film = state.filmInformation;
                   final images = state.filmImages;
-                  return FilmInformationWidget(
-                    film: film, 
-                    images: images, 
-                    onSaveInLibraryPressed: () => onSaveInLibraryPressed(film),
-                    onRemoveFromLibraryPressed: () => onRemoveFromLibraryPressed(film),
+
+                  return BlocBuilder<CollectionsBloc, CollectionsState>(
+                    bloc: _collectionsBloc,
+                    builder: (context, collectionsState) {
+                      List<CollectionEntity> collections = [];
+                      if (collectionsState is CollectionsLoadedSuccesful) {
+                        collections = collectionsState.collections;
+                      }
+                      return FilmInformationWidget(
+                        filmInformationBloc: _filmInformationBloc,
+                        collectionsBloc: _collectionsBloc,
+                        film: film,
+                        images: images,
+                        collections: collections,
+                        onAddFilmInCollectionPressed: onAddFilmInCollectionPressed,
+                        onRemoveFilmFromCollectionPressed: onRemoveFilmFromCollectionPressed,
+                      );
+                    },
                   );
                 }
                 return SizedBox();
               },
-            ),
+            )
+          )
           ),
-        ));
+        ),
+      );
   }
 }

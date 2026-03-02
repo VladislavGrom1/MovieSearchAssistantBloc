@@ -3,13 +3,15 @@ import 'package:hive/hive.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/hive_storage_keys.dart';
 import 'package:movie_search_assistant_bloc/data/models/collection_model.dart';
+import 'package:uuid/uuid.dart';
 
 class CollectionLocalDataSource {
-  
+
   Future<void> addCollection(CollectionModel collection) async {
     try{
       final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
-      await storageBox.put(collection.collectionName, collection);
+      collection.id = Uuid().v4();
+      await storageBox.put(collection.id, collection);
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
     } catch(e){
@@ -29,23 +31,13 @@ class CollectionLocalDataSource {
     }
   }
 
-  Future<void> removeCollection(String collectionName) async {
+  // TODO: При удалении коллекции нужно удалить ссылки на коллекцию у фильмов
+  Future<void> removeCollection(String collectionId) async {
     try{
       final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
-      await storageBox.delete(collectionName);
+      await storageBox.delete(collectionId);
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
-    } catch(e){
-      rethrow;
-    }
-  }
-
-  Future<bool> collectionsIsExist(String collectionName) async {
-    try{
-      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
-      return storageBox.containsKey(collectionName);
-    } on LocalDataSourceException {
-      rethrow;
     } catch(e){
       rethrow;
     }
@@ -62,10 +54,10 @@ class CollectionLocalDataSource {
     }
   }
 
-  Future<bool> collectionIsExist(String collectionName) async {
+  Future<bool> collectionIsExist(String collectionId) async {
     try{
       final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
-      return storageBox.containsKey(collectionName);
+      return storageBox.containsKey(collectionId);
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
     } catch(e){

@@ -93,7 +93,7 @@ class FilmDetailModel {
         year: film.year,
         type: film.type.name,
         posterUrl: film.posterUrl,
-        posterUrlPreview: film.posterUrlPreview
+        posterUrlPreview: film.posterUrlPreview,
       ),
       kinopoiskHDId: film.kinopoiskHDId,
       imdbId: film.imdbId,
@@ -145,7 +145,10 @@ class FilmDetailModel {
         year: filmEntity.year,
         type: filmEntity.type,
         posterUrl: filmEntity.posterUrl,
-        posterUrlPreview: filmEntity.posterUrlPreview
+        posterUrlPreview: filmEntity.posterUrlPreview,
+        collectionIds: filmEntity.collectionIds,
+        userComment: filmEntity.userComment,
+        userRating: filmEntity.userRating
       ),
       kinopoiskHDId: filmEntity.kinopoiskHDId,
       imdbId: filmEntity.imdbId,

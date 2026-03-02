@@ -3,10 +3,10 @@ import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 
-class AddFilmInLibraryUseCase {
+class AddFilmInCollectionUseCase {
   final FilmRepository filmRepository;
 
-  AddFilmInLibraryUseCase({
+  AddFilmInCollectionUseCase({
     required this.filmRepository
   });
 

@@ -17,21 +17,24 @@ class CollectionModelAdapter extends TypeAdapter<CollectionModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return CollectionModel(
-      collectionName: fields[0] as String?,
-      createdAt: fields[1] as DateTime?,
-      filmCount: fields[2] as int?,
+      id: fields[0] as String?,
+      name: fields[1] as String?,
+      createdAt: fields[2] as DateTime?,
+      filmCount: fields[3] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, CollectionModel obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
-      ..write(obj.collectionName)
+      ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.createdAt)
+      ..write(obj.name)
       ..writeByte(2)
+      ..write(obj.createdAt)
+      ..writeByte(3)
       ..write(obj.filmCount);
   }
 

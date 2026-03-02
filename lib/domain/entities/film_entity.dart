@@ -17,7 +17,7 @@ class FilmEntity extends Equatable {
   final String? type;
   final String? posterUrl;
   final String? posterUrlPreview;
-  final String? collectionTag;
+  final List<String>? collectionIds;
   final String? userComment;
   final double? userRating;
   // FilmDetailInformation
@@ -69,7 +69,7 @@ class FilmEntity extends Equatable {
     this.type,
     this.posterUrl,
     this.posterUrlPreview,
-    this.collectionTag,
+    this.collectionIds,
     this.userComment,
     this.userRating,
     // FilmDetailInformation
@@ -123,7 +123,7 @@ class FilmEntity extends Equatable {
       type: filmBaseModel.type,
       posterUrl: filmBaseModel.posterUrl,
       posterUrlPreview: filmBaseModel.posterUrlPreview,
-      collectionTag: filmBaseModel.collectionTag,
+      collectionIds: filmBaseModel.collectionIds,
       userComment: filmBaseModel.userComment,
       userRating: filmBaseModel.userRating
     );
@@ -144,7 +144,7 @@ class FilmEntity extends Equatable {
       type: filmDetailModel.filmBaseModel.type,
       posterUrl: filmDetailModel.filmBaseModel.posterUrl,
       posterUrlPreview: filmDetailModel.filmBaseModel.posterUrlPreview,
-      collectionTag: filmDetailModel.filmBaseModel.collectionTag,
+      collectionIds: filmDetailModel.filmBaseModel.collectionIds,
       userComment: filmDetailModel.filmBaseModel.userComment,
       userRating: filmDetailModel.filmBaseModel.userRating,
       // FilmDetailInformation
@@ -185,7 +185,7 @@ class FilmEntity extends Equatable {
   }
 
   FilmEntity copyWith({
-    bool? isSaved,
+    List<String>? updatedCollectionIds,
   }) {
     return FilmEntity(
       // FilmBaseInformation
@@ -201,7 +201,7 @@ class FilmEntity extends Equatable {
       type: type,
       posterUrl: posterUrl,
       posterUrlPreview: posterUrlPreview,
-      collectionTag: collectionTag,
+      collectionIds: updatedCollectionIds,
       userComment: userComment,
       userRating: userRating,
       // FilmDetailInformation
@@ -258,7 +258,7 @@ class FilmEntity extends Equatable {
     type,
     posterUrl,
     posterUrlPreview,
-    collectionTag,
+    collectionIds,
     userComment,
     userRating,
     // FilmDetailInformation

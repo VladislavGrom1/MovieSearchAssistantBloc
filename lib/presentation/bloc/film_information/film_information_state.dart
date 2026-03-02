@@ -11,20 +11,20 @@ final class FilmInformationInitial extends FilmInformationState {}
 
 final class FilmInformatinonLoading extends FilmInformationState {}
 
-final class FilmInformationLoaded extends FilmInformationState {
+final class FilmInformationLoadedSuccessful extends FilmInformationState {
   final FilmEntity filmInformation;
   final FilmImagesEntity? filmImages;
   
-  const FilmInformationLoaded({
+  const FilmInformationLoadedSuccessful({
     required this.filmInformation,
     required this.filmImages,
   });
 
-  FilmInformationLoaded copyWith({
+  FilmInformationLoadedSuccessful copyWith({
     FilmEntity? filmInformation,
     FilmImagesEntity? filmImages,
   }) {
-    return FilmInformationLoaded(
+    return FilmInformationLoadedSuccessful(
       filmInformation: filmInformation ?? this.filmInformation,
       filmImages: filmImages ?? this.filmImages,
     );
@@ -44,25 +44,28 @@ final class FilmInformationLoadedFailure extends FilmInformationState{
   List<Object> get props => [exceptionType, if (statusCode != null) statusCode!];
 }
 
-// final class FilmSavedSuccesful extends FilmInformationLoaded{
-//    const FilmSavedSuccesful({
-//     required super.filmInformation,
-//     super.filmImages
-//    });
+final class FilmSavedSuccesful extends FilmInformationState {}
 
-//   @override
-//   List<Object> get props => [super.props];
-// }
+final class FilmRemovedSuccesful extends FilmInformationState {}
 
-// final class FilmSavedFailure extends FilmInformationLoaded{
-//   final String message;
+final class FilmSavedFailure extends FilmInformationState{
+  final String message;
 
-//   const FilmSavedFailure({
-//     required super.filmInformation,
-//     super.filmImages,
-//     required this.message
-//   });
+  const FilmSavedFailure({
+    required this.message
+  });
 
-//   @override
-//   List<Object> get props => [super.props, message];
-// }
+  @override
+  List<Object> get props => [message];
+}
+
+final class FilmRemovedFailure extends FilmInformationState{
+  final String message;
+
+  const FilmRemovedFailure({
+    required this.message
+  });
+
+  @override
+  List<Object> get props => [message];
+}

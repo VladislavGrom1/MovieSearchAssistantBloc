@@ -1,4 +1,4 @@
-// // TODO: Доработать тесты
+// // // TODO: Доработать тесты
 
 // import 'dart:io';
 // import 'package:dio/dio.dart';
@@ -38,7 +38,9 @@
 //   String? type = "MOVIE",
 //   String? posterUrl = "posterUrl",
 //   String? posterUrlPreview = "posterUrlPreview",
-//   bool? isSaved = false,
+//   String? collectionTag = "Library",
+//   String? userComment = "Best film",
+//   double? userRating = 8.9
 // }) => FilmBaseModel(
 //   kinopoiskId: kinopoiskId,
 //   nameRu: nameRu,
@@ -52,7 +54,9 @@
 //   type: type,
 //   posterUrl: posterUrl,
 //   posterUrlPreview: posterUrlPreview,
-//   isSaved: isSaved,
+//   collectionTag: collectionTag,
+//   userComment: userComment,
+//   userRating: userRating,
 // );
 
 // // Функция для создания FilmEntity из FilmBaseModel (только базовые поля)
@@ -69,7 +73,9 @@
 //   String? type = "MOVIE",
 //   String? posterUrl = "posterUrl",
 //   String? posterUrlPreview = "posterUrlPreview",
-//   bool? isSaved = false,
+//   String? collectionTag = "Library",
+//   String? userComment = "Best film",
+//   double? userRating = 8.9
 // }) => FilmEntity(
 //   // FilmBaseInformation
 //   kinopoiskId: kinopoiskId,
@@ -84,7 +90,9 @@
 //   type: type,
 //   posterUrl: posterUrl,
 //   posterUrlPreview: posterUrlPreview,
-//   isSaved: isSaved,
+//   collectionTag: collectionTag,
+//   userComment: userComment,
+//   userRating: userRating,
 //   // FilmDetailInformation (все null)
 //   kinopoiskHDId: null,
 //   imdbId: null,
@@ -136,7 +144,9 @@
 //   String? type = "FILM",
 //   String? posterUrl = "https://kinopoiskapiunofficial.tech/images/posters/kp/301.jpg",
 //   String? posterUrlPreview = "https://kinopoiskapiunofficial.tech/images/posters/kp_small/301.jpg",
-//   bool? isSaved = false,
+//   String? collectionTag = "Library",
+//   String? userComment = "Best film",
+//   double? userRating = 8.9,
 //   // FilmDetailInformation
 //   String? kinopoiskHDId = "4824a95e60a7db7e86f14137516ba590",
 //   String? imdbId = "tt0133093",
@@ -185,7 +195,9 @@
 //   type: type,
 //   posterUrl: posterUrl,
 //   posterUrlPreview: posterUrlPreview,
-//   isSaved: isSaved,
+//   collectionTag: collectionTag,
+//   userComment: userComment,
+//   userRating: userRating,
 //   // FilmDetailInformation
 //   kinopoiskHDId: kinopoiskHDId,
 //   imdbId: imdbId,
@@ -236,7 +248,9 @@
 //   String? type = "FILM",
 //   String? posterUrl = "https://kinopoiskapiunofficial.tech/images/posters/kp/301.jpg",
 //   String? posterUrlPreview = "https://kinopoiskapiunofficial.tech/images/posters/kp_small/301.jpg",
-//   bool? isSaved = false,
+//   String? collectionTag = "Library",
+//   String? userComment = "Best film",
+//   double? userRating = 8.9,
 //   // Дополнительные параметры FilmDetailModel
 //   String? kinopoiskHDId = "4824a95e60a7db7e86f14137516ba590",
 //   String? imdbId = "tt0133093",
@@ -285,7 +299,9 @@
 //     type: type,
 //     posterUrl: posterUrl,
 //     posterUrlPreview: posterUrlPreview,
-//     isSaved: isSaved,
+//     collectionTag: collectionTag,
+//     userComment: userComment,
+//     userRating: userRating
 //   );
 
 //   return FilmDetailModel(
@@ -387,7 +403,7 @@
 //     test('should return List<FilmEntity> when remote data source returns List<FilmBaseModel>', () async {
 //       when(() => mockFilmRemoteDataSource.getCollectionFilms(collectionName, page))
 //           .thenAnswer((_) async => testFilmBaseModelList);
-//       when(() => mockFilmLocalDataSource.filmIsSaved(1)).thenAnswer((_) async => false);
+//       when(() => mockFilmLocalDataSource.).thenAnswer((_) async => false);
 //       when(() => mockFilmLocalDataSource.filmIsSaved(2)).thenAnswer((_) async => false);
       
 //       final expectedEntity1 = _buildFilmEntityFromBaseModel(

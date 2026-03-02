@@ -18,11 +18,20 @@ class AddNewCollection extends CollectionsEvent{
   List<Object> get props => [nameCollection];
 }
 
-class RemoveCollection extends CollectionsEvent{
-  final String collectionName;
+class UpdateCollection extends CollectionsEvent{
+  final CollectionEntity collection;
 
-  const RemoveCollection({required this.collectionName});
+  const UpdateCollection({required this.collection});
 
   @override
-  List<Object> get props => [collectionName];
+  List<Object> get props => [collection];
+}
+
+class RemoveCollection extends CollectionsEvent{
+  final String collectionId;
+
+  const RemoveCollection({required this.collectionId});
+
+  @override
+  List<Object> get props => [collectionId];
 }

@@ -7,6 +7,7 @@ import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.da
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_use_case.dart';
 
 part 'collections_event.dart';
 part 'collections_state.dart';
@@ -15,83 +16,93 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   final GetCollectionsUseCase getCollectionsUseCase;
   final AddCollectionUseCase addCollectionUseCase;
   final RemoveCollectionUseCase removeCollectionUseCase;
+  final WatchCollectionsUseCase watchCollectionsUseCase;
+  late StreamSubscription _savedCollectionsSubscription;
 
   CollectionsBloc({
     required this.getCollectionsUseCase,
     required this.addCollectionUseCase,
     required this.removeCollectionUseCase,
+    required this.watchCollectionsUseCase
   }) : super(CollectionsInitial()) {
-    on<DisplayCollections>(_displayCollections);
+    on<GetCollections>(_getCollections);
     on<AddNewCollection>(_addNewCollection);
     on<RemoveCollection>(_removeCollection);
-    on<UpdateCollection>(_updateCollection);
+    on<UpdateCollections>(_updateCollections);
+
+    _savedCollectionsSubscription = watchCollectionsUseCase.call().listen(
+      (updatedCollections) => add(UpdateCollections(updatedCollections: updatedCollections))
+    );
   }
  
-  Future<void> _displayCollections(DisplayCollections event, Emitter emit) async {
+  Future<void> _getCollections(GetCollections event, Emitter emit) async {
     emit(CollectionsLoading());
     try{
       List<CollectionEntity>? collections = await getCollectionsUseCase.call();
       if(collections != null){
-        emit(CollectionsLoadedSuccesful(collections: collections));
+        emit(CollectionsLoaded(collections: collections));
       } else{
-        emit(CollectionsLoadedFailure(exceptionType: "Нет коллекций"));
+        emit(CollectionsFailure(exceptionType: "Нет коллекций"));
       }
     } on LocalDataSourceException catch(e) {
-      emit(CollectionsLoadedFailure(exceptionType: e.message));
+      emit(CollectionsFailure(exceptionType: e.message));
     } catch(e){
-      emit(CollectionsLoadedFailure(exceptionType: e.toString()));
+      emit(CollectionsFailure(exceptionType: e.toString()));
     }
   }
 
   Future<void> _addNewCollection(AddNewCollection event, Emitter emit) async {
-    final currentState = state as CollectionsLoadedSuccesful;
-
+    final currentState = state;
+    if(currentState is! CollectionsLoaded) return;
     try{
-      await addCollectionUseCase.call(CollectionEntity(
-        name: event.nameCollection,
-        createdAt: DateTime.now(),
-        filmCount: 0
-      ));
-      final updatedCollections = await getCollectionsUseCase.call();
-      emit(CollectionAddedSuccessful());
-      emit(currentState.copyWith(collections: updatedCollections));
+      final newCollection = await addCollectionUseCase.call(event.collectionName);
+      final updatedCollections = [...currentState.collections, newCollection];
+      emit(CollectionAddedSuccess(collections: updatedCollections, message: "Коллекция успешно создана"));
+      emit(CollectionsLoaded(collections: updatedCollections));
     } on LocalDataSourceException catch(e){
-      emit(CollectionAddedFailure());
-      emit(CollectionsLoadedSuccesful(collections: currentState.collections));
+      emit(CollectionActionFailure(collections: currentState.collections, message: e.message));
+      emit(currentState);
     } catch(e){
-      emit(CollectionAddedFailure());
-      emit(CollectionsLoadedSuccesful(collections: currentState.collections));
+      emit(CollectionActionFailure(collections: currentState.collections, message: "Не удалось создать коллекцию"));
+      emit(currentState);
     }
   }
 
-  void _removeCollection(RemoveCollection event, Emitter emit) async {
-    final currentState = state as CollectionsLoadedSuccesful;
-
+  Future<void> _removeCollection(RemoveCollection event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! CollectionsLoaded) return;
     try{
       await removeCollectionUseCase.call(event.collectionId);
-      final updatedCollections = await getCollectionsUseCase.call();
-      emit(CollectionRemovedSuccessful());
-      emit(currentState.copyWith(collections: updatedCollections));
+      final updatedCollections = currentState.collections.where((c) => c.id != event.collectionId).toList();
+      emit(CollectionRemovedSuccess(collections: updatedCollections, message: "Коллекция успешно удалена"));
+      emit(CollectionsLoaded(collections: updatedCollections));
     } on LocalDataSourceException catch(e){
-      emit(CollectionRemovedFailure());
-      emit(CollectionsLoadedSuccesful(collections: currentState.collections));
+      emit(CollectionActionFailure(collections: currentState.collections, message: e.toString()));
+      emit(currentState);
     } catch(e){
-      emit(CollectionRemovedFailure());
-      emit(CollectionsLoadedSuccesful(collections: currentState.collections));
+      emit(CollectionActionFailure(collections: currentState.collections, message: "Не удалось удалить коллекцию"));
+      emit(currentState);
     }
   }
 
-  void _updateCollection(UpdateCollection event, Emitter emit) async {
-    final currentState = state as CollectionsLoadedSuccesful;
-
+  Future<void> _updateCollections(UpdateCollections event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! CollectionsLoaded) return;
     try{
-
+      final updatedCollections = event.updatedCollections;
+      emit(CollectionsLoaded(collections: updatedCollections));
     } on LocalDataSourceException catch(e){
-      emit(CollectionUpdatedFailure());
-      emit(CollectionsLoadedSuccesful(collections: currentState.collections));
+      emit(CollectionActionFailure(collections: currentState.collections, message: e.toString()));
+      emit(currentState);
     } catch(e){
-      emit(CollectionUpdatedFailure());
-      emit(CollectionsLoadedSuccesful(collections: currentState.collections));
+      emit(CollectionActionFailure(collections: currentState.collections, message: "Не удалось обновить коллекции"));
+      emit(currentState);
     }
+  }
+
+  @override
+  Future<void> close() {
+    _savedCollectionsSubscription.cancel();
+    return super.close();
   }
 }

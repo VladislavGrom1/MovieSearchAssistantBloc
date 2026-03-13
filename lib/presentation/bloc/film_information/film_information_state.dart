@@ -2,70 +2,60 @@ part of 'film_information_bloc.dart';
 
 sealed class FilmInformationState extends Equatable {
   const FilmInformationState();
-  
+
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-final class FilmInformationInitial extends FilmInformationState {}
+class FilmInitial extends FilmInformationState{}
 
-final class FilmInformatinonLoading extends FilmInformationState {}
+class FilmLoading extends FilmInformationState{}
 
-final class FilmInformationLoadedSuccessful extends FilmInformationState {
-  final FilmEntity filmInformation;
+class FilmLoaded extends FilmInformationState{
+  final FilmEntity film;
   final FilmImagesEntity? filmImages;
-  
-  const FilmInformationLoadedSuccessful({
-    required this.filmInformation,
-    required this.filmImages,
+
+  const FilmLoaded({
+    required this.film,
+    required this.filmImages
   });
 
-  FilmInformationLoadedSuccessful copyWith({
-    FilmEntity? filmInformation,
-    FilmImagesEntity? filmImages,
-  }) {
-    return FilmInformationLoadedSuccessful(
-      filmInformation: filmInformation ?? this.filmInformation,
-      filmImages: filmImages ?? this.filmImages,
-    );
-  }
-
   @override
-  List<Object> get props => [filmInformation, if (filmImages != null) filmImages!];
+  List<Object?> get props => [film, filmImages];
 }
 
-final class FilmInformationLoadedFailure extends FilmInformationState{
-  final String exceptionType;
-  final int? statusCode;
-  
-  const FilmInformationLoadedFailure({required this.exceptionType, this.statusCode});
-
-  @override
-  List<Object> get props => [exceptionType, if (statusCode != null) statusCode!];
-}
-
-final class FilmSavedSuccesful extends FilmInformationState {}
-
-final class FilmRemovedSuccesful extends FilmInformationState {}
-
-final class FilmSavedFailure extends FilmInformationState{
+class FilmFailure extends FilmInformationState {
   final String message;
 
-  const FilmSavedFailure({
+  const FilmFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class FilmActionSuccess extends FilmLoaded{
+  final String message;
+
+  const FilmActionSuccess({
+    required super.film,
+    required super.filmImages,
     required this.message
   });
 
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [film, filmImages, message];
 }
 
-final class FilmRemovedFailure extends FilmInformationState{
+class FilmActionFailure extends FilmLoaded{
   final String message;
 
-  const FilmRemovedFailure({
+  const FilmActionFailure({
+    required super.film,
+    required super.filmImages,
     required this.message
   });
 
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [film, filmImages, message];
 }
+

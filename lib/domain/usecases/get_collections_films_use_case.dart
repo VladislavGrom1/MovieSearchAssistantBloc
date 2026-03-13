@@ -7,27 +7,27 @@ import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 
-class GetFilmCollectionsUseCase {
+class GetCollectionsFilmsUseCase {
   final UserRepository userRepository;
   final FilmRepository filmRepository;
   final DioApiClient apiClient;
 
-  GetFilmCollectionsUseCase({
+  GetCollectionsFilmsUseCase({
     required this.userRepository,
     required this.filmRepository, 
     required this.apiClient
   });
 
   Future<Map<String, List<FilmEntity>?>?> call(List<String> collectionNames) async{
-    Map<String, List<FilmEntity>?> filmCollectionsMap = {};
+    Map<String, List<FilmEntity>?> collectionsFilmsMap = {};
     try{
       UserEntity? userEntity = await userRepository.getUserApiKeyInfoFromStorage();
       if(userEntity != null){
         apiClient.updateApiKeyHeaders(userEntity.apiKey!);
         for(var collectionName in collectionNames){
-          filmCollectionsMap[collectionName] = await filmRepository.getCollectionFilms(collectionName, 1);
+          collectionsFilmsMap[collectionName] = await filmRepository.getCollectionFilms(collectionName, 1);
         }
-        return filmCollectionsMap;
+        return collectionsFilmsMap;
       }
       return null;
     } on RemoteDataSourceException{

@@ -3,8 +3,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/collection_films/collection_films_screen.dart';
 
 @RoutePage()
 class CollectionsScreen extends StatefulWidget {
@@ -20,7 +22,7 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
   @override
   void initState() {
     super.initState();
-    _collectionsBloc.add(DisplayCollections());
+    _collectionsBloc.add(GetCollections());
   }
 
   @override
@@ -43,59 +45,47 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                   child: BlocConsumer<CollectionsBloc, CollectionsState>(
                 bloc: _collectionsBloc,
                 listener: (context, state) {
-                  if(state is CollectionRemovedSuccessful){
+                  if(state is CollectionAddedSuccess){
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text("Коллекция успешно удалена"),
+                        content: Text(state.message),
                         backgroundColor: Colors.green,
                       ),
                     );
                   }
-                  if(state is CollectionAddedSuccessful){
+                  if(state is CollectionRemovedSuccess){
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text("Коллекция успешно добавлена"),
+                        content: Text(state.message),
                         backgroundColor: Colors.green,
                       ),
                     );
                   }
-                  if(state is CollectionRemovedFailure){
+                  if(state is CollectionActionFailure){
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text("Коллекцию не удалось удалить"),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                  if(state is CollectionAddedFailure){
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Коллекцию не удалось добавить"),
+                        content: Text(state.message),
                         backgroundColor: Colors.red,
                       ),
                     );
                   }
                 },
                 builder: (context, state) {
-                  return BlocBuilder<CollectionsBloc, CollectionsState>(
-                      bloc: _collectionsBloc,
-                      builder: (context, state) {
                         if (state is CollectionsLoading) {
                           return Center(child: CircularProgressIndicator());
                         }
 
-                        if (state is CollectionsLoadedFailure) {
+                        if (state is CollectionsFailure) {
                           return Center(
                               child: Text(
                                   "${state.exceptionType} ${state.statusCode}"));
                         }
 
-                        if (state is CollectionsLoadedSuccesful) {
+                        if (state is CollectionsLoaded) {
                           return _buildCollections(state);
                         }
 
                         return SizedBox();
-                      });
                 },
               ))
             ],
@@ -105,7 +95,7 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
     );
   }
 
-  Widget _buildCollections(CollectionsLoadedSuccesful state) {
+  Widget _buildCollections(CollectionsLoaded state) {
     final collections = state.collections;
 
     return ListView.separated(
@@ -148,10 +138,8 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
 
           return InkWell(
             onTap: () {
-              if (collection.name != null) {
-                // TODO: Переход на экран списка фильмов в коллекции
-
-                // context.router.push(FilmInformationRoute(filmId: savedFilm.kinopoiskId!));
+              if (collection.id != null) {
+                context.router.push(CollectionFilmsRoute(collectionId: collection.id!));
               } else {
                 // TODO: Реализовать отображение Toast
                 log("collection.collectionName == null");
@@ -240,7 +228,7 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
               onPressed: () {
                 if (controller.text.isNotEmpty) {
                   _collectionsBloc
-                      .add(AddNewCollection(nameCollection: controller.text));
+                      .add(AddNewCollection(collectionName: controller.text));
                   Navigator.pop(context);
                 }
               },

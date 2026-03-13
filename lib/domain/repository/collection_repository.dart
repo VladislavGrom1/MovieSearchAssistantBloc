@@ -3,7 +3,7 @@ import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.da
 
 abstract class CollectionRepository {
 
-  Stream<List<CollectionEntity>> watchSavedCollections();
+  Stream<List<CollectionEntity>> watchCollections();
 
   Future<void> addCollection(CollectionModel collection);
 

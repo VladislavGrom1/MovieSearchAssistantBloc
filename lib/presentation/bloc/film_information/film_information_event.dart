@@ -4,41 +4,41 @@ sealed class FilmInformationEvent extends Equatable {
   const FilmInformationEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-class DisplayFilmInformationEvent extends FilmInformationEvent{
+class GetFilmInformation extends FilmInformationEvent{
   final int idFilm;
 
-  const DisplayFilmInformationEvent({required this.idFilm});
+  const GetFilmInformation({required this.idFilm});
 
   @override
-  List<Object> get props => [idFilm];
+  List<Object?> get props => [idFilm];
 }
 
-class AddFilmInCollectionEvent extends FilmInformationEvent {
+class AddFilmToCollection extends FilmInformationEvent {
   final String collectionId;
-
-  const AddFilmInCollectionEvent({required this.collectionId});
+  
+  const AddFilmToCollection({required this.collectionId});
 
   @override
-  List<Object> get props => [collectionId];
+  List<Object?> get props => [collectionId];
 }
 
-class RemoveFilmFromCollectionEvent extends FilmInformationEvent {
+class RemoveFilmFromCollection extends FilmInformationEvent {
   final String collectionId;
-
-  const RemoveFilmFromCollectionEvent({required this.collectionId});
+  
+  const RemoveFilmFromCollection({required this.collectionId});
 
   @override
-  List<Object> get props => [collectionId];
+  List<Object?> get props => [collectionId];
 }
 
-class OnSavedCollectionsUpdated extends FilmInformationEvent {
-  final List<CollectionEntity> collections;
+class UpdateFilmInformation extends FilmInformationEvent {
+  final FilmEntity? updatedFilm;
 
-  const OnSavedCollectionsUpdated({required this.collections});
+  const UpdateFilmInformation({required this.updatedFilm});
 
   @override
-  List<Object> get props => [collections];
+  List<Object?> get props => [updatedFilm];
 }

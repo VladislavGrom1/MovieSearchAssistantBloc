@@ -3,16 +3,20 @@ import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 
-class AddFilmInCollectionUseCase {
+class AddFilmToCollectionUseCase {
   final FilmRepository filmRepository;
 
-  AddFilmInCollectionUseCase({
+  AddFilmToCollectionUseCase({
     required this.filmRepository
   });
 
-  Future<void> call(FilmEntity film) async {
+  Future<FilmEntity> call(FilmEntity film, String collectionId) async {
     try{
-      await filmRepository.addFilmInLocalDataSource(FilmDetailModel.fromFilmEntity(film));
+      final updatedCollectionIds = List<String>.from(film.collectionIds ?? []);
+      updatedCollectionIds.add(collectionId);
+      final updatedFilm = film.copyWith(updatedCollectionIds: updatedCollectionIds);
+      await filmRepository.addFilmInLocalDataSource(FilmDetailModel.fromFilmEntity(updatedFilm));
+      return updatedFilm;
     } on LocalDataSourceException{
       rethrow; 
     } catch(e){

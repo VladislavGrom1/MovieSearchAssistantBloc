@@ -15,14 +15,18 @@ class RemoveCollectionUseCase {
   Future<void> call(String collectionId) async {
     try{
       await collectionRepository.removeCollection(collectionId);
-      final savedFilms = await filmRepository.getAllFilmsFromLocalDataSource();
+      final savedFilms = await filmRepository.getFilmsFromLocalDataSource(collectionId);
       if(savedFilms != null) {
         for(var film in savedFilms){
           if(film.collectionIds?.contains(collectionId) ?? false){
             final updatedCollectionIds = film.collectionIds;
             film.collectionIds?.remove(collectionId);
-            FilmDetailModel filmDetailModelUpdated = FilmDetailModel.fromFilmEntity(film.copyWith(updatedCollectionIds: updatedCollectionIds));
-            await filmRepository.addFilmInLocalDataSource(filmDetailModelUpdated);
+            if(film.collectionIds?.isEmpty ?? false){
+              await filmRepository.removeFilmFromLocalDataSource(film.kinopoiskId!);
+            } else{
+              FilmDetailModel filmDetailModelUpdated = FilmDetailModel.fromFilmEntity(film.copyWith(updatedCollectionIds: updatedCollectionIds));
+              await filmRepository.addFilmInLocalDataSource(filmDetailModelUpdated);
+            }
           }
         }
       }

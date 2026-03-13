@@ -1,10 +1,39 @@
-import 'package:hive/hive.dart';
+import 'dart:async';
+import 'dart:developer';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/hive_storage_keys.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
 
 class FilmLocalDataSource{
-  
+
+  Stream<FilmDetailModel?> watchFilmById(int idFilm) {
+    try{
+      final storageBox = Hive.box<FilmDetailModel>(HiveStorageKeys.filmDetailModelKeyBox);
+      return storageBox.watch(key: idFilm.toString()).map((event) {
+        if (event.deleted) return null;
+        return event.value as FilmDetailModel?;
+      });
+    } on HiveError catch(e){
+      throw LocalDataSourceException(message: e.message);
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  Stream<List<FilmDetailModel>> watchFilms(){
+    try{
+      final storageBox = Hive.box<FilmDetailModel>(HiveStorageKeys.filmDetailModelKeyBox);
+      return storageBox.watch().map((event) {
+        return storageBox.values.toList();
+      });
+    } on HiveError catch(e){
+      throw LocalDataSourceException(message: e.message);
+    } catch(e){
+      rethrow;
+    }
+  }
+
   Future<void> addFilm(FilmDetailModel film) async {
     try{
       final storageBox = Hive.box<FilmDetailModel>(HiveStorageKeys.filmDetailModelKeyBox);

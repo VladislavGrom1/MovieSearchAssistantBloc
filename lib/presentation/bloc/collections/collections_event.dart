@@ -7,24 +7,15 @@ sealed class CollectionsEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class DisplayCollections extends CollectionsEvent{}
+class GetCollections extends CollectionsEvent{}
 
 class AddNewCollection extends CollectionsEvent{
-  final String nameCollection;
+  final String collectionName;
 
-  const AddNewCollection({required this.nameCollection});
-
-  @override
-  List<Object> get props => [nameCollection];
-}
-
-class UpdateCollection extends CollectionsEvent{
-  final CollectionEntity collection;
-
-  const UpdateCollection({required this.collection});
+  const AddNewCollection({required this.collectionName});
 
   @override
-  List<Object> get props => [collection];
+  List<Object> get props => [collectionName];
 }
 
 class RemoveCollection extends CollectionsEvent{
@@ -35,3 +26,21 @@ class RemoveCollection extends CollectionsEvent{
   @override
   List<Object> get props => [collectionId];
 }
+
+class UpdateCollections extends CollectionsEvent{
+  final List<CollectionEntity> updatedCollections;
+
+  const UpdateCollections({required this.updatedCollections});
+
+  @override
+  List<Object> get props => [updatedCollections];
+}
+
+// class UpdateCollection extends CollectionsEvent{
+//   final CollectionEntity collection;
+
+//   const UpdateCollection({required this.collection});
+
+//   @override
+//   List<Object> get props => [collection];
+// }

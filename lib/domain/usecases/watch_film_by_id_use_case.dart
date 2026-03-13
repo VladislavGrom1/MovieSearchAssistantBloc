@@ -2,18 +2,14 @@ import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exc
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 
-class GetSavedFilmsUseCase {
+class WatchFilmByIdUseCase {
   final FilmRepository filmRepository;
+  const WatchFilmByIdUseCase({required this.filmRepository});
 
-  GetSavedFilmsUseCase({
-    required this.filmRepository
-  });
-
-  Future<List<FilmEntity>?> call(String collectionId) async{
+  Stream<FilmEntity?> call(int idFilm) {
     try{
-      List<FilmEntity>? savedFilms = await filmRepository.getFilmsFromLocalDataSource(collectionId);
-      return savedFilms;
-    } on LocalDataSourceException{
+      return filmRepository.watchFilmById(idFilm);
+    } on LocalDataSourceException {
       rethrow;
     } catch(e){
       rethrow;

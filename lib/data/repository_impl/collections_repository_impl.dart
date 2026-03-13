@@ -8,25 +8,30 @@ import 'package:movie_search_assistant_bloc/domain/repository/collection_reposit
 
 class CollectionsRepositoryImpl implements CollectionRepository{
   final CollectionLocalDataSource collectionLocalDataSource;
-  final _savedCollectionsController = StreamController<List<CollectionEntity>>.broadcast();
 
   CollectionsRepositoryImpl({
     required this.collectionLocalDataSource
   });
 
   @override
-  Stream<List<CollectionEntity>> watchSavedCollections(){
-    return _savedCollectionsController.stream;
+  Stream<List<CollectionEntity>> watchCollections(){
+    try{
+      return collectionLocalDataSource.watchCollections().map((collectionModels) {
+        return collectionModels.map((model) {
+          return CollectionEntity.fromCollectionModel(model);
+        }).toList();
+      });
+    } on LocalDataSourceException {
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
   }
 
   @override
   Future<void> addCollection(CollectionModel collection) async {
     try{
       await collectionLocalDataSource.addCollection(collection);
-      final updatedCollections = await getAllCollections();
-      if(updatedCollections != null){
-        _savedCollectionsController.add(updatedCollections);
-      }
     } on LocalDataSourceException {
       rethrow;
     } catch(e){
@@ -57,10 +62,6 @@ class CollectionsRepositoryImpl implements CollectionRepository{
   Future<void> removeCollection(String collectionId) async {
     try{
       await collectionLocalDataSource.removeCollection(collectionId);
-      final updatedCollections = await getAllCollections();
-      if(updatedCollections != null){
-        _savedCollectionsController.add(updatedCollections);
-      }
     } on LocalDataSourceException {
       rethrow;
     } catch(e){
@@ -72,10 +73,6 @@ class CollectionsRepositoryImpl implements CollectionRepository{
   Future<void> removeAllCollection() async {
     try{
       await collectionLocalDataSource.removeAllCollections();
-      final updatedCollections = await getAllCollections();
-      if(updatedCollections != null){
-        _savedCollectionsController.add(updatedCollections);
-      }
     } on LocalDataSourceException {
       rethrow;
     } catch(e){

@@ -4,14 +4,13 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/add_film_in_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_images_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_information_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_library_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/watch_saved_collections_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/watch_film_by_id_use_case.dart';
 
 part 'film_information_event.dart';
 part 'film_information_state.dart';
@@ -19,141 +18,96 @@ part 'film_information_state.dart';
 class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationState> {
   final GetFilmInformationUseCase getFilmInformationUseCase;
   final GetFilmImagesUseCase getFilmImagesUseCase;
-  final AddFilmInCollectionUseCase addFilmInUserCollectionUseCase;
-  final RemoveFilmFromLibraryUseCase removeFilmFromUserCollectionUseCase;
-  final WatchSavedCollectionsUseCase watchSavedCollectionsUseCase;
-  late final StreamSubscription _onChangeSavedCollectionsSubscription;
+  final AddFilmToCollectionUseCase addFilmToCollectionUseCase;
+  final RemoveFilmFromCollectionUseCase removeFilmFromCollectionUseCase;
+  final WatchFilmByIdUseCase watchFilmByIdUseCase;
+  late StreamSubscription? _filmSubscription;
   
   FilmInformationBloc({
     required this.getFilmInformationUseCase,
     required this.getFilmImagesUseCase,
-    required this.addFilmInUserCollectionUseCase,
-    required this.removeFilmFromUserCollectionUseCase,
-    required this.watchSavedCollectionsUseCase
-    }) : super(FilmInformationInitial()) {
-    on<DisplayFilmInformationEvent>(_displayFilmInformation);
-    on<AddFilmInCollectionEvent>(_addFilmInCollection);
-    on<RemoveFilmFromCollectionEvent>(_removeFilmFromCollection);
-    on<OnSavedCollectionsUpdated>(_onSavedCollectionsUpdated);
-
-    _onChangeSavedCollectionsSubscription = watchSavedCollectionsUseCase().listen((collections) {
-      add(OnSavedCollectionsUpdated(collections: collections));
-    });
+    required this.addFilmToCollectionUseCase,
+    required this.removeFilmFromCollectionUseCase,
+    required this.watchFilmByIdUseCase
+    }) : super(FilmInitial()) {
+    on<GetFilmInformation>(_getFilmInformation);
+    on<AddFilmToCollection>(_addFilmToCollection);
+    on<RemoveFilmFromCollection>(_removeFilmFromCollection);
+    on<UpdateFilmInformation>(_updateFilmInformation);
   }
 
-  Future<void> _displayFilmInformation(DisplayFilmInformationEvent event, Emitter emit) async{
-    emit(FilmInformatinonLoading());
+  Future<void> _getFilmInformation(GetFilmInformation event, Emitter emit) async{
+    emit(FilmLoading());
     try{
       final FilmEntity? filmInformation = await getFilmInformationUseCase.call(event.idFilm);
       final FilmImagesEntity? filmImages = await getFilmImagesUseCase.call(event.idFilm);
       if(filmInformation != null){
-        emit(FilmInformationLoadedSuccessful(
-          filmInformation: filmInformation,
-          filmImages: filmImages
-        ));
+        emit(FilmLoaded(film: filmInformation, filmImages: filmImages));
+        _filmSubscription = watchFilmByIdUseCase(event.idFilm).listen((film) {add(UpdateFilmInformation(updatedFilm: film));});
       } else{
-        emit(FilmInformationLoadedFailure(exceptionType: "Не удалось загрузить информацию о фильме"));
+        emit(FilmFailure("Не удалось получить информацию о фильме"));
       }
     } on RemoteDataSourceException catch(e){
-      emit(FilmInformationLoadedFailure(exceptionType: e.exceptionType.name, statusCode: e.statusCode));
+      emit(FilmFailure(e.exceptionType.name));
     } on LocalDataSourceException catch(e){
-      emit(FilmInformationLoadedFailure(exceptionType: e.message));
+      emit(FilmFailure(e.message));
     } catch(e){
-      emit(FilmInformationLoadedFailure(exceptionType: e.toString()));
+      emit(FilmFailure(e.toString()));
     }
   }
 
-  Future<void> _addFilmInCollection(AddFilmInCollectionEvent event, Emitter emit) async {
-    final currentState = state as FilmInformationLoadedSuccessful;
-    try{
-      final currentIds = currentState.filmInformation.collectionIds ?? [];
-      final updatedCollectionIds = [...currentIds, event.collectionId];
-      
-      final filmInformationWithUpdatedIds = currentState.filmInformation.copyWith(
-        updatedCollectionIds: updatedCollectionIds,
-      );
-
-      emit(currentState.copyWith(
-        filmInformation: filmInformationWithUpdatedIds
-      ));
-
-      await addFilmInUserCollectionUseCase.call(filmInformationWithUpdatedIds);
-      emit(FilmSavedSuccesful());
-
-      emit(FilmInformationLoadedSuccessful(
-        filmInformation: filmInformationWithUpdatedIds,
-        filmImages: currentState.filmImages,
-      ));
-    } on LocalDataSourceException catch(e){
-      emit(FilmSavedFailure(message: e.message));
-      emit(FilmInformationLoadedSuccessful(
-        filmInformation: currentState.filmInformation,
-        filmImages: currentState.filmImages,
-      ));
-    } catch(e){
-      emit(FilmSavedFailure(message: e.toString()));
-      emit(FilmInformationLoadedSuccessful(
-        filmInformation: currentState.filmInformation,
-        filmImages: currentState.filmImages,
-      ));
-    }
-  }
-
-  Future<void> _removeFilmFromCollection(RemoveFilmFromCollectionEvent event, Emitter emit) async{
-    final currentState = state as FilmInformationLoadedSuccessful;
-    try{
-      final currentIds = currentState.filmInformation.collectionIds ?? [];
-      final updatedCollectionIds = currentIds.where((id) => id != event.collectionId).toList();
-
-      final filmInformationWithUpdatedIds = currentState.filmInformation.copyWith(
-        updatedCollectionIds: updatedCollectionIds,
-      );
-
-      emit(currentState.copyWith(
-        filmInformation: filmInformationWithUpdatedIds
-      ));
-
-      if(updatedCollectionIds.isNotEmpty){
-        await addFilmInUserCollectionUseCase.call(filmInformationWithUpdatedIds);
-      } else{
-        await removeFilmFromUserCollectionUseCase.call(filmInformationWithUpdatedIds);
-      }
-      
-      emit(FilmRemovedSuccesful());
-
-      emit(FilmInformationLoadedSuccessful(
-        filmInformation: filmInformationWithUpdatedIds,
-        filmImages: currentState.filmImages,
-      ));
-    } on LocalDataSourceException catch(e){
-      emit(FilmRemovedFailure(message: e.message));
-      emit(FilmInformationLoadedSuccessful(
-        filmInformation: currentState.filmInformation,
-        filmImages: currentState.filmImages,
-      ));
-    } catch(e){
-      emit(FilmRemovedFailure(message: e.toString()));
-      emit(FilmInformationLoadedSuccessful(
-        filmInformation: currentState.filmInformation,
-        filmImages: currentState.filmImages,
-      ));
-    }
-  }
-
-  Future<void> _onSavedCollectionsUpdated(OnSavedCollectionsUpdated event, Emitter emit) async {
+  Future<void> _addFilmToCollection(AddFilmToCollection event, Emitter emit) async {
     final currentState = state;
-    if(currentState is FilmInformationLoadedSuccessful){
-      final FilmEntity? filmInformation = await getFilmInformationUseCase.call(currentState.filmInformation.kinopoiskId!);
-      emit(currentState.copyWith(
-        filmInformation: filmInformation,
-        filmImages: currentState.filmImages
-      ));
+    if(currentState is! FilmLoaded) return;
+    try {
+      final updatedFilm = await addFilmToCollectionUseCase(currentState.film, event.collectionId);
+      emit(FilmActionSuccess(film: updatedFilm, filmImages: currentState.filmImages, message: "Фильм успешно добавлен в коллекцию"));
+    } on LocalDataSourceException catch(e){
+      emit(FilmActionFailure(film: currentState.film, filmImages: currentState.filmImages, message: e.message));
+      emit(currentState);
+    } catch (e) {
+      emit(FilmActionFailure(film: currentState.film, filmImages: currentState.filmImages, message: "Не удалось добавить фильм в коллекцию"));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _removeFilmFromCollection(RemoveFilmFromCollection event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! FilmLoaded) return;
+    try {
+      final updatedFilm = await removeFilmFromCollectionUseCase.call(currentState.film, event.collectionId);
+      emit(FilmActionSuccess(film: updatedFilm, filmImages: currentState.filmImages, message: "Фильм успешно удалён из коллекции"));
+    } on LocalDataSourceException catch(e){
+      emit(FilmActionFailure(film: currentState.film, filmImages: currentState.filmImages, message: e.message));
+      emit(currentState);
+    } catch (e) {
+      emit(FilmActionFailure(film: currentState.film, filmImages: currentState.filmImages, message: "Не удалось удалить фильм из коллекции"));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _updateFilmInformation(UpdateFilmInformation event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! FilmLoaded) return;
+    try{
+      if(event.updatedFilm == null) {
+        final updatedFilm = currentState.film.copyWith(updatedCollectionIds: []);
+        emit(FilmLoaded(film: updatedFilm, filmImages: currentState.filmImages));
+        return;
+      }
+      emit(FilmLoaded(film: event.updatedFilm!, filmImages: currentState.filmImages));
+    } on LocalDataSourceException catch(e){
+      emit(FilmActionFailure(film: currentState.film, filmImages: currentState.filmImages, message: e.message));
+      emit(currentState);
+    } catch(e){
+      emit(FilmActionFailure(film: currentState.film, filmImages: currentState.filmImages, message: "Не удалось обновить информацию о фильме"));
+      emit(currentState);
     }
   }
 
   @override
   Future<void> close() {
-    _onChangeSavedCollectionsSubscription.cancel();
+    _filmSubscription?.cancel();
     return super.close();
   }
 }

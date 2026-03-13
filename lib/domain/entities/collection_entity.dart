@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:movie_search_assistant_bloc/data/models/collection_model.dart';
+import 'package:uuid/uuid.dart';
 
 class CollectionEntity extends Equatable {
   final String? id;
@@ -20,6 +21,15 @@ class CollectionEntity extends Equatable {
       name: collectionModel.name,
       createdAt: collectionModel.createdAt,
       filmCount: collectionModel.filmCount
+    );
+  }
+
+  factory CollectionEntity.create(String collectionName){
+    return CollectionEntity(
+      id: Uuid().v4(),
+      name: collectionName,
+      createdAt: DateTime.now(),
+      filmCount: 0
     );
   }
   

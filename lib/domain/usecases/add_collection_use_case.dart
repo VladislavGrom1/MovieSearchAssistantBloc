@@ -8,9 +8,11 @@ class AddCollectionUseCase {
 
   AddCollectionUseCase({required this.collectionRepository});
 
-  Future<void> call(CollectionEntity collection) async {
+  Future<CollectionEntity> call(String collectionName) async {
     try{
-      await collectionRepository.addCollection(CollectionModel.fromCollectionEntity(collection));
+      CollectionEntity newCollection = CollectionEntity.create(collectionName);
+      await collectionRepository.addCollection(CollectionModel.fromCollectionEntity(newCollection));
+      return newCollection;
     } on LocalDataSourceException{
       rethrow;
     } catch(e){

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:built_collection/built_collection.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
@@ -15,14 +14,41 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_repository.da
 class FilmRepositoryImpl implements FilmRepository{
   final FilmRemoteDataSource filmRemoteDataSource;
   final FilmLocalDataSource filmLocalDataSource;
-  final _savedFilmsController = StreamController<List<FilmEntity>>.broadcast();
 
   FilmRepositoryImpl({
     required this.filmRemoteDataSource,
     required this.filmLocalDataSource
   });
 
-  
+  @override
+  Stream<FilmEntity?> watchFilmById(int idFilm) {
+    try{
+      return filmLocalDataSource.watchFilmById(idFilm).map((model) {
+        if (model == null) return null;
+        return FilmEntity.fromFilmDetailModel(model);
+      });
+    } on LocalDataSourceException {
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  @override
+  Stream<List<FilmEntity>> watchFilms() {
+    try{
+      return filmLocalDataSource.watchFilms().map((filmModels) {
+        return filmModels.map((model) {
+          return FilmEntity.fromFilmDetailModel(model);
+        }).toList();
+      });
+    } on LocalDataSourceException {
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
   @override
   Future<List<FilmEntity>?> getCollectionFilms(String collectionName, int page) async {
     try{
@@ -81,20 +107,10 @@ class FilmRepositoryImpl implements FilmRepository{
     }
   }
 
-  @override
-  Stream<List<FilmEntity>> watchSavedFilms(){
-    return _savedFilmsController.stream;
-  }
-
   @override 
   Future<void> addFilmInLocalDataSource(FilmDetailModel film) async {
     try{
       await filmLocalDataSource.addFilm(film);
-      
-      final updatedSavedFilms = await getAllFilmsFromLocalDataSource();
-      if (updatedSavedFilms != null) {
-        _savedFilmsController.add(updatedSavedFilms);
-      }
     } on LocalDataSourceException{
       rethrow;
     } catch(e){
@@ -118,13 +134,15 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
-  Future<List<FilmEntity>?> getAllFilmsFromLocalDataSource() async{
+  Future<List<FilmEntity>?> getFilmsFromLocalDataSource(String collectionId) async{
     try{
       List<FilmEntity> savedFilmsEntity = [];
       List<FilmDetailModel>? savedFilmsModel = await filmLocalDataSource.getAllFilms();
       if(savedFilmsModel != null){
         for(var filmModel in savedFilmsModel){
-          savedFilmsEntity.add(FilmEntity.fromFilmDetailModel(filmModel));
+          if(filmModel.filmBaseModel.collectionIds?.contains(collectionId) ?? false){
+            savedFilmsEntity.add(FilmEntity.fromFilmDetailModel(filmModel));
+          }
         }
         return savedFilmsEntity;
       }
@@ -140,11 +158,6 @@ class FilmRepositoryImpl implements FilmRepository{
   Future<void> removeFilmFromLocalDataSource(int idFilm) async {
     try{
       await filmLocalDataSource.removeFilm(idFilm);
-
-      final updatedSavedFilms = await getAllFilmsFromLocalDataSource();
-      if (updatedSavedFilms != null) {
-        _savedFilmsController.add(updatedSavedFilms);
-      }
     } on LocalDataSourceException{
       rethrow;
     } catch(e){
@@ -156,7 +169,6 @@ class FilmRepositoryImpl implements FilmRepository{
   Future<void> removeAllFilmsFromLocalDataSource() async {
     try{
       await filmLocalDataSource.removeAllFilms();
-      _savedFilmsController.add([]);
     } on LocalDataSourceException{
       rethrow;
     } catch(e){
@@ -199,9 +211,5 @@ class FilmRepositoryImpl implements FilmRepository{
       filmDetailModel.filmBaseModel.userRating = userDataAboutFilm["userRating"];
     }
     return filmDetailModel;
-  }
-
-  void dispose() {
-    _savedFilmsController.close();
   }
 }

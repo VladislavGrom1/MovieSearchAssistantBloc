@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,34 +10,26 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/searc
 import 'package:movie_search_assistant_bloc/presentation/pages/search_films/widgets/custom_search_bar.dart';
 
 @RoutePage()
-class SearchFilmScreen extends StatefulWidget {
+class SearchFilmScreen extends StatelessWidget {
   const SearchFilmScreen({super.key});
 
   @override
-  State<SearchFilmScreen> createState() => _SearchFilmScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) =>
+          getIt<SearchFilmsBloc>()..add(DisplayFilmCollectionsEvent()),
+      child: _SearchFilmView(),
+    );
+  }
 }
 
-class _SearchFilmScreenState extends State<SearchFilmScreen> {
-  final _searchFilmBloc = getIt<SearchFilmsBloc>();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchFilmBloc.add(DisplayFilmCollectionsEvent());
-    });
-  }
-
-  void onSearchSubmitted(String keyword){
-    context.router.push(SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
-  }
-
-  void onFilterSubmitted(){
-    context.router.push(FilterFilmRoute());
-  }
+class _SearchFilmView extends StatelessWidget {
+  const _SearchFilmView();
 
   @override
   Widget build(BuildContext context) {
+    final searchFilmBloc = context.read<SearchFilmsBloc>();
+
     return Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
@@ -52,28 +42,23 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      _searchFilmBloc.add(DisplayFilmCollectionsEvent());
+                      searchFilmBloc.add(DisplayFilmCollectionsEvent());
                     },
                     child: BlocBuilder<SearchFilmsBloc, SearchFilmsState>(
-                      bloc: _searchFilmBloc,
                       builder: (context, state) {
                         if (state is SearchFilmsLoading) {
                           return Center(child: CircularProgressIndicator());
                         }
 
                         if (state is CollectionsFilmsLoadedFailure) {
-                          return Center(child: Text("${state.exceptionType} ${state.statusCode}"));
+                          return Center(
+                              child: Text(
+                                  "${state.exceptionType} ${state.statusCode}"));
                         }
 
                         if (state is CollectionsFilmsLoadedSuccessful) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              CustomSearchBar(onSearchSubmitted: onSearchSubmitted, onFilterSubmitted: onFilterSubmitted),
-                              SizedBox(height: 10.h),
-                              Expanded(child: _buildFilmCollections(state.filmCollectionsMap)),
-                            ],
-                          );
+                          return _SearchFilmContent(
+                              filmCollectionsMap: state.filmCollectionsMap);
                         }
                         return SizedBox();
                       },
@@ -86,9 +71,45 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
           ),
         ));
   }
+}
 
-  Widget _buildFilmCollections(
-      Map<String, List<FilmEntity>?>? filmCollectionsMap) {
+class _SearchFilmContent extends StatelessWidget {
+  final Map<String, List<FilmEntity>?>? filmCollectionsMap;
+
+  const _SearchFilmContent({required this.filmCollectionsMap});
+
+  void onSearchSubmitted(String keyword, BuildContext context) {
+    context.router.push(
+        SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
+  }
+
+  void onFilterSubmitted(BuildContext context) {
+    context.router.push(FilterFilmRoute());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        CustomSearchBar(
+            onSearchSubmitted: onSearchSubmitted,
+            onFilterSubmitted: onFilterSubmitted),
+        SizedBox(height: 10.h),
+        Expanded(
+            child: _FilmCollectionsWidget(filmCollectionsMap: filmCollectionsMap)),
+      ],
+    );
+  }
+}
+
+class _FilmCollectionsWidget extends StatelessWidget {
+  final Map<String, List<FilmEntity>?>? filmCollectionsMap;
+
+  const _FilmCollectionsWidget({required this.filmCollectionsMap});
+
+  @override
+  Widget build(BuildContext context) {
     final filmCollectionsNamesList = FilmCollectionNames.filmCollectionNames;
     return ListView.separated(
         itemBuilder: (context, index) {
@@ -100,42 +121,53 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
                   IconButton(
                       onPressed: () {
                         context.router.push(SearchedFilmsRoute(
-                          nameCollection: filmCollectionsNamesList[index],
-                          appBarTitle: filmCollectionsNamesList[index]
-                        ));
+                            nameCollection: filmCollectionsNamesList[index],
+                            appBarTitle: filmCollectionsNamesList[index]));
                       },
                       icon: Icon(Icons.arrow_forward, color: Colors.purple))
                 ],
               ),
               SizedBox(
                   height: 185.h,
-                  child: _buildFilmCollection(
-                    filmCollectionsMap, 
-                    filmCollectionsNamesList[index]
-                  ))
+                  child: _FilmCollectionWidget(
+                      filmCollectionsMap: filmCollectionsMap,
+                      filmCollectionsName: filmCollectionsNamesList[index]))
             ],
           );
         },
         separatorBuilder: (context, index) => SizedBox(height: 12.h),
         itemCount: FilmCollectionNames.filmCollectionNames.length);
   }
+}
 
-  Widget _buildFilmCollection(
-      Map<String, List<FilmEntity>?>? filmCollectionsMap,
-      String filmCollectionsName) {
-    List<FilmEntity> filmEntityList =
-        filmCollectionsMap![filmCollectionsName]!;
+class _FilmCollectionWidget extends StatelessWidget {
+  final Map<String, List<FilmEntity>?>? filmCollectionsMap;
+  final String filmCollectionsName;
+
+  const _FilmCollectionWidget({
+    required this.filmCollectionsMap, 
+    required this.filmCollectionsName
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    List<FilmEntity> filmEntityList = filmCollectionsMap![filmCollectionsName]!;
 
     return ListView.separated(
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {
-              if(filmEntityList[index].kinopoiskId != null){
-                context.router.push(FilmInformationRoute(filmId: filmEntityList[index].kinopoiskId!));
-              } else{
-                // TODO: Реализовать отображение Toast
-                log("kinoposikId == null");
+              if (filmEntityList[index].kinopoiskId != null) {
+                context.router.push(FilmInformationRoute(
+                    filmId: filmEntityList[index].kinopoiskId!));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Не удалось получить информацию о фильме"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
             child: Column(
@@ -159,8 +191,7 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
                         fontSize: 11,
                         height: 11 / 9,
                         letterSpacing: 0,
-                        fontWeight: FontWeight.bold
-                      ),
+                        fontWeight: FontWeight.bold),
                   ),
                 )
               ],
@@ -168,6 +199,6 @@ class _SearchFilmScreenState extends State<SearchFilmScreen> {
           );
         },
         separatorBuilder: (context, index) => SizedBox(width: 12.w),
-        itemCount: filmCollectionsMap[filmCollectionsName]!.length);
+        itemCount: filmCollectionsMap![filmCollectionsName]!.length);
   }
 }

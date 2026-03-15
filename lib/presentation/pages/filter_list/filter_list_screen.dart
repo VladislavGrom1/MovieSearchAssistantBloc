@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/filter_data.dart';
 
 @RoutePage()
-class FilterListScreen extends StatefulWidget {
+class FilterListScreen extends StatelessWidget {
   const FilterListScreen({
     super.key,
     @PathParam("filterType") required this.filterType
@@ -13,44 +13,8 @@ class FilterListScreen extends StatefulWidget {
   final String filterType;
 
   @override
-  State<FilterListScreen> createState() => _FilterListScreenState();
-}
-
-class _FilterListScreenState extends State<FilterListScreen> {
-  late FilterData filterData;
-
-  @override
-  void initState() {
-    filterData = FilterData.fromType(widget.filterType);
-    super.initState();
-  }
-
-  FilterType _stringToFilterType(String type) {
-    switch (type) {
-      case 'countries':
-        return FilterType.countries;
-      case 'genres':
-        return FilterType.genres;
-      case 'years':
-        return FilterType.years;
-      default:
-        throw ArgumentError('Unknown filter type: $type');
-    }
-  }
-
-  String _filterTypeToString() {
-    switch (_stringToFilterType(widget.filterType)) {
-      case FilterType.countries:
-        return 'Страны';
-      case FilterType.genres:
-        return 'Жанры';
-      case FilterType.years:
-        return 'Годы';
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final filterData = FilterData.fromType(filterType);
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -91,5 +55,29 @@ class _FilterListScreenState extends State<FilterListScreen> {
         ),
           ),
         ));
+  }
+
+  FilterType _stringToFilterType(String type) {
+    switch (type) {
+      case 'countries':
+        return FilterType.countries;
+      case 'genres':
+        return FilterType.genres;
+      case 'years':
+        return FilterType.years;
+      default:
+        throw ArgumentError('Unknown filter type: $type');
+    }
+  }
+
+  String _filterTypeToString() {
+    switch (_stringToFilterType(filterType)) {
+      case FilterType.countries:
+        return 'Страны';
+      case FilterType.genres:
+        return 'Жанры';
+      case FilterType.years:
+        return 'Годы';
+    }
   }
 }

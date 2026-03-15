@@ -1,38 +1,34 @@
-import 'dart:developer';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/collection_films/collection_films_screen.dart';
 
 @RoutePage()
-class CollectionsScreen extends StatefulWidget {
+class CollectionsScreen extends StatelessWidget {
   const CollectionsScreen({super.key});
 
   @override
-  State<CollectionsScreen> createState() => _CollectionsScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<CollectionsBloc>()..add(GetCollections()),
+      child: _CollectionsView(),
+    );
+  }
 }
 
-class _CollectionsScreenState extends State<CollectionsScreen> {
-  final _collectionsBloc = getIt<CollectionsBloc>();
-
-  @override
-  void initState() {
-    super.initState();
-    _collectionsBloc.add(GetCollections());
-  }
+class _CollectionsView extends StatelessWidget {
+  const _CollectionsView();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Коллекции",
-            style: TextStyle(
-                color: Colors.white, overflow: TextOverflow.ellipsis)),
+        title: Text("Коллекции", style: TextStyle(color: Colors.white, overflow: TextOverflow.ellipsis)),
       ),
       body: SafeArea(
         child: Padding(
@@ -43,49 +39,18 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
             children: [
               Expanded(
                   child: BlocConsumer<CollectionsBloc, CollectionsState>(
-                bloc: _collectionsBloc,
-                listener: (context, state) {
-                  if(state is CollectionAddedSuccess){
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                  if(state is CollectionRemovedSuccess){
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                  if(state is CollectionActionFailure){
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
+                listener: _collectionBlocListener,
                 builder: (context, state) {
-                        if (state is CollectionsLoading) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-
-                        if (state is CollectionsFailure) {
-                          return Center(
-                              child: Text(
-                                  "${state.exceptionType} ${state.statusCode}"));
-                        }
-
-                        if (state is CollectionsLoaded) {
-                          return _buildCollections(state);
-                        }
-
-                        return SizedBox();
+                  if (state is CollectionsLoading) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (state is CollectionsFailure) {
+                    return Center(child: Text("${state.exceptionType} ${state.statusCode}"));
+                  }
+                  if (state is CollectionsLoaded) {
+                    return _CollectionsList(collections: state.collections);
+                  }
+                  return const SizedBox();
                 },
               ))
             ],
@@ -95,121 +60,184 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
     );
   }
 
-  Widget _buildCollections(CollectionsLoaded state) {
-    final collections = state.collections;
+  void _collectionBlocListener(BuildContext context, CollectionsState state){
+    if(state is CollectionActionFailure){
+      _showSnackBar(context, state.message, Colors.red);
+    }
+
+    if(state is CollectionAddedSuccess ||
+       state is CollectionRemovedSuccess ||
+       state is CollectionClearedSuccess) {
+      final message = (state as dynamic).message;
+      _showSnackBar(context, message, Colors.green);
+    }
+  }
+
+  void _showSnackBar(BuildContext context, String message, Color color){
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+}
+
+class _CollectionsList extends StatelessWidget {
+  final List<CollectionEntity> collections;
+  const _CollectionsList({required this.collections});
+
+  @override
+  Widget build(BuildContext context) {
+    final collectionBloc = context.read<CollectionsBloc>();
 
     return ListView.separated(
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return InkWell(
-              onTap: () {
-                _showCreateCollectionDialog();
-              },
-              child: Card(
-                color: Colors.grey,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      height: 120.h,
-                      width: 120.w,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.w),
-                        color: Colors.purple,
-                      ),
-                    ),
-                    SizedBox(width: 16.w),
-                    Expanded(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Новая коллекция",
-                                overflow: TextOverflow.ellipsis, maxLines: 2),
-                          ]),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
+      itemCount: collections.length + 1,
+      separatorBuilder: (_, __) => SizedBox(height: 12.h), 
+      itemBuilder: (context, index) {
+        if(index == 0){
+          return _CreateCollectionCard();
+        }
+        final collection = collections[index - 1];
+        return _CollectionCard(
+          collection: collection,
+          onClear: () => collectionBloc.add(ClearCollection(collectionId: collection.id!)),
+          onRemove: () => collectionBloc.add(RemoveCollection(collectionId: collection.id!)),
+        );
+      },
+    );
+  }
+}
 
-          final collection = collections[index - 1];
+class _CollectionCard extends StatelessWidget {
+  final CollectionEntity collection;
+  final VoidCallback onRemove;
+  final VoidCallback onClear;
 
-          return InkWell(
-            onTap: () {
-              if (collection.id != null) {
-                context.router.push(CollectionFilmsRoute(collectionId: collection.id!));
-              } else {
-                // TODO: Реализовать отображение Toast
-                log("collection.collectionName == null");
-              }
-            },
-            child: Card(
-              color: Colors.grey,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 120.h,
-                    width: 120.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.w),
-                      color: Colors.purple,
+  const _CollectionCard({
+    required this.collection,
+    required this.onRemove,
+    required this.onClear
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        context.router.push(CollectionFilmsRoute(collectionId: collection.id!));
+        },
+          child: Card(
+            color: Colors.white,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 120.h,
+                  width: 120.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.w),
+                    color: Colors.purple,
                     ),
                   ),
                   SizedBox(width: 16.w),
                   Expanded(
                     child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 5.h),
-                          Text(collection.name ?? "Название отсутствует",
-                              overflow: TextOverflow.ellipsis, maxLines: 2),
-                          SizedBox(height: 10.h),
-                          Text("${collection.filmCount} фильмов"),
-                          SizedBox(height: 10.h),
-                          Text(collection.createdAt.toString()),
-                        ]),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 5.h),
+                        Text(collection.name ?? "Название отсутствует", overflow: TextOverflow.ellipsis, maxLines: 2),
+                        SizedBox(height: 10.h),
+                        Text("${collection.filmCount} фильмов"),
+                        SizedBox(height: 10.h),
+                        Text(collection.createdAt.toString()),
+                        ]
+                      ),
                   ),
                   PopupMenuButton(
-                      icon: Icon(Icons.more_vert, color: Colors.purple),
-                      onSelected: (value) {
-                        switch (value) {
-                          case ("removeCollection"):
-                            {
-                              _collectionsBloc.add(RemoveCollection(
-                                  collectionId: collection.id!));
-                            }
-                          case ("clearCollection"):
-                            {}
-                        }
+                    icon: Icon(Icons.more_vert, color: Colors.purple),
+                    onSelected: (value) {
+                      if(value == "removeCollection") onRemove();
+                      if(value == "clearCollection") onClear();
                       },
-                      itemBuilder: (context) => [
-                            PopupMenuItem(
-                                value: 'removeCollection',
-                                child: Text("Удалить коллекцию")),
-                            PopupMenuItem(
-                                value: 'clearCollection',
-                                child: Text("Очистить коллекцию"))
-                          ])
-                ],
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(value: 'removeCollection', child: Text("Удалить коллекцию")),
+                        PopupMenuItem(value: 'clearCollection',child: Text("Очистить коллекцию"))]
+                        )
+                      ],
               ),
             ),
           );
-        },
-        separatorBuilder: (context, index) => SizedBox(height: 12.h),
-        itemCount: state.collections.length + 1);
+  }
+}
+
+class _CreateCollectionCard extends StatelessWidget {
+  const _CreateCollectionCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+        onTap: () => showDialog(
+          context: context,
+          builder: (dialogContext) {
+            return BlocProvider.value(
+              value: context.read<CollectionsBloc>(),
+              child: const _CreateCollectionDialog()
+            );
+          },
+        ),
+        child: Card(
+            color: Colors.white,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  height: 120.h,
+                  width: 120.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.w),
+                    color: Colors.purple,
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 5.h),
+                        Text("Новая коллекция"),
+                        ]
+                      ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+class _CreateCollectionDialog extends StatefulWidget {
+  const _CreateCollectionDialog();
+
+  @override
+  State<_CreateCollectionDialog> createState() => _CreateCollectionDialogState();
+}
+
+class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
+  final controller = TextEditingController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
-  void _showCreateCollectionDialog() {
-    final controller = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    final collectionBloc = context.read<CollectionsBloc>();
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
+    return AlertDialog(
           title: Text('Новая коллекция'),
           content: TextField(
             controller: controller,
@@ -218,6 +246,7 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
               border: OutlineInputBorder(),
             ),
             autofocus: true,
+            onChanged: (_) => setState(() {})
           ),
           actions: [
             TextButton(
@@ -225,18 +254,15 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
               child: Text('Отмена'),
             ),
             ElevatedButton(
-              onPressed: () {
-                if (controller.text.isNotEmpty) {
-                  _collectionsBloc
-                      .add(AddNewCollection(collectionName: controller.text));
-                  Navigator.pop(context);
-                }
-              },
+              onPressed: controller.text.isEmpty
+                  ? null
+                  : () {
+                      collectionBloc.add(AddNewCollection(collectionName: controller.text));
+                      Navigator.pop(context);
+                    },
               child: Text('Сохранить'),
             ),
           ],
         );
-      },
-    );
   }
 }

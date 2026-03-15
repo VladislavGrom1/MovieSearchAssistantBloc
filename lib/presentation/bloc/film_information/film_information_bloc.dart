@@ -21,7 +21,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   final AddFilmToCollectionUseCase addFilmToCollectionUseCase;
   final RemoveFilmFromCollectionUseCase removeFilmFromCollectionUseCase;
   final WatchFilmByIdUseCase watchFilmByIdUseCase;
-  late StreamSubscription? _filmSubscription;
+  StreamSubscription<FilmEntity?>? _filmSubscription;
   
   FilmInformationBloc({
     required this.getFilmInformationUseCase,
@@ -43,6 +43,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       final FilmImagesEntity? filmImages = await getFilmImagesUseCase.call(event.idFilm);
       if(filmInformation != null){
         emit(FilmLoaded(film: filmInformation, filmImages: filmImages));
+        await _filmSubscription?.cancel();
         _filmSubscription = watchFilmByIdUseCase(event.idFilm).listen((film) {add(UpdateFilmInformation(updatedFilm: film));});
       } else{
         emit(FilmFailure("Не удалось получить информацию о фильме"));

@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -177,8 +176,12 @@ class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
               if(searchedFilm.kinopoiskId != null){
                 context.router.push(FilmInformationRoute(filmId: searchedFilm.kinopoiskId!));
               } else{
-                // TODO: Реализовать отображение Toast
-                log("kinoposikId == null");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Не удалось получить информацию о фильме"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
             child: Card(

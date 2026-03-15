@@ -1,20 +1,15 @@
+
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
-import 'package:movie_search_assistant_bloc/domain/repository/collection_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 
-class RemoveCollectionUseCase {
-  final CollectionRepository collectionRepository;
+class ClearCollectionUseCase {
   final FilmRepository filmRepository;
 
-  RemoveCollectionUseCase({
-    required this.collectionRepository,
-    required this.filmRepository
-  });
+  const ClearCollectionUseCase({required this.filmRepository});
 
   Future<void> call(String collectionId) async {
     try{
-      await collectionRepository.removeCollection(collectionId);
       final savedFilms = await filmRepository.getFilmsFromLocalDataSource(collectionId);
       if(savedFilms != null) {
         for(var film in savedFilms){

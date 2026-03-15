@@ -42,7 +42,6 @@ class CollectionLocalDataSource {
     }
   }
 
-  // TODO: При удалении коллекции нужно удалить ссылки на коллекцию у фильмов
   Future<void> removeCollection(String collectionId) async {
     try{
       final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);

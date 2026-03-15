@@ -2,11 +2,11 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
-
-//TODO: При удалении коллекции полностью, у фильма не обновляются collectionTags
 
 @RoutePage()
 class FilmInformationScreen extends StatelessWidget {
@@ -38,64 +38,61 @@ class _FilmInformationView extends StatelessWidget {
     return MultiBlocListener(
       listeners: [
         BlocListener<FilmInformationBloc, FilmInformationState>(
-          listener: (context, state) {
-            if (state is FilmActionSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            }
-            if (state is FilmActionFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
+            listener: _filmInformationBlocListener
         ),
         BlocListener<CollectionsBloc, CollectionsState>(
-          listener: (context, state) {
-            if(state is CollectionRemovedSuccess){
-              final filmState = context.read<FilmInformationBloc>().state;
-              if(filmState is FilmLoaded){
-                final filmId = filmState.film.kinopoiskId!;
-                context.read<FilmInformationBloc>().add(GetFilmInformation(idFilm: filmId));
-              }
-            }
-          },
+            listener: _collectionsBlocListener
         )
       ],
       child: Scaffold(
         appBar: AppBar(backgroundColor: Colors.black),
         backgroundColor: Colors.white,
-        body: SafeArea(
-            child: BlocBuilder<FilmInformationBloc, FilmInformationState>(
+        body: SafeArea(child:
+            BlocBuilder<FilmInformationBloc, FilmInformationState>(
                 builder: (context, state) {
-                  if (state is FilmLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-      
-                  if (state is FilmFailure) {
-                    return Center(child: Text(state.message));
-                  }
-      
-                  if (state is FilmLoaded) {
-                    return FilmInformationContent();
-                  }
-      
-                  return const SizedBox();
-                })),
+          if (state is FilmLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is FilmFailure) {
+            return Center(child: Text(state.message));
+          }
+          if (state is FilmLoaded) {
+            return _FilmInformationContent();
+          }
+          return const SizedBox();
+        })),
+      ),
+    );
+  }
+
+  void _filmInformationBlocListener(
+      BuildContext context, FilmInformationState state) {
+    if (state is FilmActionSuccess) {
+      _showSnackBar(context, state.message, Colors.green);
+    }
+    if (state is FilmActionFailure) {
+      _showSnackBar(context, state.message, Colors.red);
+    }
+  }
+
+  void _collectionsBlocListener(BuildContext context, CollectionsState state) {
+    if (state is CollectionRemovedSuccess) {
+      _showSnackBar(context, state.message, Colors.green);
+    }
+  }
+
+  void _showSnackBar(BuildContext context, String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
       ),
     );
   }
 }
 
-class FilmInformationContent extends StatelessWidget {
-  const FilmInformationContent({super.key});
+class _FilmInformationContent extends StatelessWidget {
+  const _FilmInformationContent();
 
   @override
   Widget build(BuildContext context) {
@@ -162,19 +159,16 @@ class FilmInformationContent extends StatelessWidget {
   }
 
   void _openCollectionSheet(BuildContext context) {
-    final filmBloc = context.read<FilmInformationBloc>();
-    final collectionsBloc = context.read<CollectionsBloc>();
-
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider<FilmInformationBloc>.value(value: filmBloc),
-            BlocProvider<CollectionsBloc>.value(value: collectionsBloc),
-          ],
-        child: const CollectionPickerSheet(),
-    ));
+        builder: (bottomSheetContext) => MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: context.read<FilmInformationBloc>()),
+                BlocProvider.value(value: context.read<CollectionsBloc>()),
+              ],
+              child: const _CollectionPickerSheet(),
+            ));
   }
 
   String _getGenresString(List<String>? genres) {
@@ -205,8 +199,8 @@ class FilmInformationContent extends StatelessWidget {
   }
 }
 
-class CollectionPickerSheet extends StatelessWidget {
-  const CollectionPickerSheet({super.key});
+class _CollectionPickerSheet extends StatelessWidget {
+  const _CollectionPickerSheet();
 
   @override
   Widget build(BuildContext context) {
@@ -217,9 +211,9 @@ class CollectionPickerSheet extends StatelessWidget {
             buildWhen: (previous, current) => current is FilmLoaded,
             builder: (context, filmState) {
               final film = (filmState as FilmLoaded).film;
-              
+
               return BlocBuilder<CollectionsBloc, CollectionsState>(
-                  builder: (context, collectionsState) {
+                builder: (context, collectionsState) {
                 if (collectionsState is CollectionsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -229,30 +223,48 @@ class CollectionPickerSheet extends StatelessWidget {
                 }
 
                 final collections = collectionsState.collections;
-
-                return ListView.builder(
-                    controller: scrollController,
-                    itemCount: collections.length,
-                    itemBuilder: (context, index) {
-                      final collection = collections[index];
-                      final isInCollection = film.collectionIds?.contains(collection.id) ?? false;
-
-                      return ListTile(
-                        title: Text(collection.name ?? "Без названия"),
-                        trailing: Icon(
-                          isInCollection ? Icons.check_box : Icons.add,
-                          color: isInCollection ? Colors.green : Colors.grey,
-                        ),
-                        onTap: () {
-                          if (isInCollection) {
-                            context.read<FilmInformationBloc>().add(RemoveFilmFromCollection(collectionId: collection.id!));
-                          } else {
-                            context.read<FilmInformationBloc>().add(AddFilmToCollection(collectionId: collection.id!));
-                          }
-                        },
-                      );
-                    });
+                return _CollectionsList(
+                    scrollController: scrollController,
+                    film: film,
+                    collections: collections);
               });
+            },
+          );
+        });
+  }
+}
+
+class _CollectionsList extends StatelessWidget {
+  final ScrollController scrollController;
+  final FilmEntity film;
+  final List<CollectionEntity> collections;
+
+  const _CollectionsList({
+    required this.scrollController,
+    required this.film,
+    required this.collections});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+        controller: scrollController,
+        itemCount: collections.length,
+        itemBuilder: (context, index) {
+          final collection = collections[index];
+          final isInCollection = film.collectionIds?.contains(collection.id) ?? false;
+
+          return ListTile(
+            title: Text(collection.name ?? "Без названия"),
+            trailing: Icon(
+              isInCollection ? Icons.check_box : Icons.add,
+              color: isInCollection ? Colors.green : Colors.grey,
+            ),
+            onTap: () {
+              if (isInCollection) {
+                context.read<FilmInformationBloc>().add(RemoveFilmFromCollection(collectionId: collection.id!));
+              } else {
+                context.read<FilmInformationBloc>().add(AddFilmToCollection(collectionId: collection.id!));
+              }
             },
           );
         });

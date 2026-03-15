@@ -36,6 +36,15 @@ class UpdateCollections extends CollectionsEvent{
   List<Object> get props => [updatedCollections];
 }
 
+class ClearCollection extends CollectionsEvent{
+  final String collectionId;
+
+  const ClearCollection({required this.collectionId});
+
+  @override
+  List<Object> get props => [collectionId];
+}
+
 // class UpdateCollection extends CollectionsEvent{
 //   final CollectionEntity collection;
 

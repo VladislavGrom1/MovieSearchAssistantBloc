@@ -8,8 +8,8 @@ class CustomSearchBar extends StatefulWidget {
     required this.onFilterSubmitted
   });
 
-  final Function(String keyword) onSearchSubmitted;
-  final Function() onFilterSubmitted;
+  final Function(String keyword, BuildContext context) onSearchSubmitted;
+  final Function(BuildContext context) onFilterSubmitted;
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -84,7 +84,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 if (keyword == "") {
                   return;
                 } else {
-                  widget.onSearchSubmitted(_searchController.text);
+                  widget.onSearchSubmitted(_searchController.text, context);
                   _clearText();
                 }
               },
@@ -109,7 +109,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                         key: ValueKey('filter'),
                         onPressed: () {
                           _clearText();
-                          widget.onFilterSubmitted();
+                          widget.onFilterSubmitted(context);
                         },
                         icon: Icon(Icons.filter_alt_outlined, color: Colors.purple)
                       )

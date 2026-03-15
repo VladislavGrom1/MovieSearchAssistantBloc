@@ -54,6 +54,18 @@ final class CollectionRemovedSuccess extends CollectionsLoaded {
   List<Object?> get props => [collections, message];
 }
 
+final class CollectionClearedSuccess extends CollectionsLoaded {
+  final String message;
+
+  const CollectionClearedSuccess({
+    required super.collections,
+    required this.message
+  });
+
+  @override
+  List<Object?> get props => [collections, message];
+}
+
 final class CollectionActionFailure extends CollectionsLoaded {
   final String message;
 

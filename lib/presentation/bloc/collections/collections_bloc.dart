@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/clear_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_use_case.dart';
@@ -17,18 +18,21 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   final AddCollectionUseCase addCollectionUseCase;
   final RemoveCollectionUseCase removeCollectionUseCase;
   final WatchCollectionsUseCase watchCollectionsUseCase;
+  final ClearCollectionUseCase clearCollectionUseCase;
   late StreamSubscription _savedCollectionsSubscription;
 
   CollectionsBloc({
     required this.getCollectionsUseCase,
     required this.addCollectionUseCase,
     required this.removeCollectionUseCase,
-    required this.watchCollectionsUseCase
+    required this.watchCollectionsUseCase,
+    required this.clearCollectionUseCase
   }) : super(CollectionsInitial()) {
     on<GetCollections>(_getCollections);
     on<AddNewCollection>(_addNewCollection);
     on<RemoveCollection>(_removeCollection);
     on<UpdateCollections>(_updateCollections);
+    on<ClearCollection>(_clearCollection);
 
     _savedCollectionsSubscription = watchCollectionsUseCase.call().listen(
       (updatedCollections) => add(UpdateCollections(updatedCollections: updatedCollections))
@@ -91,6 +95,21 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     try{
       final updatedCollections = event.updatedCollections;
       emit(CollectionsLoaded(collections: updatedCollections));
+    } on LocalDataSourceException catch(e){
+      emit(CollectionActionFailure(collections: currentState.collections, message: e.toString()));
+      emit(currentState);
+    } catch(e){
+      emit(CollectionActionFailure(collections: currentState.collections, message: "Не удалось обновить коллекции"));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _clearCollection(ClearCollection event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! CollectionsLoaded) return;
+    try{
+      await clearCollectionUseCase.call(event.collectionId);
+      emit(CollectionClearedSuccess(collections: currentState.collections, message: "Коллекция успешно очищена"));
     } on LocalDataSourceException catch(e){
       emit(CollectionActionFailure(collections: currentState.collections, message: e.toString()));
       emit(currentState);

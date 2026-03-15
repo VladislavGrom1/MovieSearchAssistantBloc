@@ -46,10 +46,10 @@ class CollectionFilmsBloc extends Bloc<CollectionFilmsEvent, CollectionFilmsStat
       emit(CollectionFilmsLoaded(collectionId: currentState.collectionId, savedFilms: updatedCollectionSavedFilms));
     } on LocalDataSourceException catch(e){
       emit(CollectionFilmsFailure(message: e.message));
-      emit(CollectionFilmsLoaded(collectionId: currentState.collectionId, savedFilms: currentState.savedFilms));
+      emit(currentState);
     } catch(e){
       emit(CollectionFilmsFailure(message: e.toString()));
-      emit(CollectionFilmsLoaded(collectionId: currentState.collectionId, savedFilms: currentState.savedFilms));
+      emit(currentState);
     }
   }
 

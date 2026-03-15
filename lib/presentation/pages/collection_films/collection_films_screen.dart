@@ -16,8 +16,8 @@ class CollectionFilmsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: getIt<CollectionFilmsBloc>()..add(GetSavedFilms(collectionId: collectionId)),
+    return BlocProvider(
+      create: (_) => getIt<CollectionFilmsBloc>()..add(GetSavedFilms(collectionId: collectionId)),
       child: _CollectionFilmsView()
     );
   }
@@ -28,13 +28,7 @@ class _CollectionFilmsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CollectionFilmsBloc, CollectionFilmsState>(
-      listener: (context, state) {
-        if(state is CollectionFilmsFailure){
-
-        }
-      },
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(),
         body: SafeArea(
@@ -59,7 +53,6 @@ class _CollectionFilmsView extends StatelessWidget {
             ),
           )
         ),
-      ),
     );
   }
 }

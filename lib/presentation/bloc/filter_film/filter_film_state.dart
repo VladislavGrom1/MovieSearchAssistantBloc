@@ -24,7 +24,6 @@ class FiltersLoaded extends FilterFilmState {
   int? get genre => filters[FilterType.genres] as int?;
   String? get years => filters[FilterType.years] as String?;
   
-  // Для удобства
   (int, int)? get yearRange {
     final yearsValue = years;
     if(yearsValue == null){

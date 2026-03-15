@@ -22,7 +22,6 @@ class FilterFilmBloc extends Bloc<FilterFilmEvent, FilterFilmState> {
     if (currentState is FiltersLoaded) {
       final updatedFilters = Map<FilterType, dynamic>.from(currentState.filters);
       updatedFilters[event.filterType] = event.value;
-      
       emit(currentState.copyWith(filters: updatedFilters));
     }
   }

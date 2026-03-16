@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
@@ -57,7 +58,10 @@ class _FilmInformationView extends StatelessWidget {
             return Center(child: Text(state.message));
           }
           if (state is FilmLoaded) {
-            return _FilmInformationContent();
+            return _FilmInformationContent(
+              film: state.film,
+              filmImages: state.filmImages,
+            );
           }
           return const SizedBox();
         })),
@@ -92,14 +96,15 @@ class _FilmInformationView extends StatelessWidget {
 }
 
 class _FilmInformationContent extends StatelessWidget {
-  const _FilmInformationContent();
+  final FilmEntity film;
+  final FilmImagesEntity? filmImages;
+  const _FilmInformationContent({
+    required this.film,
+    required this.filmImages
+  });
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<FilmInformationBloc>().state;
-    final film = (state as FilmLoaded).film;
-    final filmImages = state.filmImages;
-
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -252,21 +257,35 @@ class _CollectionsList extends StatelessWidget {
         itemBuilder: (context, index) {
           final collection = collections[index];
           final isInCollection = film.collectionIds?.contains(collection.id) ?? false;
-
-          return ListTile(
-            title: Text(collection.name ?? "Без названия"),
-            trailing: Icon(
-              isInCollection ? Icons.check_box : Icons.add,
-              color: isInCollection ? Colors.green : Colors.grey,
-            ),
-            onTap: () {
-              if (isInCollection) {
-                context.read<FilmInformationBloc>().add(RemoveFilmFromCollection(collectionId: collection.id!));
-              } else {
-                context.read<FilmInformationBloc>().add(AddFilmToCollection(collectionId: collection.id!));
-              }
-            },
-          );
+          return _CollectionTile(collection: collection, isInCollection: isInCollection);
         });
+  }
+}
+
+class _CollectionTile extends StatelessWidget {
+  final CollectionEntity collection;
+  final bool isInCollection;
+  
+  const _CollectionTile({
+    required this.collection,
+    required this.isInCollection
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(collection.name ?? "Без названия"),
+      trailing: Icon(
+        isInCollection ? Icons.check_box : Icons.add,
+        color: isInCollection ? Colors.green : Colors.grey,
+        ),
+        onTap: () {
+            if (isInCollection) {
+              context.read<FilmInformationBloc>().add(RemoveFilmFromCollection(collectionId: collection.id!));
+            } else {
+              context.read<FilmInformationBloc>().add(AddFilmToCollection(collectionId: collection.id!));
+            }
+          },
+    );
   }
 }

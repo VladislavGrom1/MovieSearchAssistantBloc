@@ -134,7 +134,7 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
-  Future<List<FilmEntity>?> getFilmsFromLocalDataSource(String collectionId) async{
+  Future<List<FilmEntity>> getFilmsFromLocalDataSource(String collectionId) async{
     try{
       List<FilmEntity> savedFilmsEntity = [];
       List<FilmDetailModel>? savedFilmsModel = await filmLocalDataSource.getAllFilms();
@@ -144,9 +144,8 @@ class FilmRepositoryImpl implements FilmRepository{
             savedFilmsEntity.add(FilmEntity.fromFilmDetailModel(filmModel));
           }
         }
-        return savedFilmsEntity;
       }
-      return null;
+      return savedFilmsEntity;
     } on LocalDataSourceException{
       rethrow;
     } catch(e){

@@ -26,7 +26,7 @@ class FiltersLoaded extends FilterFilmState {
   
   (int, int)? get yearRange {
     final yearsValue = years;
-    if(yearsValue == null){
+    if(yearsValue == null || yearsValue == "Все годы"){
       return null;
     }
     if (yearsValue.contains('-')) {

@@ -16,8 +16,7 @@ class SearchFilmScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          getIt<SearchFilmsBloc>()..add(DisplayFilmCollectionsEvent()),
+      create: (_) => getIt<SearchFilmsBloc>()..add(DisplayFilmCollections()),
       child: _SearchFilmView(),
     );
   }
@@ -42,7 +41,7 @@ class _SearchFilmView extends StatelessWidget {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      searchFilmBloc.add(DisplayFilmCollectionsEvent());
+                      searchFilmBloc.add(DisplayFilmCollections());
                     },
                     child: BlocBuilder<SearchFilmsBloc, SearchFilmsState>(
                       builder: (context, state) {
@@ -51,14 +50,11 @@ class _SearchFilmView extends StatelessWidget {
                         }
 
                         if (state is CollectionsFilmsLoadedFailure) {
-                          return Center(
-                              child: Text(
-                                  "${state.exceptionType} ${state.statusCode}"));
+                          return Center(child: Text("${state.exceptionType} ${state.statusCode}"));
                         }
 
                         if (state is CollectionsFilmsLoadedSuccessful) {
-                          return _SearchFilmContent(
-                              filmCollectionsMap: state.filmCollectionsMap);
+                          return _SearchFilmContent(filmCollectionsMap: state.filmCollectionsMap);
                         }
                         return SizedBox();
                       },
@@ -79,8 +75,7 @@ class _SearchFilmContent extends StatelessWidget {
   const _SearchFilmContent({required this.filmCollectionsMap});
 
   void onSearchSubmitted(String keyword, BuildContext context) {
-    context.router.push(
-        SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
+    context.router.push(SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
   }
 
   void onFilterSubmitted(BuildContext context) {
@@ -92,21 +87,18 @@ class _SearchFilmContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        CustomSearchBar(
-            onSearchSubmitted: onSearchSubmitted,
-            onFilterSubmitted: onFilterSubmitted),
+        CustomSearchBar(onSearchSubmitted: onSearchSubmitted, onFilterSubmitted: onFilterSubmitted),
         SizedBox(height: 10.h),
-        Expanded(
-            child: _FilmCollectionsWidget(filmCollectionsMap: filmCollectionsMap)),
+        Expanded(child: _CollectionsList(filmCollectionsMap: filmCollectionsMap)),
       ],
     );
   }
 }
 
-class _FilmCollectionsWidget extends StatelessWidget {
+class _CollectionsList extends StatelessWidget {
   final Map<String, List<FilmEntity>?>? filmCollectionsMap;
 
-  const _FilmCollectionsWidget({required this.filmCollectionsMap});
+  const _CollectionsList({required this.filmCollectionsMap});
 
   @override
   Widget build(BuildContext context) {
@@ -129,9 +121,7 @@ class _FilmCollectionsWidget extends StatelessWidget {
               ),
               SizedBox(
                   height: 185.h,
-                  child: _FilmCollectionWidget(
-                      filmCollectionsMap: filmCollectionsMap,
-                      filmCollectionsName: filmCollectionsNamesList[index]))
+                  child: _CollectionFilmsList(filmCollectionsMap: filmCollectionsMap, filmCollectionsName: filmCollectionsNamesList[index]))
             ],
           );
         },
@@ -140,11 +130,11 @@ class _FilmCollectionsWidget extends StatelessWidget {
   }
 }
 
-class _FilmCollectionWidget extends StatelessWidget {
+class _CollectionFilmsList extends StatelessWidget {
   final Map<String, List<FilmEntity>?>? filmCollectionsMap;
   final String filmCollectionsName;
 
-  const _FilmCollectionWidget({
+  const _CollectionFilmsList({
     required this.filmCollectionsMap, 
     required this.filmCollectionsName
   });
@@ -155,12 +145,23 @@ class _FilmCollectionWidget extends StatelessWidget {
 
     return ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          return InkWell(
+        itemBuilder: (context, index) => _FilmCard(film: filmEntityList[index]),
+        separatorBuilder: (context, index) => SizedBox(width: 12.w),
+        itemCount: filmCollectionsMap![filmCollectionsName]!.length);
+  }
+}
+
+class _FilmCard extends StatelessWidget {
+  final FilmEntity film;
+  const _FilmCard({required this.film});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
             onTap: () {
-              if (filmEntityList[index].kinopoiskId != null) {
+              if (film.kinopoiskId != null) {
                 context.router.push(FilmInformationRoute(
-                    filmId: filmEntityList[index].kinopoiskId!));
+                    filmId: film.kinopoiskId!));
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -184,7 +185,7 @@ class _FilmCollectionWidget extends StatelessWidget {
                 SizedBox(
                   width: 96.w,
                   child: Text(
-                    filmEntityList[index].nameRu!,
+                    film.nameRu!,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 3,
                     style: TextStyle(
@@ -197,8 +198,5 @@ class _FilmCollectionWidget extends StatelessWidget {
               ],
             ),
           );
-        },
-        separatorBuilder: (context, index) => SizedBox(width: 12.w),
-        itemCount: filmCollectionsMap![filmCollectionsName]!.length);
   }
 }

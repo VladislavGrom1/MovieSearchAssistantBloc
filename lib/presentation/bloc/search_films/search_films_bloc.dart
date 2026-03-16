@@ -12,7 +12,7 @@ part 'search_films_state.dart';
 class SearchFilmsBloc extends Bloc<SearchFilmsEvent, SearchFilmsState> {
   final GetCollectionsFilmsUseCase displayFilmCollectionsUseCase;
   SearchFilmsBloc({required this.displayFilmCollectionsUseCase}) : super(SearchFilmsInitial()) {
-    on<DisplayFilmCollectionsEvent>(_displayFilmCollections);
+    on<DisplayFilmCollections>(_displayFilmCollections);
   }
 
   Future<void> _displayFilmCollections(SearchFilmsEvent event, Emitter emit) async{

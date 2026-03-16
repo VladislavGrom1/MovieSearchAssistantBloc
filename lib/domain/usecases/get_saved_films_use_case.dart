@@ -9,9 +9,9 @@ class GetSavedFilmsUseCase {
     required this.filmRepository
   });
 
-  Future<List<FilmEntity>?> call(String collectionId) async{
+  Future<List<FilmEntity>> call(String collectionId) async{
     try{
-      List<FilmEntity>? savedFilms = await filmRepository.getFilmsFromLocalDataSource(collectionId);
+      List<FilmEntity> savedFilms = await filmRepository.getFilmsFromLocalDataSource(collectionId);
       return savedFilms;
     } on LocalDataSourceException{
       rethrow;

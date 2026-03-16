@@ -7,4 +7,4 @@ sealed class SearchFilmsEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class DisplayFilmCollectionsEvent extends SearchFilmsEvent{}
+class DisplayFilmCollections extends SearchFilmsEvent{}

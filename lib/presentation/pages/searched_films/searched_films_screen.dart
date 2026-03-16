@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +15,7 @@ class SearchedFilmsScreen extends StatefulWidget {
   final int? yearFrom;
   final int? yearTo;
   final String appBarTitle;
-  
+
   const SearchedFilmsScreen({
     super.key,
     this.nameCollection,
@@ -33,206 +32,221 @@ class SearchedFilmsScreen extends StatefulWidget {
 }
 
 class _SearchedFilmsScreenState extends State<SearchedFilmsScreen> {
-  final _searchedFilmsBloc = getIt<SearchedFilmsBloc>();
-  final _scrollController = ScrollController();
-  bool isSearchCollectionFilms = false;
+  late final SearchedFilmsBloc _searchedFilmBloc;
+  final ScrollController _scrollController = ScrollController();
+
+  bool get isCollectionSearch => widget.nameCollection != null;
 
   @override
   void initState() {
     super.initState();
-    isSearchCollectionFilms = widget.nameCollection != null;
-
-    if(isSearchCollectionFilms){
-      searchCollectionFilms();
-    } else{
-      searchFilterFilms();
-    }
-
-    scrollControllerAddListener();
+    _searchedFilmBloc = getIt<SearchedFilmsBloc>();
+    _loadFirstPage();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    super.dispose();
     _scrollController.dispose();
+    _searchedFilmBloc.close();
+    super.dispose();
   }
 
-  void scrollControllerAddListener(){
-    _scrollController.addListener(() {
-      final isReadyToLoadMore = _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200;
+  void _onScroll() {
+    final isNearBottom =
+        _scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200;
 
-      if (isReadyToLoadMore && isSearchCollectionFilms) {
-        loadNextSearchedCollectionFilms();
-      }
-      if (isReadyToLoadMore && !isSearchCollectionFilms){
-        loadNextSearchedFilterFilms();
-      }
-    });
+    if (!isNearBottom) return;
+
+    if (isCollectionSearch) {
+      _searchedFilmBloc.add(
+        LoadNextSearchedCollectionFilmsPage(
+          nameCollection: widget.nameCollection!,
+        ),
+      );
+    } else {
+      _searchedFilmBloc.add(
+        LoadNextSearchedFilterFilmsPage(
+          keyword: widget.keyword,
+          countries: widget.countries,
+          genres: widget.genres,
+          yearFrom: widget.yearFrom,
+          yearTo: widget.yearTo,
+        ),
+      );
+    }
   }
 
-  void loadNextSearchedFilterFilms() {
-    _searchedFilmsBloc.add(LoadNextSearchedFilterFilmsPage(
-      keyword: widget.keyword,
-      countries: widget.countries,
-      genres: widget.genres,
-      yearFrom: widget.yearFrom,
-      yearTo: widget.yearTo
-    ));
+  void _loadFirstPage() {
+    if (isCollectionSearch) {
+      _searchedFilmBloc.add(
+        DisplaySearchedCollectionFilms(
+          nameCollection: widget.nameCollection!,
+          page: 1,
+        ),
+      );
+    } else {
+      _searchedFilmBloc.add(
+        DisplaySearchedFilterFilms(
+          keyword: widget.keyword,
+          countries: widget.countries,
+          genres: widget.genres,
+          yearFrom: widget.yearFrom,
+          yearTo: widget.yearTo,
+          page: 1,
+        ),
+      );
+    }
   }
 
-  void loadNextSearchedCollectionFilms() {
-    _searchedFilmsBloc.add(LoadNextSearchedCollectionFilmsPage(
-      nameCollection: widget.nameCollection!
-    ));
-  }
-
-  void searchCollectionFilms(){
-    _searchedFilmsBloc.add(DisplaySearchedCollectionFilms(
-        nameCollection: widget.nameCollection!, 
-        page: 1
-    ));
-  }
-
-  void searchFilterFilms(){
-    _searchedFilmsBloc.add(DisplaySearchedFilterFilms(
-        keyword: widget.keyword,
-        countries: widget.countries,
-        genres: widget.genres,
-        yearFrom: widget.yearFrom,
-        yearTo: widget.yearTo,
-        page: 1
-    ));
+  Future<void> _onRefresh() async {
+    _loadFirstPage();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: Text(widget.appBarTitle, style: TextStyle(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(
+          widget.appBarTitle,
+          style: const TextStyle(
             color: Colors.white,
-            overflow: TextOverflow.ellipsis
-          )),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(left: 20.w, right: 20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      if(isSearchCollectionFilms){
-                        searchCollectionFilms();
-                      } else{
-                        searchFilterFilms();
-                      }
-                    },
-                    child: BlocBuilder<SearchedFilmsBloc, SearchedFilmsState>(
-                      bloc: _searchedFilmsBloc,
-                      builder: (context, state) {
-                        if (state is SearchedFilmsLoading) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-                        if (state is SearchedFilmsLoadedFailure) {
-                          return Center(child: Text("${state.exceptionType} ${state.statusCode}"));
-                        }
-                        if (state is SearchedFilmsLoadedSuccessful) {
-                          return _buildSearchedFilms(state);
-                        }
-                        return SizedBox();
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ));
-  }
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: BlocBuilder<SearchedFilmsBloc, SearchedFilmsState>(
+            bloc: _searchedFilmBloc,
+            builder: (context, state) {
+              if (state is SearchedFilmsLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-  // TODO: Доработать отображение карточки фильмов (не все данные + покрытие NULL значений)
+              if (state is SearchedFilmsLoadedFailure) {
+                return Center(child: Text("${state.exceptionType} ${state.statusCode}"),
+                );
+              }
 
-  Widget _buildSearchedFilms(SearchedFilmsLoadedSuccessful state){
-    final searchedFilms = state.searchedFilms;
-    
-    return ListView.separated(
-        controller: _scrollController,
-        itemBuilder: (context, index) {
-          
-          if (index >= state.searchedFilms.length) {
-            return const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          
-          final searchedFilm = searchedFilms[index];
-
-          return InkWell(
-            onTap: () {
-              if(searchedFilm.kinopoiskId != null){
-                context.router.push(FilmInformationRoute(filmId: searchedFilm.kinopoiskId!));
-              } else{
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Не удалось получить информацию о фильме"),
-                    backgroundColor: Colors.red,
+              if (state is SearchedFilmsLoadedSuccessful) {
+                return RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: _FilmsList(
+                    state: state,
+                    controller: _scrollController,
                   ),
                 );
               }
+
+              return const SizedBox();
             },
-            child: Card(
-              color: Colors.grey,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 140.h,
-                    width: 100.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16.w),
-                      color: Colors.purple,
-                    ),
-                  ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 5.h),
-                        Text(
-                          searchedFilm.nameRu == null 
-                          ? searchedFilm.nameOriginal.toString() 
-                          : searchedFilm.nameRu.toString(), 
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2),
-                        SizedBox(height: 10.h),
-                        Text(
-                          searchedFilm.nameOriginal == null 
-                          ? "-" 
-                          : searchedFilm.nameOriginal.toString(),
-                        ),
-                        SizedBox(height: 10.h),
-                        Text(
-                          searchedFilm.countries!.isEmpty 
-                          ? "${searchedFilm.year}" 
-                          : "${searchedFilm.countries.toString()}, ${searchedFilm.year}",
-                        ),
-                        SizedBox(height: 10.h),
-                      ]
-                    ),
-                  )
-                ],
-              ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilmsList extends StatelessWidget {
+  final SearchedFilmsLoadedSuccessful state;
+  final ScrollController controller;
+
+  const _FilmsList({
+    required this.state,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final films = state.searchedFilms;
+
+    return ListView.separated(
+      controller: controller,
+      itemCount: films.length + (state.isLoadingMore ? 1 : 0),
+      separatorBuilder: (_, __) => SizedBox(height: 12.h),
+      itemBuilder: (context, index) {
+        if (index >= films.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final film = films[index];
+
+        return _FilmCard(film: film);
+      },
+    );
+  }
+}
+
+class _FilmCard extends StatelessWidget {
+  final dynamic film;
+
+  const _FilmCard({required this.film});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        if (film.kinopoiskId != null) {
+          context.router.push(
+            FilmInformationRoute(filmId: film.kinopoiskId!),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Не удалось получить информацию о фильме"),
+              backgroundColor: Colors.red,
             ),
           );
-        },
-        separatorBuilder: (context, index) => SizedBox(height: 12.h),
-        itemCount: state.searchedFilms.length + (state.isLoadingMore ? 1 : 0),
-        );
+        }
+      },
+      child: Card(
+        color: Colors.grey,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 140.h,
+              width: 100.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.w),
+                color: Colors.purple,
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(top: 5.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      film.nameRu ?? film.nameOriginal ?? "-",
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 10.h),
+                    Text(film.nameOriginal ?? "-"),
+                    SizedBox(height: 10.h),
+                    Text(
+                      film.countries!.isEmpty
+                          ? "${film.year}"
+                          : "${film.countries}, ${film.year}",
+                    ),
+                    SizedBox(height: 10.h),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

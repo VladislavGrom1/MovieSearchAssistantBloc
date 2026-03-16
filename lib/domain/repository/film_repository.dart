@@ -26,7 +26,7 @@ abstract class FilmRepository {
 
   Future<FilmEntity?> getFilmFromLocalDataSource(int idFilm);
 
-  Future<List<FilmEntity>?> getFilmsFromLocalDataSource(String collectionId);
+  Future<List<FilmEntity>> getFilmsFromLocalDataSource(String collectionId);
 
   Future<void> removeFilmFromLocalDataSource(int idFilm);
 

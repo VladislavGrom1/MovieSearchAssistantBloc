@@ -48,7 +48,7 @@ void main(){
         when(() => mockDisplayFilmCollectionsUseCase.call(FilmCollectionNames.filmCollectionNames)).thenAnswer((_) async => testfilmCardEntityList);
       },
       build: () => SearchFilmsBloc(displayFilmCollectionsUseCase: mockDisplayFilmCollectionsUseCase),
-      act: (bloc) => bloc.add(DisplayFilmCollectionsEvent()),
+      act: (bloc) => bloc.add(DisplayFilmCollections()),
       expect: () => <SearchFilmsState>[
         SearchFilmsLoading(),
         CollectionsFilmsLoadedSuccessful(filmCollectionsMap: testfilmCardEntityList)
@@ -64,7 +64,7 @@ void main(){
         when(() => mockDisplayFilmCollectionsUseCase.call(FilmCollectionNames.filmCollectionNames)).thenAnswer((_) async => null);
       },
       build: () => SearchFilmsBloc(displayFilmCollectionsUseCase: mockDisplayFilmCollectionsUseCase),
-      act: (bloc) => bloc.add(DisplayFilmCollectionsEvent()),
+      act: (bloc) => bloc.add(DisplayFilmCollections()),
       expect: () => [
         SearchFilmsLoading(),
         isA<CollectionsFilmsLoadedFailure>()
@@ -83,7 +83,7 @@ void main(){
         ));
       },
       build: () => SearchFilmsBloc(displayFilmCollectionsUseCase: mockDisplayFilmCollectionsUseCase),
-      act: (bloc) => bloc.add(DisplayFilmCollectionsEvent()),
+      act: (bloc) => bloc.add(DisplayFilmCollections()),
       expect: () => [
         SearchFilmsLoading(),
         isA<CollectionsFilmsLoadedFailure>()
@@ -99,7 +99,7 @@ void main(){
         when(() => mockDisplayFilmCollectionsUseCase.call(FilmCollectionNames.filmCollectionNames)).thenThrow(Exception());
       },
       build: () => SearchFilmsBloc(displayFilmCollectionsUseCase: mockDisplayFilmCollectionsUseCase),
-      act: (bloc) => bloc.add(DisplayFilmCollectionsEvent()),
+      act: (bloc) => bloc.add(DisplayFilmCollections()),
       expect: () => [
         SearchFilmsLoading(),
         isA<CollectionsFilmsLoadedFailure>()

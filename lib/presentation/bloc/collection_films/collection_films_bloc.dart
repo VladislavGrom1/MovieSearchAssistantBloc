@@ -29,7 +29,7 @@ class CollectionFilmsBloc extends Bloc<CollectionFilmsEvent, CollectionFilmsStat
   Future<void> _getSavedFilms(GetSavedFilms event, Emitter emit) async {
     emit(CollectionFilmsLoading());
     try{
-      final List<FilmEntity>? savedFilms = await getSavedFilmsUseCase.call(event.collectionId);
+      final List<FilmEntity> savedFilms = await getSavedFilmsUseCase.call(event.collectionId);
       emit(CollectionFilmsLoaded(collectionId: event.collectionId, savedFilms: savedFilms));
     } on LocalDataSourceException catch(e){
       emit(CollectionFilmsFailure(message: e.message));

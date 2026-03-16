@@ -7,17 +7,20 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
 
 @RoutePage()
-class UserAuthenticationScreen extends StatefulWidget {
+class UserAuthenticationScreen extends StatelessWidget {
   const UserAuthenticationScreen({super.key});
 
   @override
-  State<UserAuthenticationScreen> createState() =>
-      _UserAuthenticationScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<AuthenticationBloc>(),
+      child: _UserAuthenticationView(),
+    );
+  }
 }
 
-class _UserAuthenticationScreenState extends State<UserAuthenticationScreen> {
-  final _authBloc = getIt<AuthenticationBloc>();
-  final TextEditingController _textEditingController = TextEditingController();
+class _UserAuthenticationView extends StatelessWidget {
+  const _UserAuthenticationView();
 
   @override
   Widget build(BuildContext context) {
@@ -27,43 +30,70 @@ class _UserAuthenticationScreenState extends State<UserAuthenticationScreen> {
           child: Padding(
             padding: EdgeInsets.only(left: 20.w, right: 20.w),
             child: BlocListener<AuthenticationBloc, AuthenticationState>(
-                bloc: _authBloc,
-                listener: (context, state) {
-                  if (state is AuthenticationSuccess) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text("Успешный вход")));
-                    context.router.replace(HomeRoute());
-                  } else if (state is AuthenticationFailure) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Не удалось выполнить вход: ${state.exceptionType}, ${state.statusCode}")));
-                  }
-                },
-                child: Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "UserAuthentication",
-                        style: TextStyle(color: Colors.purple),
-                      ),
-                      SizedBox(height: 20.h),
-                      TextFormField(controller: _textEditingController),
-                      SizedBox(height: 20.h),
-                      TextButton(
-                        onPressed: () {
-                          _authBloc.add(TryAuthenticationEvent(
-                              apiKey: _textEditingController.text));
-                        },
-                        child: Text(
-                          "Перейти на SearchFilmScreen",
-                          style: TextStyle(color: Colors.purple),
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
+                listener: _userAuthenticationBlocListener,
+                child: _UserAuthenticationContent()),
           ),
         ));
+  }
+
+  void _userAuthenticationBlocListener(BuildContext context, AuthenticationState state) {
+    if (state is AuthenticationSuccess) {
+      _showSnackBar(context, "Успешный вход", Colors.green);
+      context.router.replace(HomeRoute());
+    }
+
+    if (state is AuthenticationFailure) {
+      _showSnackBar(context, "Не удалось выполнить вход: ${state.exceptionType}, ${state.statusCode}", Colors.red);
+    }
+  }
+
+  void _showSnackBar(BuildContext context, String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+}
+
+class _UserAuthenticationContent extends StatefulWidget {
+  const _UserAuthenticationContent();
+
+  @override
+  State<_UserAuthenticationContent> createState() => _UserAuthenticationContentState();
+}
+
+class _UserAuthenticationContentState extends State<_UserAuthenticationContent> {
+  final TextEditingController _textEditingController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    final authenticationBloc = context.read<AuthenticationBloc>();
+
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            "UserAuthentication",
+            style: TextStyle(color: Colors.purple),
+          ),
+          SizedBox(height: 20.h),
+          TextFormField(controller: _textEditingController),
+          SizedBox(height: 20.h),
+          TextButton(
+            onPressed: () {
+              authenticationBloc.add(TryAuthenticationEvent(apiKey: _textEditingController.text));
+            },
+            child: Text(
+              "Перейти на SearchFilmScreen",
+              style: TextStyle(color: Colors.purple),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

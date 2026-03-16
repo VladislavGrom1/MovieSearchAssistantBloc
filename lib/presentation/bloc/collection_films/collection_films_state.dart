@@ -13,7 +13,7 @@ final class CollectionFilmsLoading extends CollectionFilmsState {}
 
 final class CollectionFilmsLoaded extends CollectionFilmsState {
   final String collectionId;
-  final List<FilmEntity>? savedFilms;
+  final List<FilmEntity> savedFilms;
 
   const CollectionFilmsLoaded({
     required this.collectionId,

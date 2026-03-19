@@ -34,11 +34,11 @@ class RemoveFilmFromCollection extends FilmInformationEvent {
   List<Object?> get props => [collectionId];
 }
 
-class UpdateFilmInformation extends FilmInformationEvent {
-  final FilmEntity? updatedFilm;
+class UpdateFilmLinks extends FilmInformationEvent {
+  final List<String> updatedCollectionIds;
 
-  const UpdateFilmInformation({required this.updatedFilm});
+  const UpdateFilmLinks({required this.updatedCollectionIds});
 
   @override
-  List<Object?> get props => [updatedFilm];
+  List<Object?> get props => [updatedCollectionIds]; 
 }

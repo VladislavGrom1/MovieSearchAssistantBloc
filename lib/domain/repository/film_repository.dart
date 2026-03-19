@@ -6,8 +6,6 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.d
 
 abstract class FilmRepository {
 
-  Stream<FilmEntity?> watchFilmById(int idFilm);
-
   Stream<List<FilmEntity>> watchFilms();
   
   Future<List<FilmEntity>?> getCollectionFilms(String collectionName, int page);
@@ -15,6 +13,8 @@ abstract class FilmRepository {
   Future<List<FilmEntity>?> getFilterFilms(String? keyword, List<int>? countries, List<int>? genres, int? yearFrom, int? yearTo, int page);
 
   Future<FilmEntity?> getFilmInformation(int idFilm);
+
+  Future<bool> filmIsSaved(int idFilm);
 
   Future<FilmImagesEntity?> getFilmImages(int idFilm);
 
@@ -26,7 +26,7 @@ abstract class FilmRepository {
 
   Future<FilmEntity?> getFilmFromLocalDataSource(int idFilm);
 
-  Future<List<FilmEntity>> getFilmsFromLocalDataSource(String collectionId);
+  Future<List<FilmEntity>> getFilmsFromLocalDataSource(List<int> filmIds);
 
   Future<void> removeFilmFromLocalDataSource(int idFilm);
 

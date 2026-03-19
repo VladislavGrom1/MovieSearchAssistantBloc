@@ -21,20 +21,6 @@ class FilmRepositoryImpl implements FilmRepository{
   });
 
   @override
-  Stream<FilmEntity?> watchFilmById(int idFilm) {
-    try{
-      return filmLocalDataSource.watchFilmById(idFilm).map((model) {
-        if (model == null) return null;
-        return FilmEntity.fromFilmDetailModel(model);
-      });
-    } on LocalDataSourceException {
-      rethrow;
-    } catch(e){
-      rethrow;
-    }
-  }
-
-  @override
   Stream<List<FilmEntity>> watchFilms() {
     try{
       return filmLocalDataSource.watchFilms().map((filmModels) {
@@ -107,6 +93,17 @@ class FilmRepositoryImpl implements FilmRepository{
     }
   }
 
+  @override
+  Future<bool> filmIsSaved(int idFilm) async{
+    try{
+      return await filmLocalDataSource.filmIsSaved(idFilm);
+    } on LocalDataSourceException{
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
   @override 
   Future<void> addFilmInLocalDataSource(FilmDetailModel film) async {
     try{
@@ -134,15 +131,13 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
-  Future<List<FilmEntity>> getFilmsFromLocalDataSource(String collectionId) async{
+  Future<List<FilmEntity>> getFilmsFromLocalDataSource(List<int> filmIds) async{
     try{
       List<FilmEntity> savedFilmsEntity = [];
-      List<FilmDetailModel>? savedFilmsModel = await filmLocalDataSource.getAllFilms();
+      List<FilmDetailModel>? savedFilmsModel = await filmLocalDataSource.getFilmsByIds(filmIds);
       if(savedFilmsModel != null){
-        for(var filmModel in savedFilmsModel){
-          if(filmModel.filmBaseModel.collectionIds?.contains(collectionId) ?? false){
-            savedFilmsEntity.add(FilmEntity.fromFilmDetailModel(filmModel));
-          }
+        for(final film in savedFilmsModel){
+          savedFilmsEntity.add(FilmEntity.fromFilmDetailModel(film));
         }
       }
       return savedFilmsEntity;
@@ -194,7 +189,7 @@ class FilmRepositoryImpl implements FilmRepository{
   Future<FilmBaseModel> initUserDataForFilmBaseModel(FilmBaseModel filmBaseModel) async {
     Map<String, dynamic>? userDataAboutFilm = await filmLocalDataSource.getUserDataAboutFilm(filmBaseModel.kinopoiskId!);
     if(userDataAboutFilm != null){
-      filmBaseModel.collectionIds = userDataAboutFilm["collectionTag"];
+      //filmBaseModel.collectionIds = userDataAboutFilm["collectionTag"];
       filmBaseModel.userComment = userDataAboutFilm["userComment"];
       filmBaseModel.userRating = userDataAboutFilm["userRating"];
     }
@@ -205,7 +200,7 @@ class FilmRepositoryImpl implements FilmRepository{
   Future<FilmDetailModel> initUserDataForFilmDetailModel(FilmDetailModel filmDetailModel) async {
     Map<String, dynamic>? userDataAboutFilm = await filmLocalDataSource.getUserDataAboutFilm(filmDetailModel.filmBaseModel.kinopoiskId!);
     if(userDataAboutFilm != null){
-      filmDetailModel.filmBaseModel.collectionIds = userDataAboutFilm["collectionTag"];
+      //filmDetailModel.filmBaseModel.collectionIds = userDataAboutFilm["collectionTag"];
       filmDetailModel.filmBaseModel.userComment = userDataAboutFilm["userComment"];
       filmDetailModel.filmBaseModel.userRating = userDataAboutFilm["userRating"];
     }

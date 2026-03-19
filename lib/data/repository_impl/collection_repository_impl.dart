@@ -6,10 +6,10 @@ import 'package:movie_search_assistant_bloc/data/models/collection_model.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/collection_repository.dart';
 
-class CollectionsRepositoryImpl implements CollectionRepository{
+class CollectionRepositoryImpl implements CollectionRepository{
   final CollectionLocalDataSource collectionLocalDataSource;
 
-  CollectionsRepositoryImpl({
+  CollectionRepositoryImpl({
     required this.collectionLocalDataSource
   });
 

@@ -8,7 +8,7 @@ class CollectionLocalDataSource {
 
   Stream<List<CollectionModel>> watchCollections() {
     try{
-      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
+      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelBox);
       return storageBox.watch().map((event) {
         return storageBox.values.toList();
       });
@@ -21,7 +21,7 @@ class CollectionLocalDataSource {
 
   Future<void> addCollection(CollectionModel collection) async {
     try{
-      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
+      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelBox);
       await storageBox.put(collection.id, collection);
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
@@ -32,7 +32,7 @@ class CollectionLocalDataSource {
 
   Future<List<CollectionModel>?> getAllCollections() async {
     try{
-      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
+      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelBox);
       List<CollectionModel>? collections = storageBox.values.toList();
       return collections;
     } on HiveError catch(e){
@@ -44,7 +44,7 @@ class CollectionLocalDataSource {
 
   Future<void> removeCollection(String collectionId) async {
     try{
-      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
+      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelBox);
       await storageBox.delete(collectionId);
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
@@ -55,7 +55,7 @@ class CollectionLocalDataSource {
 
   Future<void> removeAllCollections() async {
     try{
-      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
+      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelBox);
       await storageBox.clear();
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
@@ -66,7 +66,7 @@ class CollectionLocalDataSource {
 
   Future<bool> collectionIsExist(String collectionId) async {
     try{
-      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelKeyBox);
+      final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelBox);
       return storageBox.containsKey(collectionId);
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);

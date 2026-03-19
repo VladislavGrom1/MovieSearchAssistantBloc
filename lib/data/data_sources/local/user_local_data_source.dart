@@ -8,8 +8,8 @@ class UserLocalDataSource {
   UserModel? getUserApiKeyInfo() {
     UserModel? userApiKeyInfo;
     try{
-      final storageBox = Hive.box<UserModel>(HiveStorageKeys.userModelKeyBox);
-      userApiKeyInfo = storageBox.get(HiveStorageKeys.userModel);
+      final storageBox = Hive.box<UserModel>(HiveStorageKeys.userModelBox);
+      userApiKeyInfo = storageBox.get(HiveStorageKeys.userModelKey);
       return userApiKeyInfo;
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
@@ -20,8 +20,8 @@ class UserLocalDataSource {
 
   Future<void> addUserApiKeyInfo(UserModel userModel) async {
     try{
-      final storageBox = Hive.box<UserModel>(HiveStorageKeys.userModelKeyBox);
-      await storageBox.put(HiveStorageKeys.userModel, userModel);
+      final storageBox = Hive.box<UserModel>(HiveStorageKeys.userModelBox);
+      await storageBox.put(HiveStorageKeys.userModelKey, userModel);
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
     } catch(e){
@@ -31,8 +31,8 @@ class UserLocalDataSource {
 
   Future<void> removeUserApiKeyInfo() async{
     try{
-      final storageBox = Hive.box<UserModel>(HiveStorageKeys.userModelKeyBox);
-      await storageBox.delete(HiveStorageKeys.userModel);
+      final storageBox = Hive.box<UserModel>(HiveStorageKeys.userModelBox);
+      await storageBox.delete(HiveStorageKeys.userModelKey);
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
     } catch(e){

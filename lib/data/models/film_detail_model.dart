@@ -146,7 +146,6 @@ class FilmDetailModel {
         type: filmEntity.type,
         posterUrl: filmEntity.posterUrl,
         posterUrlPreview: filmEntity.posterUrlPreview,
-        collectionIds: filmEntity.collectionIds,
         userComment: filmEntity.userComment,
         userRating: filmEntity.userRating
       ),

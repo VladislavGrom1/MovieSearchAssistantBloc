@@ -1,10 +1,11 @@
 class HiveStorageKeys {
-  static const String userModel = 'userModel';
-  static const String userModelKeyBox = 'userModelBox';
+  static const String userModelKey = 'userModelKey';
+  static const String userModelBox = 'userModelBox';
   
-  static const String collectionModel = 'collectionModel';
-  static const String collectionModelKeyBox = 'collectionModelBox';
+  static const String collectionModelBox = 'collectionModelBox';
 
-  static const String filmDetailModel = 'filmDetailModel';
-  static const String filmDetailModelKeyBox = 'filmDetailModelBox';
+  static const String filmDetailModelBox = 'filmDetailModelBox';
+
+  static const String filmCollectionLinkBox = 'filmToCollectionLinkBox';
+
 }

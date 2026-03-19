@@ -61,6 +61,7 @@ class _FilmInformationView extends StatelessWidget {
             return _FilmInformationContent(
               film: state.film,
               filmImages: state.filmImages,
+              collectionIds: state.collectionIds,
             );
           }
           return const SizedBox();
@@ -71,9 +72,6 @@ class _FilmInformationView extends StatelessWidget {
 
   void _filmInformationBlocListener(
       BuildContext context, FilmInformationState state) {
-    if (state is FilmActionSuccess) {
-      _showSnackBar(context, state.message, Colors.green);
-    }
     if (state is FilmActionFailure) {
       _showSnackBar(context, state.message, Colors.red);
     }
@@ -98,9 +96,11 @@ class _FilmInformationView extends StatelessWidget {
 class _FilmInformationContent extends StatelessWidget {
   final FilmEntity film;
   final FilmImagesEntity? filmImages;
+  final List<String> collectionIds;
   const _FilmInformationContent({
     required this.film,
-    required this.filmImages
+    required this.filmImages,
+    required this.collectionIds
   });
 
   @override
@@ -122,7 +122,7 @@ class _FilmInformationContent extends StatelessWidget {
                 SizedBox(height: 16),
                 Text(film.nameRu ?? film.nameOriginal ?? "Без названия"),
                 SizedBox(height: 8),
-                Text(film.collectionIds.toString()),
+                Text(collectionIds.toString()),
                 SizedBox(height: 10.h),
                 if (film.nameOriginal != null) ...[
                   Text(film.nameOriginal!),
@@ -215,7 +215,7 @@ class _CollectionPickerSheet extends StatelessWidget {
           return BlocBuilder<FilmInformationBloc, FilmInformationState>(
             buildWhen: (previous, current) => current is FilmLoaded,
             builder: (context, filmState) {
-              final film = (filmState as FilmLoaded).film;
+              final collectionIds = (filmState as FilmLoaded).collectionIds;
 
               return BlocBuilder<CollectionsBloc, CollectionsState>(
                 builder: (context, collectionsState) {
@@ -230,7 +230,7 @@ class _CollectionPickerSheet extends StatelessWidget {
                 final collections = collectionsState.collections;
                 return _CollectionsList(
                     scrollController: scrollController,
-                    film: film,
+                    collectionsIds: collectionIds,
                     collections: collections);
               });
             },
@@ -241,12 +241,12 @@ class _CollectionPickerSheet extends StatelessWidget {
 
 class _CollectionsList extends StatelessWidget {
   final ScrollController scrollController;
-  final FilmEntity film;
+  final List<String> collectionsIds;
   final List<CollectionEntity> collections;
 
   const _CollectionsList({
     required this.scrollController,
-    required this.film,
+    required this.collectionsIds,
     required this.collections});
 
   @override
@@ -256,7 +256,7 @@ class _CollectionsList extends StatelessWidget {
         itemCount: collections.length,
         itemBuilder: (context, index) {
           final collection = collections[index];
-          final isInCollection = film.collectionIds?.contains(collection.id) ?? false;
+          final isInCollection = collectionsIds.contains(collection.id);
           return _CollectionTile(collection: collection, isInCollection: isInCollection);
         });
   }

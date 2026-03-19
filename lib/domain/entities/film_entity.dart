@@ -17,7 +17,6 @@ class FilmEntity extends Equatable {
   final String? type;
   final String? posterUrl;
   final String? posterUrlPreview;
-  final List<String>? collectionIds;
   final String? userComment;
   final double? userRating;
   // FilmDetailInformation
@@ -69,7 +68,6 @@ class FilmEntity extends Equatable {
     this.type,
     this.posterUrl,
     this.posterUrlPreview,
-    this.collectionIds,
     this.userComment,
     this.userRating,
     // FilmDetailInformation
@@ -123,7 +121,6 @@ class FilmEntity extends Equatable {
       type: filmBaseModel.type,
       posterUrl: filmBaseModel.posterUrl,
       posterUrlPreview: filmBaseModel.posterUrlPreview,
-      collectionIds: filmBaseModel.collectionIds,
       userComment: filmBaseModel.userComment,
       userRating: filmBaseModel.userRating
     );
@@ -144,7 +141,6 @@ class FilmEntity extends Equatable {
       type: filmDetailModel.filmBaseModel.type,
       posterUrl: filmDetailModel.filmBaseModel.posterUrl,
       posterUrlPreview: filmDetailModel.filmBaseModel.posterUrlPreview,
-      collectionIds: filmDetailModel.filmBaseModel.collectionIds,
       userComment: filmDetailModel.filmBaseModel.userComment,
       userRating: filmDetailModel.filmBaseModel.userRating,
       // FilmDetailInformation
@@ -184,65 +180,6 @@ class FilmEntity extends Equatable {
     );
   }
 
-  FilmEntity copyWith({
-    List<String>? updatedCollectionIds,
-  }) {
-    return FilmEntity(
-      // FilmBaseInformation
-      kinopoiskId: kinopoiskId,
-      nameRu: nameRu,
-      nameEn: nameEn,
-      nameOriginal: nameOriginal,
-      countries: countries,
-      genres: genres,
-      ratingKinopoisk: ratingKinopoisk,
-      ratingImbd: ratingImbd,
-      year: year,
-      type: type,
-      posterUrl: posterUrl,
-      posterUrlPreview: posterUrlPreview,
-      collectionIds: updatedCollectionIds,
-      userComment: userComment,
-      userRating: userRating,
-      // FilmDetailInformation
-      kinopoiskHDId: kinopoiskHDId,
-      imdbId: imdbId,
-      coverUrl: coverUrl,
-      logoUrl: logoUrl,
-      reviewsCount: reviewsCount,
-      ratingGoodReview: ratingGoodReview,
-      ratingGoodReviewVoteCount: ratingGoodReviewVoteCount,
-      ratingKinopoiskVoteCount: ratingKinopoiskVoteCount,
-      ratingImdbVoteCount: ratingImdbVoteCount,
-      ratingFilmCritics: ratingFilmCritics,
-      ratingFilmCriticsVoteCount: ratingFilmCriticsVoteCount,
-      ratingAwait: ratingAwait,
-      ratingAwaitCount: ratingAwaitCount,
-      ratingRfCritics: ratingRfCritics,
-      ratingRfCriticsVoteCount: ratingRfCriticsVoteCount,
-      webUrl: webUrl,
-      filmLength: filmLength,
-      slogan: slogan,
-      description: description,
-      shortDescription: shortDescription,
-      editorAnnotation: editorAnnotation,
-      isTicketsAvailable: isTicketsAvailable,
-      productionStatus: productionStatus,
-      ratingMpaa: ratingMpaa,
-      ratingAgeLimits: ratingAgeLimits,
-      hasImax: hasImax,
-      has3D: has3D,
-      lastSync: lastSync,
-      startYear: startYear,
-      endYear: endYear,
-      serial: serial,
-      shortFilm: shortFilm,
-      completed: completed,
-    );
-  }
-
-
-
   @override
   List<Object?> get props => [
     // FilmBaseInformation
@@ -258,7 +195,6 @@ class FilmEntity extends Equatable {
     type,
     posterUrl,
     posterUrlPreview,
-    collectionIds,
     userComment,
     userRating,
     // FilmDetailInformation

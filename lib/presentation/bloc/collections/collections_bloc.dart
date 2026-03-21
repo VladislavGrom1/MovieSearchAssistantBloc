@@ -19,7 +19,7 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   final RemoveCollectionUseCase removeCollectionUseCase;
   final WatchCollectionsUseCase watchCollectionsUseCase;
   final ClearCollectionUseCase clearCollectionUseCase;
-  late StreamSubscription _savedCollectionsSubscription;
+  StreamSubscription? _savedCollectionsSubscription;
 
   CollectionsBloc({
     required this.getCollectionsUseCase,
@@ -33,95 +33,66 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     on<RemoveCollection>(_removeCollection);
     on<UpdateCollections>(_updateCollections);
     on<ClearCollection>(_clearCollection);
-
-    _savedCollectionsSubscription = watchCollectionsUseCase.call().listen(
-      (updatedCollections) => add(UpdateCollections(updatedCollections: updatedCollections))
-    );
   }
  
   Future<void> _getCollections(GetCollections event, Emitter emit) async {
     emit(CollectionsLoading());
     try{
-      List<CollectionEntity>? collections = await getCollectionsUseCase.call();
-      if(collections != null){
-        emit(CollectionsLoaded(collections: collections));
-      } else{
-        emit(CollectionsFailure(exceptionType: "Нет коллекций"));
-      }
+      _savedCollectionsSubscription?.cancel();
+      _savedCollectionsSubscription = watchCollectionsUseCase.call().listen(
+        (updatedCollections) => add(UpdateCollections(updatedCollections: updatedCollections))
+      );
     } on LocalDataSourceException catch(e) {
-      emit(CollectionsFailure(exceptionType: e.message));
+      emit(CollectionsFailure(message: e.message));
     } catch(e){
-      emit(CollectionsFailure(exceptionType: e.toString()));
+      emit(CollectionsFailure(message: e.toString()));
     }
   }
 
   Future<void> _addNewCollection(AddNewCollection event, Emitter emit) async {
-    final currentState = state;
-    if(currentState is! CollectionsLoaded) return;
     try{
-      final newCollection = await addCollectionUseCase.call(event.collectionName);
-      final updatedCollections = [...currentState.collections, newCollection];
-      emit(CollectionAddedSuccess(collections: updatedCollections, message: "Коллекция успешно создана"));
-      emit(CollectionsLoaded(collections: updatedCollections));
+      await addCollectionUseCase.call(event.collectionName);
     } on LocalDataSourceException catch(e){
-      emit(CollectionActionFailure(collections: currentState.collections, message: e.message));
-      emit(currentState);
+      emit(CollectionsFailure(message: e.message));
     } catch(e){
-      emit(CollectionActionFailure(collections: currentState.collections, message: "Не удалось создать коллекцию"));
-      emit(currentState);
+      emit(CollectionsFailure(message: e.toString()));
     }
   }
 
   Future<void> _removeCollection(RemoveCollection event, Emitter emit) async {
-    final currentState = state;
-    if(currentState is! CollectionsLoaded) return;
     try{
       await removeCollectionUseCase.call(event.collectionId);
-      final updatedCollections = currentState.collections.where((c) => c.id != event.collectionId).toList();
-      emit(CollectionRemovedSuccess(collections: updatedCollections, message: "Коллекция успешно удалена"));
-      emit(CollectionsLoaded(collections: updatedCollections));
     } on LocalDataSourceException catch(e){
-      emit(CollectionActionFailure(collections: currentState.collections, message: e.toString()));
-      emit(currentState);
+      emit(CollectionsFailure(message: e.message));
     } catch(e){
-      emit(CollectionActionFailure(collections: currentState.collections, message: "Не удалось удалить коллекцию"));
-      emit(currentState);
+      emit(CollectionsFailure(message: e.toString()));
     }
   }
 
   Future<void> _updateCollections(UpdateCollections event, Emitter emit) async {
-    final currentState = state;
-    if(currentState is! CollectionsLoaded) return;
     try{
       final updatedCollections = event.updatedCollections;
       emit(CollectionsLoaded(collections: updatedCollections));
     } on LocalDataSourceException catch(e){
-      emit(CollectionActionFailure(collections: currentState.collections, message: e.toString()));
-      emit(currentState);
+      emit(CollectionsFailure(message: e.message));
     } catch(e){
-      emit(CollectionActionFailure(collections: currentState.collections, message: "Не удалось обновить коллекции"));
-      emit(currentState);
+      emit(CollectionsFailure(message: e.toString()));
     }
   }
 
   Future<void> _clearCollection(ClearCollection event, Emitter emit) async {
-    final currentState = state;
-    if(currentState is! CollectionsLoaded) return;
     try{
       await clearCollectionUseCase.call(event.collectionId);
-      emit(CollectionClearedSuccess(collections: currentState.collections, message: "Коллекция успешно очищена"));
     } on LocalDataSourceException catch(e){
-      emit(CollectionActionFailure(collections: currentState.collections, message: e.toString()));
-      emit(currentState);
+      emit(CollectionsFailure(message: e.message));
     } catch(e){
-      emit(CollectionActionFailure(collections: currentState.collections, message: "Не удалось обновить коллекции"));
-      emit(currentState);
+      emit(CollectionsFailure(message: e.toString()));
     }
   }
 
   @override
   Future<void> close() {
-    _savedCollectionsSubscription.cancel();
+    _savedCollectionsSubscription?.cancel();
     return super.close();
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
 
@@ -185,7 +186,7 @@ class _FilmsList extends StatelessWidget {
 }
 
 class _FilmCard extends StatelessWidget {
-  final dynamic film;
+  final FilmEntity film;
 
   const _FilmCard({required this.film});
 
@@ -195,7 +196,10 @@ class _FilmCard extends StatelessWidget {
       onTap: () {
         if (film.kinopoiskId != null) {
           context.router.push(
-            FilmInformationRoute(filmId: film.kinopoiskId!),
+            FilmInformationRoute(
+              filmId: film.kinopoiskId!,
+              filmName: film.nameRu ?? film.nameOriginal.toString()
+            ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

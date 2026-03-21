@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_collection_link.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
@@ -26,9 +24,8 @@ class RemoveFilmFromCollectionUseCase {
       final allFilmCollectionLinks = await filmCollectionRepository.getAllFilmCollectionLinks();
 
       bool filmHasOtherLinks = allFilmCollectionLinks.any((link) => link.filmId == filmId);
-      log(filmHasOtherLinks.toString());
+
       if(!filmHasOtherLinks){
-        log("удалить фильм");
         await filmRepository.removeFilmFromLocalDataSource(filmId);
       }
       return film;

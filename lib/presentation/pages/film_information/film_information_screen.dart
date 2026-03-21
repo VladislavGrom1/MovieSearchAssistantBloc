@@ -14,9 +14,11 @@ class FilmInformationScreen extends StatelessWidget {
   const FilmInformationScreen({
     super.key,
     @PathParam('filmId') required this.filmId,
+    @PathParam('filmName') required this.filmName
   });
 
   final int filmId;
+  final String filmName;
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +29,16 @@ class FilmInformationScreen extends StatelessWidget {
       BlocProvider(
         create: (_) => getIt<CollectionsBloc>()..add(GetCollections()),
       )
-    ], child: const _FilmInformationView());
+    ], child: _FilmInformationView(filmName: filmName));
   }
 }
 
 class _FilmInformationView extends StatelessWidget {
-  const _FilmInformationView();
+  const _FilmInformationView({
+    required this.filmName
+  });
+
+  final String filmName;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +52,10 @@ class _FilmInformationView extends StatelessWidget {
         )
       ],
       child: Scaffold(
-        appBar: AppBar(backgroundColor: Colors.black),
+        appBar: AppBar(
+          title: Text(filmName, style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.black
+        ),
         backgroundColor: Colors.white,
         body: SafeArea(child:
             BlocBuilder<FilmInformationBloc, FilmInformationState>(

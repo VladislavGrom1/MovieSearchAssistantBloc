@@ -64,11 +64,19 @@ class CollectionFilmsRoute
   CollectionFilmsRoute({
     _i16.Key? key,
     required String collectionId,
+    required String collectionName,
     List<_i15.PageRouteInfo>? children,
   }) : super(
           CollectionFilmsRoute.name,
-          args: CollectionFilmsRouteArgs(key: key, collectionId: collectionId),
-          rawPathParams: {'collectionId': collectionId},
+          args: CollectionFilmsRouteArgs(
+            key: key,
+            collectionId: collectionId,
+            collectionName: collectionName,
+          ),
+          rawPathParams: {
+            'collectionId': collectionId,
+            'collectionName': collectionName,
+          },
           initialChildren: children,
         );
 
@@ -81,37 +89,48 @@ class CollectionFilmsRoute
       final args = data.argsAs<CollectionFilmsRouteArgs>(
         orElse: () => CollectionFilmsRouteArgs(
           collectionId: pathParams.getString('collectionId'),
+          collectionName: pathParams.getString('collectionName'),
         ),
       );
       return _i2.CollectionFilmsScreen(
         key: args.key,
         collectionId: args.collectionId,
+        collectionName: args.collectionName,
       );
     },
   );
 }
 
 class CollectionFilmsRouteArgs {
-  const CollectionFilmsRouteArgs({this.key, required this.collectionId});
+  const CollectionFilmsRouteArgs({
+    this.key,
+    required this.collectionId,
+    required this.collectionName,
+  });
 
   final _i16.Key? key;
 
   final String collectionId;
 
+  final String collectionName;
+
   @override
   String toString() {
-    return 'CollectionFilmsRouteArgs{key: $key, collectionId: $collectionId}';
+    return 'CollectionFilmsRouteArgs{key: $key, collectionId: $collectionId, collectionName: $collectionName}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! CollectionFilmsRouteArgs) return false;
-    return key == other.key && collectionId == other.collectionId;
+    return key == other.key &&
+        collectionId == other.collectionId &&
+        collectionName == other.collectionName;
   }
 
   @override
-  int get hashCode => key.hashCode ^ collectionId.hashCode;
+  int get hashCode =>
+      key.hashCode ^ collectionId.hashCode ^ collectionName.hashCode;
 }
 
 /// generated route for
@@ -153,11 +172,16 @@ class FilmInformationRoute
   FilmInformationRoute({
     _i16.Key? key,
     required int filmId,
+    required String filmName,
     List<_i15.PageRouteInfo>? children,
   }) : super(
           FilmInformationRoute.name,
-          args: FilmInformationRouteArgs(key: key, filmId: filmId),
-          rawPathParams: {'filmId': filmId},
+          args: FilmInformationRouteArgs(
+            key: key,
+            filmId: filmId,
+            filmName: filmName,
+          ),
+          rawPathParams: {'filmId': filmId, 'filmName': filmName},
           initialChildren: children,
         );
 
@@ -168,35 +192,49 @@ class FilmInformationRoute
     builder: (data) {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<FilmInformationRouteArgs>(
-        orElse: () =>
-            FilmInformationRouteArgs(filmId: pathParams.getInt('filmId')),
+        orElse: () => FilmInformationRouteArgs(
+          filmId: pathParams.getInt('filmId'),
+          filmName: pathParams.getString('filmName'),
+        ),
       );
-      return _i5.FilmInformationScreen(key: args.key, filmId: args.filmId);
+      return _i5.FilmInformationScreen(
+        key: args.key,
+        filmId: args.filmId,
+        filmName: args.filmName,
+      );
     },
   );
 }
 
 class FilmInformationRouteArgs {
-  const FilmInformationRouteArgs({this.key, required this.filmId});
+  const FilmInformationRouteArgs({
+    this.key,
+    required this.filmId,
+    required this.filmName,
+  });
 
   final _i16.Key? key;
 
   final int filmId;
 
+  final String filmName;
+
   @override
   String toString() {
-    return 'FilmInformationRouteArgs{key: $key, filmId: $filmId}';
+    return 'FilmInformationRouteArgs{key: $key, filmId: $filmId, filmName: $filmName}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! FilmInformationRouteArgs) return false;
-    return key == other.key && filmId == other.filmId;
+    return key == other.key &&
+        filmId == other.filmId &&
+        filmName == other.filmName;
   }
 
   @override
-  int get hashCode => key.hashCode ^ filmId.hashCode;
+  int get hashCode => key.hashCode ^ filmId.hashCode ^ filmName.hashCode;
 }
 
 /// generated route for

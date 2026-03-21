@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_collection_link.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';

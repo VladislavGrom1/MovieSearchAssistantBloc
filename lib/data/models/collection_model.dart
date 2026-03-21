@@ -8,13 +8,11 @@ class CollectionModel {
   @HiveField(0) String? id;
   @HiveField(1) String? name;
   @HiveField(2) DateTime? createdAt;
-  @HiveField(3) int? filmCount;
 
   CollectionModel({
     this.id,
     this.name,
     this.createdAt,
-    this.filmCount
   });
 
   factory CollectionModel.fromCollectionEntity(CollectionEntity collectionEntity){
@@ -22,7 +20,6 @@ class CollectionModel {
       id: collectionEntity.id,
       name: collectionEntity.name,
       createdAt: collectionEntity.createdAt,
-      filmCount: collectionEntity.filmCount
     );
   }
 }

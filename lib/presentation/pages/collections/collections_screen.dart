@@ -44,9 +44,11 @@ class _CollectionsView extends StatelessWidget {
                   if (state is CollectionsLoading) {
                     return Center(child: CircularProgressIndicator());
                   }
+
                   if (state is CollectionsFailure) {
-                    return Center(child: Text("${state.exceptionType} ${state.statusCode}"));
+                    return Center(child: Text(state.message));
                   }
+
                   if (state is CollectionsLoaded) {
                     return _CollectionsList(collections: state.collections);
                   }
@@ -124,7 +126,10 @@ class _CollectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.router.push(CollectionFilmsRoute(collectionId: collection.id!));
+        context.router.push(CollectionFilmsRoute(
+          collectionId: collection.id!,
+          collectionName: collection.name!
+          ));
         },
           child: Card(
             color: Colors.white,

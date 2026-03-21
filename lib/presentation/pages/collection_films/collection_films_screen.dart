@@ -11,26 +11,34 @@ class CollectionFilmsScreen extends StatelessWidget {
   const CollectionFilmsScreen({
     super.key,
     @PathParam('collectionId') required this.collectionId,
+    @PathParam('collectionName') required this.collectionName
   });
 
   final String collectionId;
+  final String collectionName;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
         create: (_) => getIt<CollectionFilmsBloc>()..add(GetSavedFilms(collectionId: collectionId)),
-        child: _CollectionFilmsView());
+        child: _CollectionFilmsView(collectionName: collectionName));
   }
 }
 
 class _CollectionFilmsView extends StatelessWidget {
-  const _CollectionFilmsView();
+  const _CollectionFilmsView({
+    required this.collectionName
+  });
+
+  final String collectionName;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text(collectionName, style: TextStyle(color: Colors.white)),
+      ),
       body: SafeArea(
           child: Padding(
         padding: EdgeInsets.only(left: 20.w, right: 20.h),
@@ -45,7 +53,10 @@ class _CollectionFilmsView extends StatelessWidget {
             }
 
             if (state is CollectionFilmsLoaded) {
-              return _CollectionFilmsList(savedFilms: state.savedFilms);
+              return _CollectionFilmsList(
+                savedFilms: state.savedFilms,
+                collectionId: state.collectionId,
+              );
             }
 
             return SizedBox();
@@ -58,10 +69,17 @@ class _CollectionFilmsView extends StatelessWidget {
 
 class _CollectionFilmsList extends StatelessWidget {
   final List<FilmEntity> savedFilms;
-  const _CollectionFilmsList({required this.savedFilms});
+  final String collectionId;
+  
+  const _CollectionFilmsList({
+    required this.savedFilms,
+    required this.collectionId
+  });
 
   @override
   Widget build(BuildContext context) {
+    final collectionFilmsBloc = context.read<CollectionFilmsBloc>();
+
     if (savedFilms.isEmpty) {
       return Center(child: Text("Коллекция пуста", style: TextStyle(color: Colors.black)));
     }
@@ -69,7 +87,11 @@ class _CollectionFilmsList extends StatelessWidget {
     return ListView.separated(
         itemBuilder: (context, index) {
           final savedFilm = savedFilms[index];
-          return _FilmCard(savedFilm: savedFilm);
+          return _FilmCard(
+            savedFilm: savedFilm,
+            collectionId: collectionId,
+            collectionFilmsBloc: collectionFilmsBloc,
+          );
         },
         separatorBuilder: (context, index) => SizedBox(height: 12.h),
         itemCount: savedFilms.length);
@@ -78,8 +100,18 @@ class _CollectionFilmsList extends StatelessWidget {
 
 class _FilmCard extends StatelessWidget {
   final FilmEntity savedFilm;
+  final String collectionId;
+  final CollectionFilmsBloc collectionFilmsBloc;
 
-  const _FilmCard({required this.savedFilm});
+  const _FilmCard({
+    required this.savedFilm,
+    required this.collectionId,
+    required this.collectionFilmsBloc
+  });
+
+  void onRemove(){
+    collectionFilmsBloc.add(RemoveFilm(film: savedFilm, collectionId: collectionId));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +158,17 @@ class _FilmCard extends StatelessWidget {
                     : "${savedFilm.countries.toString()}, ${savedFilm.year}"),
                 SizedBox(height: 10.h)
               ],
-            ))
+            )
+            ),
+            PopupMenuButton(
+              icon: Icon(Icons.more_vert, color: Colors.purple),
+              onSelected: (value) {
+                if(value == "removeFilm") onRemove();
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'removeFilm', child: Text("Удалить фильм")),
+              ]
+            )
           ],
         ),
       ),

@@ -62,7 +62,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     final currentState = state;
     if(currentState is! FilmLoaded) return;
     try {
-      final updatedFilm = await addFilmToCollectionUseCase(currentState.film, event.collectionId);
+      await addFilmToCollectionUseCase(currentState.film, event.collectionId);
     } on LocalDataSourceException catch(e){
       emit(FilmActionFailure(film: currentState.film, filmImages: currentState.filmImages, collectionIds: currentState.collectionIds, message: e.message));
       emit(currentState);
@@ -81,7 +81,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     final currentState = state;
     if(currentState is! FilmLoaded) return;
     try {
-      final updatedFilm = await removeFilmFromCollectionUseCase.call(currentState.film, event.collectionId);
+      await removeFilmFromCollectionUseCase.call(currentState.film, event.collectionId);
     } on LocalDataSourceException catch(e){
       emit(FilmActionFailure(film: currentState.film, filmImages: currentState.filmImages, collectionIds: currentState.collectionIds, message: e.message));
       emit(currentState);

@@ -21,13 +21,12 @@ final class CollectionsLoaded extends CollectionsState {
 }
 
 final class CollectionsFailure extends CollectionsState {
-  final String exceptionType;
-  final int? statusCode;
+  final String message;
   
-  const CollectionsFailure({required this.exceptionType, this.statusCode});
+  const CollectionsFailure({required this.message});
 
   @override
-  List<Object> get props => [exceptionType, if (statusCode != null) statusCode!];
+  List<Object> get props => [message];
 }
 
 final class CollectionAddedSuccess extends CollectionsLoaded {

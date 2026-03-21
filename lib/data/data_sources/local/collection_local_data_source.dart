@@ -3,15 +3,16 @@ import 'package:hive/hive.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/hive_storage_keys.dart';
 import 'package:movie_search_assistant_bloc/data/models/collection_model.dart';
+import 'package:rxdart/rxdart.dart';
 
 class CollectionLocalDataSource {
 
   Stream<List<CollectionModel>> watchCollections() {
     try{
       final storageBox = Hive.box<CollectionModel>(HiveStorageKeys.collectionModelBox);
-      return storageBox.watch().map((event) {
-        return storageBox.values.toList();
-      });
+      return storageBox.watch()
+      .map((_) => storageBox.values.toList())
+      .startWith(storageBox.values.toList());
     } on HiveError catch(e){
       throw LocalDataSourceException(message: e.message);
     } catch(e){

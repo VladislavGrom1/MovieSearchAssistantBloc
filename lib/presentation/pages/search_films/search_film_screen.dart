@@ -161,7 +161,9 @@ class _FilmCard extends StatelessWidget {
             onTap: () {
               if (film.kinopoiskId != null) {
                 context.router.push(FilmInformationRoute(
-                    filmId: film.kinopoiskId!));
+                    filmId: film.kinopoiskId!,
+                    filmName: film.nameRu ?? film.nameOriginal.toString()
+                  ));
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

@@ -3,6 +3,8 @@ import 'package:movie_search_assistant_bloc/data/models/film_collection_link.dar
 
 abstract class FilmCollectionRepository {
 
+  Stream<List<FilmCollectionLink>> watchLinks();
+
   Stream<List<int>> watchLinksByCollectionId(String collectionId);
 
   Stream<List<String>> watchLinksByFilmId(int filmId);

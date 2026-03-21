@@ -81,7 +81,7 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => ClearCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchLinksByFilmUseCase(filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchCollectionFilmsUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
-    getIt.registerLazySingleton(() => WatchCollectionsUseCase(collectionRepository: getIt()));
+    getIt.registerLazySingleton(() => WatchCollectionsUseCase(collectionRepository: getIt(), filmCollectionRepository: getIt()));
 
     // Blocs
     getIt.registerFactory(() => AuthenticationBloc(authenticationUseCase: getIt()));
@@ -102,5 +102,9 @@ Future<void> initializeDependencies() async {
       watchCollectionsUseCase: getIt(),
       clearCollectionUseCase: getIt()
     ));
-    getIt.registerFactory(() => CollectionFilmsBloc(getSavedFilmsUseCase: getIt(), watchFilmsUseCase: getIt()));
+    getIt.registerFactory(() => CollectionFilmsBloc(
+      getSavedFilmsUseCase: getIt(),
+      removeFilmFromCollectionUseCase: getIt(), 
+      watchFilmsUseCase: getIt()
+    ));
 }

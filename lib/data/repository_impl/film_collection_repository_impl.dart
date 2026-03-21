@@ -9,6 +9,17 @@ class FilmCollectionRepositoryImpl implements FilmCollectionRepository{
   FilmCollectionRepositoryImpl({required this.filmCollectionLinkLocalDataSource});
 
   @override
+  Stream<List<FilmCollectionLink>> watchLinks() {
+    try{
+      return filmCollectionLinkLocalDataSource.watchLinks();
+    } on LocalDataSourceException {
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  @override
   Stream<List<int>> watchLinksByCollectionId(String collectionId) {
     try{
       return filmCollectionLinkLocalDataSource.watchLinksByCollectionId(collectionId);

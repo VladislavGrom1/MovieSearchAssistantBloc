@@ -24,3 +24,13 @@ class UpdateSavedFilms extends CollectionFilmsEvent {
   @override
   List<Object> get props => [updatedSavedFilms];
 }
+
+class RemoveFilm extends CollectionFilmsEvent{
+  final FilmEntity film;
+  final String collectionId;
+ 
+  const RemoveFilm({required this.film, required this.collectionId});
+
+  @override
+  List<Object> get props => [film, collectionId];
+}

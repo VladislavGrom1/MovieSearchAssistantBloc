@@ -20,7 +20,7 @@ class CollectionEntity extends Equatable {
       id: collectionModel.id,
       name: collectionModel.name,
       createdAt: collectionModel.createdAt,
-      filmCount: collectionModel.filmCount
+      filmCount: 0
     );
   }
 

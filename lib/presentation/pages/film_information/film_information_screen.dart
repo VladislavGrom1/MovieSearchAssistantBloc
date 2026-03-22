@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,24 +24,32 @@ class FilmInformationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(providers: [
-      BlocProvider(
-        create: (_) => getIt<FilmInformationBloc>()..add(GetFilmInformation(idFilm: filmId)),
-      ),
-      BlocProvider(
-        create: (_) => getIt<CollectionsBloc>()..add(GetCollections()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => getIt<FilmInformationBloc>()..add(GetFilmInformation(idFilm: filmId)),
+        ),
+        BlocProvider(
+          create: (_) => getIt<CollectionsBloc>()..add(GetCollections()),
+        )
+      ], 
+      child: _FilmInformationView(
+        filmId: filmId,
+        filmName: filmName
       )
-    ], child: _FilmInformationView(filmName: filmName));
+    );
   }
 }
 
 class _FilmInformationView extends StatelessWidget {
   const _FilmInformationView({
+    required this.filmId,
     required this.filmName
   });
 
+  final int filmId;
   final String filmName;
-
+  
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
@@ -57,24 +67,40 @@ class _FilmInformationView extends StatelessWidget {
           backgroundColor: Colors.black
         ),
         backgroundColor: Colors.white,
-        body: SafeArea(child:
-            BlocBuilder<FilmInformationBloc, FilmInformationState>(
-                builder: (context, state) {
-          if (state is FilmLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is FilmFailure) {
-            return Center(child: Text(state.message));
-          }
-          if (state is FilmLoaded) {
-            return _FilmInformationContent(
-              film: state.film,
-              filmImages: state.filmImages,
-              collectionIds: state.collectionIds,
-            );
-          }
-          return const SizedBox();
-        })),
+        body: SafeArea(
+          child:
+            RefreshIndicator(
+              onRefresh: () async {
+                final filmInformationBloc = context.read<FilmInformationBloc>();
+                final state = filmInformationBloc.state;
+                if(state is FilmLoaded){
+                  final currentFilm = state.film;
+                  filmInformationBloc.add(RefreshFilmInformation(film: currentFilm));
+                  log("фильм обновился");
+                }
+
+                if(state is FilmFailure){
+                  filmInformationBloc.add(GetFilmInformation(idFilm: filmId));
+                }
+              },
+              child: BlocBuilder<FilmInformationBloc, FilmInformationState>(
+                  builder: (context, state) {
+                        if (state is FilmLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        if (state is FilmFailure) {
+                          return Center(child: Text(state.message));
+                        }
+                        if (state is FilmLoaded) {
+                        return _FilmInformationContent(
+                          film: state.film,
+                          filmImages: state.filmImages,
+                          collectionIds: state.collectionIds,
+                        );
+                        }
+                        return const SizedBox();
+                      }),
+            )),
       ),
     );
   }
@@ -96,7 +122,7 @@ class _FilmInformationView extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.green,
+        backgroundColor: color,
       ),
     );
   }

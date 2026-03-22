@@ -39,20 +39,20 @@ class _CollectionsView extends StatelessWidget {
             children: [
               Expanded(
                   child: BlocConsumer<CollectionsBloc, CollectionsState>(
-                listener: _collectionBlocListener,
-                builder: (context, state) {
-                  if (state is CollectionsLoading) {
-                    return Center(child: CircularProgressIndicator());
-                  }
+                    listener: _collectionBlocListener,
+                    builder: (context, state) {
+                      if (state is CollectionsLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      }
 
-                  if (state is CollectionsFailure) {
-                    return Center(child: Text(state.message));
-                  }
+                      if (state is CollectionsFailure) {
+                        return Center(child: Text(state.message));
+                      }
 
-                  if (state is CollectionsLoaded) {
-                    return _CollectionsList(collections: state.collections);
-                  }
-                  return const SizedBox();
+                      if (state is CollectionsLoaded) {
+                        return _CollectionsList(collections: state.collections);
+                      }
+                      return const SizedBox();
                 },
               ))
             ],
@@ -103,8 +103,18 @@ class _CollectionsList extends StatelessWidget {
         final collection = collections[index - 1];
         return _CollectionCard(
           collection: collection,
+          onRename: (CollectionEntity collection) => showDialog(
+            context: context, 
+            builder: (dialogContext) {
+              return BlocProvider.value(
+                value: context.read<CollectionsBloc>(),
+                child: _RenameCollectionDialog(collection: collection)
+              );
+            }
+          ),
           onClear: () => collectionBloc.add(ClearCollection(collectionId: collection.id!)),
           onRemove: () => collectionBloc.add(RemoveCollection(collectionId: collection.id!)),
+          
         );
       },
     );
@@ -113,11 +123,13 @@ class _CollectionsList extends StatelessWidget {
 
 class _CollectionCard extends StatelessWidget {
   final CollectionEntity collection;
+  final Function onRename;
   final VoidCallback onRemove;
   final VoidCallback onClear;
 
   const _CollectionCard({
     required this.collection,
+    required this.onRename,
     required this.onRemove,
     required this.onClear
   });
@@ -162,10 +174,12 @@ class _CollectionCard extends StatelessWidget {
                   PopupMenuButton(
                     icon: Icon(Icons.more_vert, color: Colors.purple),
                     onSelected: (value) {
+                      if(value == "renameCollection") onRename(collection);
                       if(value == "removeCollection") onRemove();
                       if(value == "clearCollection") onClear();
                       },
                       itemBuilder: (_) => const [
+                        PopupMenuItem(value: 'renameCollection', child: Text("Переименовать коллекцию")),
                         PopupMenuItem(value: 'removeCollection', child: Text("Удалить коллекцию")),
                         PopupMenuItem(value: 'clearCollection',child: Text("Очистить коллекцию"))]
                         )
@@ -263,6 +277,59 @@ class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
                   ? null
                   : () {
                       collectionBloc.add(AddNewCollection(collectionName: controller.text));
+                      Navigator.pop(context);
+                    },
+              child: Text('Сохранить'),
+            ),
+          ],
+        );
+  }
+}
+
+
+class _RenameCollectionDialog extends StatefulWidget {
+  const _RenameCollectionDialog({required this.collection});
+
+  final CollectionEntity collection;
+
+  @override
+  State<_RenameCollectionDialog> createState() => _RenameCollectionDialogState();
+}
+
+class _RenameCollectionDialogState extends State<_RenameCollectionDialog> {
+  final controller = TextEditingController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final collectionBloc = context.read<CollectionsBloc>();
+
+    return AlertDialog(
+          title: Text('Переименовать коллекцию'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: 'Новое название коллекции',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+            onChanged: (_) => setState(() {})
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: controller.text.isEmpty
+                  ? null
+                  : () {
+                      collectionBloc.add(RenameCollection(collection: widget.collection, updatedName: controller.text));
                       Navigator.pop(context);
                     },
               child: Text('Сохранить'),

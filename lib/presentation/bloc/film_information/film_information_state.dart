@@ -35,17 +35,14 @@ class FilmFailure extends FilmInformationState {
   List<Object?> get props => [message];
 }
 
-class FilmActionFailure extends FilmLoaded{
+class FilmActionFailure extends FilmInformationState{
   final String message;
 
   const FilmActionFailure({
-    required super.film,
-    required super.filmImages,
-    required super.collectionIds,
     required this.message
   });
 
   @override
-  List<Object?> get props => [film, filmImages, collectionIds, message];
+  List<Object?> get props => [message];
 }
 

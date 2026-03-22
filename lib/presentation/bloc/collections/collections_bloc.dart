@@ -8,6 +8,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_c
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/rename_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_use_case.dart';
 
 part 'collections_event.dart';
@@ -19,6 +20,7 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   final RemoveCollectionUseCase removeCollectionUseCase;
   final WatchCollectionsUseCase watchCollectionsUseCase;
   final ClearCollectionUseCase clearCollectionUseCase;
+  final RenameCollectionUseCase renameCollectionUseCase;
   StreamSubscription? _savedCollectionsSubscription;
 
   CollectionsBloc({
@@ -26,13 +28,15 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     required this.addCollectionUseCase,
     required this.removeCollectionUseCase,
     required this.watchCollectionsUseCase,
-    required this.clearCollectionUseCase
+    required this.clearCollectionUseCase,
+    required this.renameCollectionUseCase
   }) : super(CollectionsInitial()) {
     on<GetCollections>(_getCollections);
     on<AddNewCollection>(_addNewCollection);
     on<RemoveCollection>(_removeCollection);
     on<UpdateCollections>(_updateCollections);
     on<ClearCollection>(_clearCollection);
+    on<RenameCollection>(_renameCollection);
   }
  
   Future<void> _getCollections(GetCollections event, Emitter emit) async {
@@ -83,6 +87,16 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   Future<void> _clearCollection(ClearCollection event, Emitter emit) async {
     try{
       await clearCollectionUseCase.call(event.collectionId);
+    } on LocalDataSourceException catch(e){
+      emit(CollectionsFailure(message: e.message));
+    } catch(e){
+      emit(CollectionsFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> _renameCollection(RenameCollection event, Emitter emit) async {
+    try{
+      await renameCollectionUseCase.call(event.collection, event.updatedName);
     } on LocalDataSourceException catch(e){
       emit(CollectionsFailure(message: e.message));
     } catch(e){

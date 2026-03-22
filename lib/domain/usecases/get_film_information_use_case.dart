@@ -20,16 +20,17 @@ class GetFilmInformationUseCase {
     required this.apiClient
   });
 
-  Future<(FilmEntity?, List<String>? collectionIds)> call(int idFilm) async{
+  Future<(FilmEntity?, List<String> collectionIds)> call(int idFilm) async{
     try{
+      List<String> collectionIds = [];
       UserEntity? userEntity = await userRepository.getUserApiKeyInfoFromStorage();
       if(userEntity != null){
         apiClient.updateApiKeyHeaders(userEntity.apiKey!);
         FilmEntity? filmEntity = await filmRepository.getFilmInformation(idFilm);
-        List<String> collectionIds = await filmCollectionRepository.getCollectionIdsByFilmId(idFilm);
+        collectionIds = await filmCollectionRepository.getCollectionIdsByFilmId(idFilm);
         return (filmEntity, collectionIds);
       } 
-      return (null, null);
+      return (null, collectionIds);
     } on RemoteDataSourceException{
       rethrow;
     } on LocalDataSourceException{

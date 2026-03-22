@@ -109,7 +109,6 @@ class FilmLocalDataSource{
     try{
       final film = await getFilm(idFilm);
       if(film != null){
-        //userDataAboutFilm['collectionTag'] = film.filmBaseModel.collectionIds;
         userDataAboutFilm['userComment'] = film.filmBaseModel.userComment;
         userDataAboutFilm['userRating'] = film.filmBaseModel.userRating;
         return userDataAboutFilm;

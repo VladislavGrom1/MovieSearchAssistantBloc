@@ -44,3 +44,13 @@ class ClearCollection extends CollectionsEvent{
   @override
   List<Object> get props => [collectionId];
 }
+
+class RenameCollection extends CollectionsEvent{
+  final CollectionEntity collection;
+  final String updatedName;
+
+  const RenameCollection({required this.collection, required this.updatedName});
+
+  @override
+  List<Object> get props => [collection, updatedName];
+}

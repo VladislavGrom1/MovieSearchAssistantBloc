@@ -23,11 +23,14 @@ import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_use_
 import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_images_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_information_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_saved_film_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_saved_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/rename_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_collection_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_filter_films_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/update_saved_film_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collection_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
@@ -73,12 +76,15 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => GetFilmInformationUseCase(userRepository: getIt(), filmRepository: getIt(), filmCollectionRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => GetFilmImagesUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => GetSavedFilmsUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
+    getIt.registerLazySingleton(() => GetSavedFilmUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => AddFilmToCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
+    getIt.registerLazySingleton(() => UpdateSavedFilmUseCase(filmRepository: getIt()));
     getIt.registerLazySingleton(() => RemoveFilmFromCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => GetCollectionsUseCase(collectionRepository: getIt()));
     getIt.registerLazySingleton(() => AddCollectionUseCase(collectionRepository: getIt()));
     getIt.registerLazySingleton(() => RemoveCollectionUseCase(collectionRepository: getIt(), filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => ClearCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
+    getIt.registerLazySingleton(() => RenameCollectionUseCase(collectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchLinksByFilmUseCase(filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchCollectionFilmsUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchCollectionsUseCase(collectionRepository: getIt(), filmCollectionRepository: getIt()));
@@ -89,9 +95,11 @@ Future<void> initializeDependencies() async {
     getIt.registerFactory(() => SearchedFilmsBloc(searchFilterFilmsUseCase: getIt(), searchCollectionFilmsUseCase: getIt()));
     getIt.registerFactory(() => FilterFilmBloc());
     getIt.registerFactory(() => FilmInformationBloc(
-      getFilmInformationUseCase: getIt(), 
+      getFilmInformationUseCase: getIt(),
+      getSavedFilmUseCase: getIt(), 
       getFilmImagesUseCase: getIt(),
       addFilmToCollectionUseCase: getIt(),
+      updateSavedFilmUseCase: getIt(),
       removeFilmFromCollectionUseCase: getIt(),
       watchLinksByFilmUseCase: getIt()
     ));
@@ -100,7 +108,8 @@ Future<void> initializeDependencies() async {
       addCollectionUseCase: getIt(), 
       removeCollectionUseCase: getIt(),
       watchCollectionsUseCase: getIt(),
-      clearCollectionUseCase: getIt()
+      clearCollectionUseCase: getIt(),
+      renameCollectionUseCase: getIt()
     ));
     getIt.registerFactory(() => CollectionFilmsBloc(
       getSavedFilmsUseCase: getIt(),

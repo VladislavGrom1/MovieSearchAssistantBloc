@@ -1,5 +1,7 @@
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get_it/get_it.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
+import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_cache_manager.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/collection_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/film_collection_link_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/flim_local_data_source.dart';
@@ -41,6 +43,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/filter_film/filter
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_profile_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -116,4 +119,5 @@ Future<void> initializeDependencies() async {
       removeFilmFromCollectionUseCase: getIt(), 
       watchFilmsUseCase: getIt()
     ));
+    getIt.registerFactory(() => UserProfileBloc());
 }

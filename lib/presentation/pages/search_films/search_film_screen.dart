@@ -1,8 +1,12 @@
+import 'dart:math';
+
 import 'package:auto_route/auto_route.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
+import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_cache_manager.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
@@ -104,6 +108,7 @@ class _CollectionsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final filmCollectionsNamesList = FilmCollectionNames.filmCollectionNames;
     return ListView.separated(
+        physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
           return Column(
             children: [
@@ -144,10 +149,11 @@ class _CollectionFilmsList extends StatelessWidget {
     List<FilmEntity> filmEntityList = filmCollectionsMap![filmCollectionsName]!;
 
     return ListView.separated(
+        physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) => _FilmCard(film: filmEntityList[index]),
+        itemBuilder: (context, index) => RepaintBoundary(child: _FilmCard(film: filmEntityList[index])),
         separatorBuilder: (context, index) => SizedBox(width: 12.w),
-        itemCount: filmCollectionsMap![filmCollectionsName]!.length);
+        itemCount: min(filmCollectionsMap![filmCollectionsName]!.length, 10));
   }
 }
 
@@ -176,13 +182,7 @@ class _FilmCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  height: 140.h,
-                  width: 90.w,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16.w),
-                      color: Colors.purple),
-                ),
+                _CachedImageWidget(urlImage: film.posterUrlPreview),
                 SizedBox(height: 5.h),
                 SizedBox(
                   width: 96.w,
@@ -200,5 +200,31 @@ class _FilmCard extends StatelessWidget {
               ],
             ),
           );
+  }
+}
+
+class _CachedImageWidget extends StatelessWidget {
+  final String? urlImage;
+
+  const _CachedImageWidget({
+    required this.urlImage
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16.w),
+      child: CachedNetworkImage(
+        imageUrl: urlImage ?? '',
+        cacheManager: FilmImageCacheManager.instance,
+        memCacheHeight: 300,
+        memCacheWidth: 200,
+        fit: BoxFit.cover,
+        width: 100.w,
+        height: 140.h,
+        placeholder: (context, url) => Container(color: Colors.grey[200]),
+        errorWidget: (context, url, error) => const Icon(Icons.error),
+        ),
+      );
   }
 }

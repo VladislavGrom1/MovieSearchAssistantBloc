@@ -1,9 +1,11 @@
 import 'dart:developer';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_cache_manager.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
@@ -76,7 +78,6 @@ class _FilmInformationView extends StatelessWidget {
                 if(state is FilmLoaded){
                   final currentFilm = state.film;
                   filmInformationBloc.add(RefreshFilmInformation(film: currentFilm));
-                  log("фильм обновился");
                 }
 
                 if(state is FilmFailure){
@@ -147,6 +148,26 @@ class _FilmInformationContent extends StatelessWidget {
             padding: EdgeInsets.only(left: 20.w, right: 20.w),
             child: Column(
               children: [
+                CachedNetworkImage(
+                  imageUrl: film.posterUrlPreview ?? '',
+                  cacheManager: FilmImageCacheManager.instance,
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                        opacity: 1.0,
+                      ),
+                    ),
+                  ),
+                  placeholder: (context, url) => Container(
+                    height: 200,
+                    color: Colors.white
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  fit: BoxFit.cover,
+                ),
                 TextButton(
                   onPressed: () => _openCollectionSheet(context),
                   child: const Text(

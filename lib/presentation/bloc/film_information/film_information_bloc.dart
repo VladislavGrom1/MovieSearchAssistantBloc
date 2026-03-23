@@ -45,27 +45,45 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   Future<void> _getFilmInformation(GetFilmInformation event, Emitter emit) async{
     emit(FilmLoading());
     try{
+      
       final FilmEntity? savedFilmInformation;
       List<String> collectionIds;
-      (savedFilmInformation, collectionIds) = await getSavedFilmUseCase.call(event.idFilm);
-      // TODO: Реализовать загрузку изображений с локального хранилища сначала
-      final FilmImagesEntity? filmImages = await getFilmImagesUseCase.call(event.idFilm);
-      
-      if(savedFilmInformation != null) {
-        emit(FilmLoaded(film: savedFilmInformation, filmImages: filmImages, collectionIds: collectionIds));
-      } else{
-        final FilmEntity? filmInformation;
-        (filmInformation, collectionIds) = await getFilmInformationUseCase.call(event.idFilm);
-        if(filmInformation != null) {
-          emit(FilmLoaded(film: filmInformation, filmImages: filmImages, collectionIds: collectionIds));
-          await _collectionIdsSubscription?.cancel();
-          _collectionIdsSubscription = watchLinksByFilmUseCase(event.idFilm).listen((collectionIds) {
-            add(UpdateFilmLinks(updatedCollectionIds: collectionIds));
-          });
-        } else{
-          emit(FilmFailure("Не удалось получить информацию о фильме"));
-        }
+
+      final results = await Future.wait([
+        getSavedFilmUseCase.call(event.idFilm),
+        getFilmImagesUseCase.call(event.idFilm),
+      ]);
+
+      (savedFilmInformation, collectionIds) = results[0] as (FilmEntity?, List<String>);
+      final filmImages = results[1] as FilmImagesEntity?;
+
+      FilmEntity? film;
+
+      if (savedFilmInformation != null) {
+        film = savedFilmInformation;
+      } else {
+        final (filmInformation, ids) = await getFilmInformationUseCase.call(event.idFilm);
+        film = filmInformation;
+        collectionIds = ids;
       }
+
+      if (film == null) {
+        emit(FilmFailure("Не удалось получить информацию о фильме"));
+        return;
+      }
+
+      emit(FilmLoaded(
+        film: film,
+        filmImages: filmImages,
+        collectionIds: collectionIds,
+      ));
+
+      await _collectionIdsSubscription?.cancel();
+      _collectionIdsSubscription = watchLinksByFilmUseCase(event.idFilm).listen(
+        (collectionIds) {
+          add(UpdateFilmLinks(updatedCollectionIds: collectionIds));
+        },
+      );
 
     } on RemoteDataSourceException catch(e){
       emit(FilmFailure(e.exceptionType.name));

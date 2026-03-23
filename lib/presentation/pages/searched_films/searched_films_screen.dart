@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
+import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_cache_manager.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
@@ -166,6 +168,7 @@ class _FilmsList extends StatelessWidget {
     final films = state.searchedFilms;
 
     return ListView.separated(
+      physics: const BouncingScrollPhysics(),
       controller: controller,
       itemCount: films.length + (state.isLoadingMore ? 1 : 0),
       separatorBuilder: (_, __) => SizedBox(height: 12.h),
@@ -179,7 +182,7 @@ class _FilmsList extends StatelessWidget {
 
         final film = films[index];
 
-        return _FilmCard(film: film);
+        return RepaintBoundary(child: _FilmCard(film: film));
       },
     );
   }
@@ -215,14 +218,7 @@ class _FilmCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 140.h,
-              width: 100.w,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.w),
-                color: Colors.purple,
-              ),
-            ),
+            _CachedImageWidget(urlImage: film.posterUrlPreview),
             SizedBox(width: 16.w),
             Expanded(
               child: Padding(
@@ -252,5 +248,31 @@ class _FilmCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _CachedImageWidget extends StatelessWidget {
+  final String? urlImage;
+
+  const _CachedImageWidget({
+    required this.urlImage
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16.w),
+      child: CachedNetworkImage(
+        imageUrl: urlImage ?? '',
+        cacheManager: FilmImageCacheManager.instance,
+        memCacheHeight: 200,
+        memCacheWidth: 200,
+        fit: BoxFit.fill,
+        height: 140.h,
+        width: 100.w,
+        placeholder: (context, url) => Container(color: Colors.grey[200]),
+        errorWidget: (context, url, error) => const Icon(Icons.error),
+        ),
+      );
   }
 }

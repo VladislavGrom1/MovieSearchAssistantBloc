@@ -8,7 +8,7 @@ import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_ca
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
-import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_cubit/selection_cubit.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_films_cubit/selection_films_cubit.dart';
 
 @RoutePage()
 class CollectionFilmsScreen extends StatelessWidget {

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_cache_manager.dart';
@@ -24,7 +22,6 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     emit(UserProfileLoading());
     await FilmImageCacheManager.clearCache();
     final sizeMB = await FilmImageCacheManager.getCacheSizeInMB();
-    log(sizeMB.toString());
     emit(CacheSizeLoaded(sizeMB: sizeMB));
   }
 }

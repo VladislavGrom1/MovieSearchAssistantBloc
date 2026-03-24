@@ -168,6 +168,8 @@ class _FilmsList extends StatelessWidget {
     final films = state.searchedFilms;
 
     return ListView.separated(
+      addAutomaticKeepAlives: false,
+      addSemanticIndexes: false,
       physics: const BouncingScrollPhysics(),
       controller: controller,
       itemCount: films.length + (state.isLoadingMore ? 1 : 0),
@@ -182,7 +184,7 @@ class _FilmsList extends StatelessWidget {
 
         final film = films[index];
 
-        return RepaintBoundary(child: _FilmCard(film: film));
+        return _FilmCard(film: film);
       },
     );
   }
@@ -262,17 +264,19 @@ class _CachedImageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.w),
-      child: CachedNetworkImage(
-        imageUrl: urlImage ?? '',
-        cacheManager: FilmImageCacheManager.instance,
-        memCacheHeight: 200,
-        memCacheWidth: 200,
-        fit: BoxFit.fill,
-        height: 140.h,
-        width: 100.w,
-        placeholder: (context, url) => Container(color: Colors.grey[200]),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-        ),
+      child: RepaintBoundary(
+        child: CachedNetworkImage(
+          imageUrl: urlImage ?? '',
+          cacheManager: FilmImageCacheManager.instance,
+          memCacheHeight: 140,
+          memCacheWidth: 100,
+          fit: BoxFit.fill,
+          height: 140.h,
+          width: 100.w,
+          placeholder: (context, url) => Container(color: Colors.grey[200]),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
+          ),
+      ),
       );
   }
 }

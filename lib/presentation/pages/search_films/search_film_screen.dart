@@ -149,9 +149,11 @@ class _CollectionFilmsList extends StatelessWidget {
     List<FilmEntity> filmEntityList = filmCollectionsMap![filmCollectionsName]!;
 
     return ListView.separated(
+        addAutomaticKeepAlives: false,
+        addSemanticIndexes: false,
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) => RepaintBoundary(child: _FilmCard(film: filmEntityList[index])),
+        itemBuilder: (context, index) => _FilmCard(film: filmEntityList[index]),
         separatorBuilder: (context, index) => SizedBox(width: 12.w),
         itemCount: min(filmCollectionsMap![filmCollectionsName]!.length, 10));
   }
@@ -214,17 +216,19 @@ class _CachedImageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.w),
-      child: CachedNetworkImage(
-        imageUrl: urlImage ?? '',
-        cacheManager: FilmImageCacheManager.instance,
-        memCacheHeight: 300,
-        memCacheWidth: 200,
-        fit: BoxFit.cover,
-        width: 100.w,
-        height: 140.h,
-        placeholder: (context, url) => Container(color: Colors.grey[200]),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-        ),
+      child: RepaintBoundary(
+        child: CachedNetworkImage(
+          imageUrl: urlImage ?? '',
+          cacheManager: FilmImageCacheManager.instance,
+          memCacheWidth: 100,
+          memCacheHeight: 140,
+          fit: BoxFit.cover,
+          width: 100.w,
+          height: 140.h,
+          placeholder: (context, url) => Container(color: Colors.grey[200]),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
+          ),
+      ),
       );
   }
 }

@@ -8,30 +8,31 @@ import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_ca
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_cubit/selection_cubit.dart';
 
 @RoutePage()
 class CollectionFilmsScreen extends StatelessWidget {
-  const CollectionFilmsScreen({
-    super.key,
-    @PathParam('collectionId') required this.collectionId,
-    @PathParam('collectionName') required this.collectionName
-  });
+  const CollectionFilmsScreen(
+      {super.key,
+      @PathParam('collectionId') required this.collectionId,
+      @PathParam('collectionName') required this.collectionName});
 
   final String collectionId;
   final String collectionName;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (_) => getIt<CollectionFilmsBloc>()..add(GetSavedFilms(collectionId: collectionId)),
-        child: _CollectionFilmsView(collectionName: collectionName));
+    return MultiBlocProvider(providers: [
+      BlocProvider(create: (_) => getIt<CollectionFilmsBloc>()..add(GetSavedFilms(collectionId: collectionId))),
+      BlocProvider(create: (_) => getIt<SelectionFilmsCubit>()),
+    ], child: _CollectionFilmsView(collectionName: collectionName));
   }
 }
 
+// TODO: если выбрано 2 фильма и удалить 1 фильм из коллекции, то в multiselect будет отображаться "выбрано 2 фильма" а не "1"
+
 class _CollectionFilmsView extends StatelessWidget {
-  const _CollectionFilmsView({
-    required this.collectionName
-  });
+  const _CollectionFilmsView({required this.collectionName});
 
   final String collectionName;
 
@@ -40,7 +41,56 @@ class _CollectionFilmsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(collectionName, style: TextStyle(color: Colors.white)),
+        title: BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
+          builder: (context, state) {
+            if (!state.isSelectionMode) {
+              return Text(collectionName, style: TextStyle(color: Colors.white));
+            } 
+            return Text("Выбрано: ${state.selectedFilmIds.length}", style: TextStyle(color: Colors.white));
+          },
+        ),
+        actions: [
+          BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
+            builder: (context, selectionFilmsState) {
+              if (!selectionFilmsState.isSelectionMode) {
+                return SizedBox();
+              } 
+              final collectionFilmsState = context.read<CollectionFilmsBloc>().state;
+              return Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.select_all),
+                    onPressed: () {
+                      if (collectionFilmsState is CollectionFilmsLoaded) {
+                        if (selectionFilmsState.selectedFilmIds.length ==
+                            collectionFilmsState.savedFilms.length) {
+                          context.read<SelectionFilmsCubit>().clear();
+                        } else {
+                          context.read<SelectionFilmsCubit>().selectAll(collectionFilmsState.savedFilms.map((e) => e.kinopoiskId!).toList());
+                        }
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      if (collectionFilmsState is CollectionFilmsLoaded) {
+                        final selected = selectionFilmsState.selectedFilmIds;
+                        for (final film in collectionFilmsState.savedFilms) {
+                          if (selected.contains(film.kinopoiskId)) {
+                            context.read<CollectionFilmsBloc>().add(RemoveFilm(film: film, collectionId: collectionFilmsState.collectionId),
+                            );
+                          }
+                        }
+                        context.read<SelectionFilmsCubit>().clear();
+                      }
+                    },
+                  )
+                ],
+              );
+            },
+          )
+        ],
       ),
       body: SafeArea(
           child: Padding(
@@ -73,11 +123,8 @@ class _CollectionFilmsView extends StatelessWidget {
 class _CollectionFilmsList extends StatelessWidget {
   final List<FilmEntity> savedFilms;
   final String collectionId;
-  
-  const _CollectionFilmsList({
-    required this.savedFilms,
-    required this.collectionId
-  });
+
+  const _CollectionFilmsList({required this.savedFilms, required this.collectionId});
 
   @override
   Widget build(BuildContext context) {
@@ -88,15 +135,15 @@ class _CollectionFilmsList extends StatelessWidget {
     }
 
     return ListView.separated(
+        addAutomaticKeepAlives: false,
+        addSemanticIndexes: false,
         physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
           final savedFilm = savedFilms[index];
-          return RepaintBoundary(
-            child: _FilmCard(
+          return _FilmCard(
               savedFilm: savedFilm,
               collectionId: collectionId,
               collectionFilmsBloc: collectionFilmsBloc,
-            ),
           );
         },
         separatorBuilder: (context, index) => SizedBox(height: 12.h),
@@ -109,13 +156,12 @@ class _FilmCard extends StatelessWidget {
   final String collectionId;
   final CollectionFilmsBloc collectionFilmsBloc;
 
-  const _FilmCard({
-    required this.savedFilm,
-    required this.collectionId,
-    required this.collectionFilmsBloc
-  });
+  const _FilmCard(
+      {required this.savedFilm,
+      required this.collectionId,
+      required this.collectionFilmsBloc});
 
-  void onRemove(){
+  void onRemove() {
     collectionFilmsBloc.add(RemoveFilm(film: savedFilm, collectionId: collectionId));
   }
 
@@ -123,10 +169,19 @@ class _FilmCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.router.push(FilmInformationRoute(
-          filmId: savedFilm.kinopoiskId!, 
-          filmName: savedFilm.nameRu ?? savedFilm.nameOriginal.toString()
-        ));
+        final selectionFilmsCubit = context.read<SelectionFilmsCubit>();
+        final selectionFilmsState = selectionFilmsCubit.state;
+
+        if (selectionFilmsState.isSelectionMode) {
+          selectionFilmsCubit.toggle(savedFilm.kinopoiskId!);
+        } else {
+          context.router.push(FilmInformationRoute(
+              filmId: savedFilm.kinopoiskId!,
+              filmName: savedFilm.nameRu ?? savedFilm.nameOriginal.toString()));
+        }
+      },
+      onLongPress: () {
+        context.read<SelectionFilmsCubit>().enterSelection(savedFilm.kinopoiskId!);
       },
       child: Card(
         color: Colors.grey,
@@ -160,16 +215,28 @@ class _FilmCard extends StatelessWidget {
                     : "${savedFilm.countries.toString()}, ${savedFilm.year}"),
                 SizedBox(height: 10.h)
               ],
-            )
-            ),
-            PopupMenuButton(
-              icon: Icon(Icons.more_vert, color: Colors.purple),
-              onSelected: (value) {
-                if(value == "removeFilm") onRemove();
+            )),
+            BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
+              builder: (context, state) {
+                if (!state.isSelectionMode) {
+                  return PopupMenuButton(
+                      icon: Icon(Icons.more_vert, color: Colors.purple),
+                      onSelected: (value) {
+                        if (value == "removeFilm") onRemove();
+                      },
+                      itemBuilder: (_) => const [
+                            PopupMenuItem(
+                                value: 'removeFilm',
+                                child: Text("Удалить фильм")),
+                          ]);
+                }
+                final isSelected = state.selectedFilmIds.contains(savedFilm.kinopoiskId!);
+                return Checkbox(
+                    value: isSelected,
+                    onChanged: (_) {
+                      context.read<SelectionFilmsCubit>().toggle(savedFilm.kinopoiskId!);
+                    });
               },
-              itemBuilder: (_) => const [
-                PopupMenuItem(value: 'removeFilm', child: Text("Удалить фильм")),
-              ]
             )
           ],
         ),
@@ -181,25 +248,25 @@ class _FilmCard extends StatelessWidget {
 class _CachedImageWidget extends StatelessWidget {
   final String? urlImage;
 
-  const _CachedImageWidget({
-    required this.urlImage
-  });
+  const _CachedImageWidget({required this.urlImage});
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.w),
-      child: CachedNetworkImage(
-        imageUrl: urlImage ?? '',
-        cacheManager: FilmImageCacheManager.instance,
-        memCacheHeight: 200,
-        memCacheWidth: 200,
-        fit: BoxFit.fill,
-        height: 140.h,
-        width: 100.w,
-        placeholder: (context, url) => Container(color: Colors.grey[200]),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
+      child: RepaintBoundary(
+        child: CachedNetworkImage(
+          imageUrl: urlImage ?? '',
+          cacheManager: FilmImageCacheManager.instance,
+          memCacheHeight: 140,
+          memCacheWidth: 100,
+          fit: BoxFit.fill,
+          height: 140.h,
+          width: 100.w,
+          placeholder: (context, url) => Container(color: Colors.grey[200]),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
         ),
-      );
+      ),
+    );
   }
 }

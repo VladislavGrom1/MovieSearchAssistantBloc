@@ -37,6 +37,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_us
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collection_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_cubit/selection_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/filter_film/filter_film_bloc.dart';
@@ -120,4 +121,7 @@ Future<void> initializeDependencies() async {
       watchFilmsUseCase: getIt()
     ));
     getIt.registerFactory(() => UserProfileBloc());
+
+    // Cubit
+    getIt.registerFactory(() => SelectionFilmsCubit());
 }

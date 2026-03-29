@@ -10,6 +10,7 @@ import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_ca
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/search_films/widgets/custom_search_bar.dart';
 
@@ -19,8 +20,15 @@ class SearchFilmScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<SearchFilmsBloc>()..add(DisplayFilmCollections()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => getIt<SearchFilmsBloc>()..add(DisplayFilmCollections()),
+        ),
+        BlocProvider(
+          create: (_) => getIt<WatchFilmCollectionLinksCubit>(),
+        ),
+      ],
       child: _SearchFilmView(),
     );
   }
@@ -54,11 +62,14 @@ class _SearchFilmView extends StatelessWidget {
                         }
 
                         if (state is CollectionsFilmsLoadedFailure) {
-                          return Center(child: Text("${state.exceptionType} ${state.statusCode}"));
+                          return Center(
+                              child: Text(
+                                  "${state.exceptionType} ${state.statusCode}"));
                         }
 
                         if (state is CollectionsFilmsLoadedSuccessful) {
-                          return _SearchFilmContent(filmCollectionsMap: state.filmCollectionsMap);
+                          return _SearchFilmContent(
+                              filmCollectionsMap: state.filmCollectionsMap);
                         }
                         return SizedBox();
                       },
@@ -79,7 +90,8 @@ class _SearchFilmContent extends StatelessWidget {
   const _SearchFilmContent({required this.filmCollectionsMap});
 
   void onSearchSubmitted(String keyword, BuildContext context) {
-    context.router.push(SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
+    context.router.push(
+        SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
   }
 
   void onFilterSubmitted(BuildContext context) {
@@ -91,9 +103,12 @@ class _SearchFilmContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        CustomSearchBar(onSearchSubmitted: onSearchSubmitted, onFilterSubmitted: onFilterSubmitted),
+        CustomSearchBar(
+            onSearchSubmitted: onSearchSubmitted,
+            onFilterSubmitted: onFilterSubmitted),
         SizedBox(height: 10.h),
-        Expanded(child: _CollectionsList(filmCollectionsMap: filmCollectionsMap)),
+        Expanded(
+            child: _CollectionsList(filmCollectionsMap: filmCollectionsMap)),
       ],
     );
   }
@@ -126,7 +141,9 @@ class _CollectionsList extends StatelessWidget {
               ),
               SizedBox(
                   height: 185.h,
-                  child: _CollectionFilmsList(filmCollectionsMap: filmCollectionsMap, filmCollectionsName: filmCollectionsNamesList[index]))
+                  child: _CollectionFilmsList(
+                      filmCollectionsMap: filmCollectionsMap,
+                      filmCollectionsName: filmCollectionsNamesList[index]))
             ],
           );
         },
@@ -139,78 +156,84 @@ class _CollectionFilmsList extends StatelessWidget {
   final Map<String, List<FilmEntity>?>? filmCollectionsMap;
   final String filmCollectionsName;
 
-  const _CollectionFilmsList({
-    required this.filmCollectionsMap, 
-    required this.filmCollectionsName
-  });
+  const _CollectionFilmsList(
+      {required this.filmCollectionsMap, required this.filmCollectionsName});
 
   @override
   Widget build(BuildContext context) {
     List<FilmEntity> filmEntityList = filmCollectionsMap![filmCollectionsName]!;
 
-    return ListView.separated(
-        addAutomaticKeepAlives: false,
-        addSemanticIndexes: false,
-        physics: const BouncingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) => _FilmCard(film: filmEntityList[index]),
-        separatorBuilder: (context, index) => SizedBox(width: 12.w),
-        itemCount: min(filmCollectionsMap![filmCollectionsName]!.length, 10));
+    return BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
+      builder: (context, savedFilmIds) {
+        return ListView.separated(
+            addAutomaticKeepAlives: false,
+            addSemanticIndexes: false,
+            physics: const BouncingScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (context, index) {
+              final film = filmEntityList[index];
+              final isSaved = savedFilmIds.contains(film.kinopoiskId);
+              return _FilmCard(film: film, isSaved: isSaved);
+            },
+            separatorBuilder: (context, index) => SizedBox(width: 12.w),
+            itemCount: min(filmCollectionsMap![filmCollectionsName]!.length, 10));
+      },
+    );
   }
 }
 
 class _FilmCard extends StatelessWidget {
   final FilmEntity film;
-  const _FilmCard({required this.film});
+  final bool isSaved;
+  
+  const _FilmCard({required this.film, required this.isSaved});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-            onTap: () {
-              if (film.kinopoiskId != null) {
-                context.router.push(FilmInformationRoute(
-                    filmId: film.kinopoiskId!,
-                    filmName: film.nameRu ?? film.nameOriginal.toString()
-                  ));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Не удалось получить информацию о фильме"),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _CachedImageWidget(urlImage: film.posterUrlPreview),
-                SizedBox(height: 5.h),
-                SizedBox(
-                  width: 96.w,
-                  child: Text(
-                    film.nameRu!,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 3,
-                    style: TextStyle(
-                        fontSize: 11,
-                        height: 11 / 9,
-                        letterSpacing: 0,
-                        fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
+      onTap: () {
+        if (film.kinopoiskId != null) {
+          context.router.push(FilmInformationRoute(
+              filmId: film.kinopoiskId!,
+              filmName: film.nameRu ?? film.nameOriginal.toString()));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Не удалось получить информацию о фильме"),
+              backgroundColor: Colors.red,
             ),
           );
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CachedImageWidget(urlImage: film.posterUrlPreview),
+          SizedBox(height: 5.h),
+          Container(
+            width: 96.w,
+            color: isSaved ? Colors.green : Colors.white,
+            child: Text(
+              film.nameRu!,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 3,
+              style: TextStyle(
+                  fontSize: 11,
+                  height: 11 / 9,
+                  letterSpacing: 0,
+                  fontWeight: FontWeight.bold),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
 
 class _CachedImageWidget extends StatelessWidget {
   final String? urlImage;
 
-  const _CachedImageWidget({
-    required this.urlImage
-  });
+  const _CachedImageWidget({required this.urlImage});
 
   @override
   Widget build(BuildContext context) {
@@ -227,8 +250,8 @@ class _CachedImageWidget extends StatelessWidget {
           height: 140.h,
           placeholder: (context, url) => Container(color: Colors.grey[200]),
           errorWidget: (context, url, error) => const Icon(Icons.error),
-          ),
+        ),
       ),
-      );
+    );
   }
 }

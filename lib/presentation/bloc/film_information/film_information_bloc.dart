@@ -10,7 +10,8 @@ import 'package:movie_search_assistant_bloc/domain/usecases/get_film_images_use_
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_information_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_saved_film_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_collection_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/update_saved_film_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/update_rating_film_information_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/update_saved_film_from_server_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
 
 part 'film_information_event.dart';
@@ -21,7 +22,8 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   final GetSavedFilmUseCase getSavedFilmUseCase;
   final GetFilmImagesUseCase getFilmImagesUseCase;
   final AddFilmToCollectionUseCase addFilmToCollectionUseCase;
-  final UpdateSavedFilmUseCase updateSavedFilmUseCase;
+  final UpdateSavedFilmFromServerUseCase updateSavedFilmUseCase;
+  final UpdateRatingFilmInformationUseCase updateRatingFilmInformationUseCase;
   final RemoveFilmFromCollectionUseCase removeFilmFromCollectionUseCase;
   final WatchLinksByFilmUseCase watchLinksByFilmUseCase;
   StreamSubscription<List<String>>? _collectionIdsSubscription;
@@ -32,6 +34,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     required this.getFilmImagesUseCase,
     required this.addFilmToCollectionUseCase,
     required this.updateSavedFilmUseCase,
+    required this.updateRatingFilmInformationUseCase,
     required this.removeFilmFromCollectionUseCase,
     required this.watchLinksByFilmUseCase
     }) : super(FilmInitial()) {
@@ -39,6 +42,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     on<AddFilmToCollection>(_addFilmToCollection);
     on<RemoveFilmFromCollection>(_removeFilmFromCollection);
     on<UpdateFilmLinks>(_updateFilmLinks);
+    on<UpdateFilmUserRating>(_updateFilmUserRating);
     on<RefreshFilmInformation>(_refreshFilmInformation);
   }
 
@@ -136,6 +140,21 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     }
   }
 
+  Future<void> _updateFilmUserRating(UpdateFilmUserRating event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! FilmLoaded) return;
+    try{
+      final filmWithUpdatedRating = await updateRatingFilmInformationUseCase.call(currentState.film, event.userRating);
+      emit(FilmLoaded(film: filmWithUpdatedRating, filmImages: currentState.filmImages, collectionIds: currentState.collectionIds));
+    } on LocalDataSourceException catch(e){
+      emit(FilmActionFailure(message: e.message));
+      emit(currentState);
+    } catch(e){
+      emit(FilmActionFailure(message: "Не удалось обновить пользовательский рейтинг"));
+      emit(currentState);
+    }
+  }
+
   Future<void> _refreshFilmInformation(RefreshFilmInformation event, Emitter emit) async {
     final currentState = state;
     try{
@@ -163,7 +182,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
           emit(currentState);
         }
       }
-    } on LocalDataSourceException catch(e){
+    } on LocalDataSourceException {
       emit(FilmActionFailure(message: "Не удалось обновить информацию о фильме"));
       emit(currentState);
     } catch(e){

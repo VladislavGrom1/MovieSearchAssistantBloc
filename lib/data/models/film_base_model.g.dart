@@ -30,7 +30,7 @@ class FilmBaseModelAdapter extends TypeAdapter<FilmBaseModel> {
       posterUrl: fields[10] as String?,
       posterUrlPreview: fields[11] as String?,
       userComment: fields[12] as String?,
-      userRating: fields[13] as double?,
+      userRating: fields[13] as int?,
     );
   }
 

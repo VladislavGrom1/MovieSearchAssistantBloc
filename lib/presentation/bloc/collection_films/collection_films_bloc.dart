@@ -5,7 +5,7 @@ import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exc
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_saved_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_collection_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/watch_collection_films_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_collection_use_case.dart';
 
 part 'collection_films_event.dart';
 part 'collection_films_state.dart';
@@ -13,7 +13,7 @@ part 'collection_films_state.dart';
 class CollectionFilmsBloc extends Bloc<CollectionFilmsEvent, CollectionFilmsState> {
   final GetSavedFilmsUseCase getSavedFilmsUseCase;
   final RemoveFilmFromCollectionUseCase removeFilmFromCollectionUseCase;
-  final WatchCollectionFilmsUseCase watchFilmsUseCase;
+  final WatchLinksByCollectionUseCase watchFilmsUseCase;
   StreamSubscription? _savedFilmsSubscription;
 
   CollectionFilmsBloc({

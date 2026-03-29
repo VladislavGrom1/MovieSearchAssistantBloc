@@ -14,8 +14,6 @@ class AddFilmToCollectionUseCase {
     required this.filmCollectionRepository
   });
 
-  // TODO: Реализовать добавление рейтинга/комментария при первом сохранении фильма
-
   Future<FilmEntity> call(FilmEntity film, String collectionId) async {
     try{
       final idFilm = film.kinopoiskId!;

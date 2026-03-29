@@ -7,56 +7,44 @@ sealed class SearchedFilmsEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class DisplaySearchedFilterFilms extends SearchedFilmsEvent{
+class LoadSearchedFilms extends SearchedFilmsEvent{
+  final String? nameCollection;
   final String? keyword;
   final List<int>? countries;
   final List<int>? genres;
   final int? yearFrom;
   final int? yearTo;
   final int page;
-
-  const DisplaySearchedFilterFilms({
+  
+  const LoadSearchedFilms({
+    this.nameCollection,
     this.keyword,
     this.countries,
     this.genres,
     this.yearFrom,
     this.yearTo,
-    required this.page
+    this.page = 1
   });
 }
 
-class DisplaySearchedCollectionFilms extends SearchedFilmsEvent{
-  final String nameCollection;
-  final int page;
-
-  const DisplaySearchedCollectionFilms({
-    required this.nameCollection,
-    required this.page
-  });
-}
-
-class LoadNextSearchedFilterFilmsPage extends SearchedFilmsEvent {
+class LoadNextPage extends SearchedFilmsEvent {
+  final String? nameCollection;
   final String? keyword;
   final List<int>? countries;
   final List<int>? genres;
   final int? yearFrom;
   final int? yearTo;
 
-  const LoadNextSearchedFilterFilmsPage({
+  const LoadNextPage({
+    this.nameCollection,
     this.keyword,
     this.countries,
     this.genres,
     this.yearFrom,
     this.yearTo,
-  });
-}
-
-class LoadNextSearchedCollectionFilmsPage extends SearchedFilmsEvent {
-  final String nameCollection;
-
-  const LoadNextSearchedCollectionFilmsPage({
-    required this.nameCollection,
   });
 }
 
 class RefreshFilmsPage extends SearchedFilmsEvent{}
+
+

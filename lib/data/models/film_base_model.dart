@@ -18,7 +18,7 @@ class FilmBaseModel {
   @HiveField(10) String? posterUrl;
   @HiveField(11) String? posterUrlPreview;
   @HiveField(12) String? userComment;
-  @HiveField(13) double? userRating;
+  @HiveField(13) int? userRating;
 
   FilmBaseModel({
     this.kinopoiskId,

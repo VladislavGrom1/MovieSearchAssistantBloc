@@ -18,7 +18,7 @@ class FilmEntity extends Equatable {
   final String? posterUrl;
   final String? posterUrlPreview;
   final String? userComment;
-  final double? userRating;
+  final int? userRating;
   // FilmDetailInformation
   final String? kinopoiskHDId;
   final String? imdbId;
@@ -121,7 +121,7 @@ class FilmEntity extends Equatable {
     String? posterUrl,
     String? posterUrlPreview,
     String? userComment,
-    double? userRating,
+    int? userRating,
     // FilmDetailInformation
     String? kinopoiskHDId,
     String? imdbId,

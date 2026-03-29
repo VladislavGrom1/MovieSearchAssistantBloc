@@ -12,139 +12,128 @@ part 'searched_films_state.dart';
 class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
   final SearchFilterFilmsUseCase searchFilterFilmsUseCase;
   final SearchCollectionFilmsUseCase searchCollectionFilmsUseCase;
-  int currentPage;
-  bool hasReachedMax; 
+
+  int currentPage = 1;
+  bool hasReachedMax = false;
+  LoadSearchedFilms? _lastQuery; 
 
   SearchedFilmsBloc({
     required this.searchFilterFilmsUseCase,
     required this.searchCollectionFilmsUseCase,
-    this.currentPage = 1,
-    this.hasReachedMax = false
     }) : super(SearchedFilmsInitial()) {
-    on<DisplaySearchedFilterFilms>(_displaySearchedFilterFilms);
-    on<DisplaySearchedCollectionFilms>(_displaySearchedCollectionFilms);
-    on<LoadNextSearchedFilterFilmsPage>(_loadNextSearchedFilmsPage);
-    on<LoadNextSearchedCollectionFilmsPage>(_loadNextCollectionFilmsPage);
+    on<LoadSearchedFilms>(_onLoadSearchedFilms);
+    on<LoadNextPage>(_onLoadNextPage);
+    on<RefreshFilmsPage>(_onRefreshFilmsPage);
   }
 
-  Future<void> _displaySearchedFilterFilms(DisplaySearchedFilterFilms event, Emitter emit) async{
+  Future<void> _onLoadSearchedFilms(LoadSearchedFilms event, Emitter emit) async {
     emit(SearchedFilmsLoading());
 
     currentPage = 1;
     hasReachedMax = false;
+    _lastQuery = event;
 
-    emit(SearchedFilmsLoadedSuccessful(
-        searchedFilms: [],
-        isLoadingMore: false,
-        hasReachedMax: false,
-      ),
-    );
+    try {
+      final films = await _fetchFilms(event, page: currentPage);
 
-    try{
-      List<FilmEntity>? filterFilms = await searchFilterFilmsUseCase.call(
-        event.keyword, 
-        event.countries, 
-        event.genres, 
-        event.yearFrom, 
-        event.yearTo, 
-        event.page
-      );
-      if(filterFilms != null && filterFilms.isNotEmpty){
-        emit(SearchedFilmsLoadedSuccessful(searchedFilms: filterFilms));
-      } else{
-        emit(SearchedFilmsLoadedFailure(exceptionType: "По запросу ничего не найдено"));
+      if (films.isEmpty) {
+        emit(SearchedFilmsLoadedFailure(
+          exceptionType: "Ничего не найдено",
+        ));
+      } else {
+        emit(SearchedFilmsLoadedSuccessful(
+          searchedFilms: films,
+          isLoadingMore: false,
+          hasReachedMax: false,
+        ));
       }
-    } on RemoteDataSourceException catch(e){
-      emit(SearchedFilmsLoadedFailure(exceptionType: e.exceptionType.name, statusCode: e.statusCode));
-    } on LocalDataSourceException catch(e){
-      emit(SearchedFilmsLoadedFailure(exceptionType: e.message));
-    } catch(e){
-      emit(SearchedFilmsLoadedFailure(exceptionType: "Неизвестная ошибка"));
+
+    } on RemoteDataSourceException catch (e) {
+      emit(SearchedFilmsLoadedFailure(
+        exceptionType: e.exceptionType.name,
+        statusCode: e.statusCode,
+      ));
+    } on LocalDataSourceException catch (e) {
+      emit(SearchedFilmsLoadedFailure(
+        exceptionType: e.message,
+      ));
+    } catch (e) {
+      emit(SearchedFilmsLoadedFailure(
+        exceptionType: "Неизвестная ошибка",
+      ));
     }
   }
 
-  Future<void> _displaySearchedCollectionFilms(DisplaySearchedCollectionFilms event, Emitter emit) async{
-    emit(SearchedFilmsLoading());
-
-    currentPage = 1;
-    hasReachedMax = false;
-
-    try{
-      List<FilmEntity>? collectionFilms = await searchCollectionFilmsUseCase.call(
-        event.nameCollection,
-        event.page,
-      );
-      if(collectionFilms != null){
-        emit(SearchedFilmsLoadedSuccessful(searchedFilms: collectionFilms));
-      } else{
-        emit(SearchedFilmsLoadedFailure(exceptionType: "По запросу ничего не найдено"));
-      }
-    } on RemoteDataSourceException catch(e){
-      emit(SearchedFilmsLoadedFailure(exceptionType: e.exceptionType.name, statusCode: e.statusCode));
-    } on LocalDataSourceException catch(e){
-      emit(SearchedFilmsLoadedFailure(exceptionType: e.message));
-    } catch(e){
-      emit(SearchedFilmsLoadedFailure(exceptionType: "Неизвестная ошибка"));
-    }
-  }
-
-  Future<void> _loadNextSearchedFilmsPage(LoadNextSearchedFilterFilmsPage event, Emitter emit) async {
+  Future<void> _onLoadNextPage(LoadNextPage event, Emitter emit) async {
     final currentState = state;
-    if (currentState is !SearchedFilmsLoadedSuccessful ||
+
+    if (currentState is! SearchedFilmsLoadedSuccessful ||
         currentState.isLoadingMore ||
         currentState.hasReachedMax) {
-      return;
-    }
+        return;
+    } 
+
     emit(currentState.copyWith(isLoadingMore: true));
+
     currentPage++;
 
-    final newFilms = await searchFilterFilmsUseCase.call(
-      event.keyword,
-      event.countries,
-      event.genres,
-      event.yearFrom,
-      event.yearTo,
-      currentPage,
-    );
+    try {
+      final films = await _fetchFilms(_lastQuery!, page: currentPage);
 
-    if (newFilms == null || newFilms.isEmpty) {
+      if (films.isEmpty) {
+        emit(currentState.copyWith(
+          isLoadingMore: false,
+          hasReachedMax: true,
+        ));
+      } else {
+        emit(currentState.copyWith(
+          searchedFilms: [...currentState.searchedFilms, ...films],
+          isLoadingMore: false,
+        ));
+      }
+
+    } on RemoteDataSourceException {
       emit(currentState.copyWith(
         isLoadingMore: false,
-        hasReachedMax: true,
       ));
-    } else {
+    } on LocalDataSourceException {
       emit(currentState.copyWith(
-        searchedFilms: [...currentState.searchedFilms, ...newFilms],
+        isLoadingMore: false,
+      ));
+    } catch (_) {
+      emit(currentState.copyWith(
         isLoadingMore: false,
       ));
     }
   }
 
-  Future<void> _loadNextCollectionFilmsPage(LoadNextSearchedCollectionFilmsPage event, Emitter emit) async{
-    final currentState = state;
-    if (currentState is !SearchedFilmsLoadedSuccessful ||
-        currentState.isLoadingMore ||
-        currentState.hasReachedMax) {
-      return;
+  Future<void> _onRefreshFilmsPage(
+    RefreshFilmsPage event,
+    Emitter emit,
+  ) async {
+    if (_lastQuery != null) {
+      add(_lastQuery!);
     }
-    emit(currentState.copyWith(isLoadingMore: true));
-    currentPage++;
+  }
 
-    final newFilms = await searchCollectionFilmsUseCase.call(
-      event.nameCollection,
-      currentPage,
-    );
-
-    if (newFilms == null || newFilms.isEmpty) {
-      emit(currentState.copyWith(
-        isLoadingMore: false,
-        hasReachedMax: true,
-      ));
+  Future<List<FilmEntity>> _fetchFilms(
+    LoadSearchedFilms event, {
+    required int page,
+  }) async {
+    if (event.nameCollection != null) {
+      return await searchCollectionFilmsUseCase(
+        event.nameCollection!,
+        page,
+      ) ?? [];
     } else {
-      emit(currentState.copyWith(
-        searchedFilms: [...currentState.searchedFilms, ...newFilms],
-        isLoadingMore: false,
-      ));
+      return await searchFilterFilmsUseCase(
+        event.keyword,
+        event.countries,
+        event.genres,
+        event.yearFrom,
+        event.yearTo,
+        page,
+      ) ?? [];
     }
   }
 }

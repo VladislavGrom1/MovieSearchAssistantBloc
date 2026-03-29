@@ -43,6 +43,15 @@ class UpdateFilmLinks extends FilmInformationEvent {
   List<Object?> get props => [updatedCollectionIds]; 
 }
 
+class UpdateFilmUserRating extends FilmInformationEvent {
+  final int userRating;
+
+  const UpdateFilmUserRating({required this.userRating});
+
+  @override
+  List<Object?> get props => [userRating];
+}
+
 class RefreshFilmInformation extends FilmInformationEvent {
   final FilmEntity film;
 

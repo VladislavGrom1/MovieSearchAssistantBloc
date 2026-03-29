@@ -14,8 +14,4 @@ abstract class CollectionRepository {
   Future<void> removeAllCollection();
 
   Future<bool> collectionIsExist(String collectionId);
-
-  // TODO: Реализовать обновление коллекции (обновление названия коллекции)
-   // TODO: Реализовать event для обновления информации о коллекции (название, количество фильмов) 
-   // можно попробовать в UseСase добавления/удаления фильма триггерить обновление количества фильмов
 }

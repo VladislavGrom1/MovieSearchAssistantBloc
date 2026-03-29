@@ -5,11 +5,11 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_collection_re
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
-class WatchCollectionFilmsUseCase {
+class WatchLinksByCollectionUseCase {
   final FilmRepository filmRepository;
   final FilmCollectionRepository filmCollectionRepository;
 
-  WatchCollectionFilmsUseCase({
+  WatchLinksByCollectionUseCase({
     required this.filmRepository,
     required this.filmCollectionRepository
   });

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +10,7 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.d
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 
 @RoutePage()
 class FilmInformationScreen extends StatelessWidget {
@@ -33,6 +32,9 @@ class FilmInformationScreen extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => getIt<CollectionsBloc>()..add(GetCollections()),
+        ),
+        BlocProvider(
+          create: (_) => getIt<WatchFilmCollectionLinksCubit>()
         )
       ], 
       child: _FilmInformationView(
@@ -93,11 +95,11 @@ class _FilmInformationView extends StatelessWidget {
                           return Center(child: Text(state.message));
                         }
                         if (state is FilmLoaded) {
-                        return _FilmInformationContent(
-                          film: state.film,
-                          filmImages: state.filmImages,
-                          collectionIds: state.collectionIds,
-                        );
+                          return _FilmInformationContent(
+                            film: state.film,
+                            filmImages: state.filmImages,
+                            collectionIds: state.collectionIds,
+                          );
                         }
                         return const SizedBox();
                       }),
@@ -106,8 +108,7 @@ class _FilmInformationView extends StatelessWidget {
     );
   }
 
-  void _filmInformationBlocListener(
-      BuildContext context, FilmInformationState state) {
+  void _filmInformationBlocListener(BuildContext context, FilmInformationState state) {
     if (state is FilmActionFailure) {
       _showSnackBar(context, state.message, Colors.red);
     }
@@ -175,6 +176,19 @@ class _FilmInformationContent extends StatelessWidget {
                     style: TextStyle(color: Colors.purple),
                   ),
                 ),
+                BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
+                  builder: (context, savedFilmIds) {
+                    final isSaved = savedFilmIds.contains(film.kinopoiskId);
+                    if(isSaved){
+                      return TextButton(
+                        onPressed: () => _openRatingSheet(context, film.userRating),
+                        child: const Text("Оценить фильм", style: TextStyle(color: Colors.purple))
+                      );
+                    } else{
+                      return SizedBox();
+                    }
+                  },
+                ),
                 SizedBox(height: 16),
                 Text(film.nameRu ?? film.nameOriginal ?? "Без названия"),
                 SizedBox(height: 8),
@@ -210,6 +224,8 @@ class _FilmInformationContent extends StatelessWidget {
                   film.ratingImdbVoteCount,
                 ),
                 SizedBox(height: 10.h),
+                Text("Пользовательский рейтинг, ${film.userRating}"),
+                SizedBox(height: 10.h),
                 Text(filmImages?.imageUrls.toString() ?? ""),
               ],
             ),
@@ -230,6 +246,15 @@ class _FilmInformationContent extends StatelessWidget {
               ],
               child: const _CollectionPickerSheet(),
             ));
+  }
+
+  void _openRatingSheet(BuildContext context, int? currentUserRating) {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (bottomSheetContext) => BlocProvider.value(
+          value: context.read<FilmInformationBloc>(),
+          child: _RatingPickerSheet(currentUserRating: currentUserRating)));
   }
 
   String _getGenresString(List<String>? genres) {
@@ -257,6 +282,109 @@ class _FilmInformationContent extends StatelessWidget {
       return [Text(nameOriginal), SizedBox(height: 10.h)];
     }
     return [SizedBox()];
+  }
+}
+
+class _RatingPickerSheet extends StatefulWidget {
+  final int? currentUserRating;
+
+  const _RatingPickerSheet({required this.currentUserRating});
+
+  @override
+  State<_RatingPickerSheet> createState() => _RatingPickerSheetState();
+}
+
+class _RatingPickerSheetState extends State<_RatingPickerSheet> {
+  late final PageController _controller;
+  late double currentPage;
+  late int selectedRating;
+
+ @override
+  void initState() {
+    super.initState();
+    final initialPage = (widget.currentUserRating ?? 5) - 1;
+    selectedRating = widget.currentUserRating ?? 5;
+    currentPage = initialPage.toDouble();
+
+    _controller = PageController(
+      viewportFraction: 0.25,
+      initialPage: initialPage,
+    );
+
+    _controller.addListener(() {
+      setState(() {
+        currentPage = _controller.page ?? currentPage;
+        selectedRating = currentPage.round() + 1;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.28,
+      builder: (context, scrollController) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 12.h),
+            Text("Оценить", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            SizedBox(height: 20.h),
+            SizedBox(
+              height: 80.h,
+              child: PageView.builder(
+                controller: _controller,
+                physics: const PageScrollPhysics(),
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  final value = index + 1;
+                  final diff = (currentPage - index).abs();
+                  final scale = (1 - (diff * 0.3)).clamp(0.6, 1.0);
+                  final opacity = (1 - (diff * 0.5)).clamp(0.3, 1.0);
+                  return Center(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: opacity,
+                      child: Transform.scale(
+                        scale: scale,
+                        child: Text("$value",
+                          style: TextStyle(
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            color: value == selectedRating
+                                ? Colors.deepPurple
+                                : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: 20.h),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  backgroundColor: Colors.deepPurple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                onPressed: () {
+                  context.read<FilmInformationBloc>().add(UpdateFilmUserRating(userRating: selectedRating));
+                  Navigator.pop(context);
+                },
+                child: const Text("Поставить оценку", style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -309,12 +437,35 @@ class _CollectionsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
         controller: scrollController,
-        itemCount: collections.length,
+        itemCount: collections.length + 1,
         itemBuilder: (context, index) {
-          final collection = collections[index];
+          if(index == 0) {
+            return _CreateCollectionTile();
+          }
+          final collection = collections[index-1];
           final isInCollection = collectionsIds.contains(collection.id);
           return _CollectionTile(collection: collection, isInCollection: isInCollection);
         });
+  }
+}
+
+class _CreateCollectionTile extends StatelessWidget {
+  const _CreateCollectionTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text("Создать новую коллекцию"),
+        onTap: () => showDialog(
+          context: context, 
+          builder: (dialogContext) {
+            return BlocProvider.value(
+              value: context.read<CollectionsBloc>(),
+              child: const _CreateCollectionDialog(),
+            );
+          }
+        )
+    );
   }
 }
 
@@ -343,5 +494,55 @@ class _CollectionTile extends StatelessWidget {
             }
           },
     );
+  }
+}
+
+class _CreateCollectionDialog extends StatefulWidget {
+  const _CreateCollectionDialog();
+
+  @override
+  State<_CreateCollectionDialog> createState() => _CreateCollectionDialogState();
+}
+
+class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
+  final controller = TextEditingController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final collectionBloc = context.read<CollectionsBloc>();
+
+    return AlertDialog(
+          title: Text('Новая коллекция'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: 'Придумайте название',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+            onChanged: (_) => setState(() {})
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: controller.text.isEmpty
+                  ? null
+                  : () {
+                      collectionBloc.add(AddNewCollection(collectionName: controller.text));
+                      Navigator.pop(context);
+                    },
+              child: Text('Сохранить'),
+            ),
+          ],
+        );
   }
 }

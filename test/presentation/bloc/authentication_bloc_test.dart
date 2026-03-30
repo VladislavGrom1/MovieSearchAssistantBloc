@@ -1,7 +1,5 @@
 
-import 'dart:io';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
@@ -58,7 +56,7 @@ void main(){
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => <AuthenticationState>[
         AuthenticationLoading(),
-        AuthenticationFailure(exceptionType: "Информация об ApiKey отсутствует")
+        AuthenticationFailure(message: "API ключ отсутствует")
       ],
       verify: (_) {
         verify(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).called(1);
@@ -68,10 +66,7 @@ void main(){
     blocTest<AuthenticationBloc, AuthenticationState>(
       "emit AuthenticationFailure when AuthenticationUseCase rethrow RemoteDataSourceException",
       setUp: () {
-        when(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).thenThrow(RemoteDataSourceException(
-          DioExceptionType.values.first,
-          HttpStatus.badRequest
-        ));
+        when(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).thenThrow(NetworkFailure());
       },
       build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase),
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),

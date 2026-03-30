@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_cache_manager.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
@@ -62,14 +63,11 @@ class _SearchFilmView extends StatelessWidget {
                         }
 
                         if (state is CollectionsFilmsLoadedFailure) {
-                          return Center(
-                              child: Text(
-                                  "${state.exceptionType} ${state.statusCode}"));
+                          return _buildError(state.message);
                         }
 
                         if (state is CollectionsFilmsLoadedSuccessful) {
-                          return _SearchFilmContent(
-                              filmCollectionsMap: state.filmCollectionsMap);
+                          return _SearchFilmContent(filmCollectionsMap: state.filmCollectionsMap);
                         }
                         return SizedBox();
                       },
@@ -81,6 +79,20 @@ class _SearchFilmView extends StatelessWidget {
             ),
           ),
         ));
+  }
+
+  Widget _buildError(String message) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(child: Text(message)),
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -197,11 +209,9 @@ class _FilmCard extends StatelessWidget {
               filmId: film.kinopoiskId!,
               filmName: film.nameRu ?? film.nameOriginal.toString()));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Не удалось получить информацию о фильме"),
-              backgroundColor: Colors.red,
-            ),
+          Fluttertoast.showToast(
+            backgroundColor: Colors.red,
+            msg: "Не удалось получить информацию о фильме"
           );
         }
       },

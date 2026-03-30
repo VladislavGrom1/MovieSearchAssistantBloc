@@ -10,7 +10,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/get_film_images_use_
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_information_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_saved_film_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_collection_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/update_rating_film_information_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/update_user_film_information_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_saved_film_from_server_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
 
@@ -23,7 +23,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   final GetFilmImagesUseCase getFilmImagesUseCase;
   final AddFilmToCollectionUseCase addFilmToCollectionUseCase;
   final UpdateSavedFilmFromServerUseCase updateSavedFilmUseCase;
-  final UpdateRatingFilmInformationUseCase updateRatingFilmInformationUseCase;
+  final UpdateUserFilmInformationUseCase updateUserFilmInformationUseCase;
   final RemoveFilmFromCollectionUseCase removeFilmFromCollectionUseCase;
   final WatchLinksByFilmUseCase watchLinksByFilmUseCase;
   StreamSubscription<List<String>>? _collectionIdsSubscription;
@@ -34,7 +34,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     required this.getFilmImagesUseCase,
     required this.addFilmToCollectionUseCase,
     required this.updateSavedFilmUseCase,
-    required this.updateRatingFilmInformationUseCase,
+    required this.updateUserFilmInformationUseCase,
     required this.removeFilmFromCollectionUseCase,
     required this.watchLinksByFilmUseCase
     }) : super(FilmInitial()) {
@@ -42,61 +42,61 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     on<AddFilmToCollection>(_addFilmToCollection);
     on<RemoveFilmFromCollection>(_removeFilmFromCollection);
     on<UpdateFilmLinks>(_updateFilmLinks);
-    on<UpdateFilmUserRating>(_updateFilmUserRating);
+    on<UpdateUserFilmInformation>(_updateUserFilmInformation);
     on<RefreshFilmInformation>(_refreshFilmInformation);
   }
 
-  Future<void> _getFilmInformation(GetFilmInformation event, Emitter emit) async{
-    emit(FilmLoading());
-    try{
-      
-      final FilmEntity? savedFilmInformation;
-      List<String> collectionIds;
+  Future<void> _getFilmInformation(GetFilmInformation event, Emitter emit) async {
+  emit(FilmLoading());
 
-      final results = await Future.wait([
-        getSavedFilmUseCase.call(event.idFilm),
-        getFilmImagesUseCase.call(event.idFilm),
-      ]);
+  try {
+    FilmEntity? savedFilm;
+    List<String>? collectionIds; 
+    
+    (savedFilm, collectionIds) = await getSavedFilmUseCase.call(event.idFilm);
 
-      (savedFilmInformation, collectionIds) = results[0] as (FilmEntity?, List<String>);
-      final filmImages = results[1] as FilmImagesEntity?;
+    FilmImagesEntity? filmImages;
 
-      FilmEntity? film;
-
-      if (savedFilmInformation != null) {
-        film = savedFilmInformation;
-      } else {
-        final (filmInformation, ids) = await getFilmInformationUseCase.call(event.idFilm);
-        film = filmInformation;
-        collectionIds = ids;
-      }
-
-      if (film == null) {
-        emit(FilmFailure("Не удалось получить информацию о фильме"));
-        return;
-      }
-
-      emit(FilmLoaded(
-        film: film,
-        filmImages: filmImages,
-        collectionIds: collectionIds,
-      ));
-
-      await _collectionIdsSubscription?.cancel();
-      _collectionIdsSubscription = watchLinksByFilmUseCase(event.idFilm).listen(
-        (collectionIds) {
-          add(UpdateFilmLinks(updatedCollectionIds: collectionIds));
-        },
-      );
-
-    } on RemoteDataSourceException catch(e){
-      emit(FilmFailure(e.exceptionType.name));
-    } on LocalDataSourceException catch(e){
-      emit(FilmFailure(e.message));
-    } catch(e){
-      emit(FilmFailure(e.toString()));
+    try {
+      filmImages = await getFilmImagesUseCase.call(event.idFilm);
+    } catch (_) {
+      filmImages = null;
     }
+
+    FilmEntity? film = savedFilm;
+
+    if (film == null) {
+      final (remoteFilm, ids) = await getFilmInformationUseCase.call(event.idFilm);
+      film = remoteFilm;
+      collectionIds = collectionIds;
+    }
+
+    if (film == null) {
+      emit(FilmFailure(message: "Не удалось получить информацию о фильме"));
+      return;
+    }
+
+    emit(FilmLoaded(
+      film: film,
+      filmImages: filmImages,
+      collectionIds: collectionIds,
+    ));
+
+    await _collectionIdsSubscription?.cancel();
+    _collectionIdsSubscription =
+        watchLinksByFilmUseCase(event.idFilm).listen(
+      (collectionIds) {
+        add(UpdateFilmLinks(updatedCollectionIds: collectionIds));
+      },
+    );
+  } on RemoteDataSourceException catch (e) {
+    emit(FilmFailure(message: e.message));
+  } on LocalDataSourceException catch (e) {
+    emit(FilmFailure(message: e.message));
+  } catch (e) {
+    emit(FilmFailure(message: "Неизвестная ошибка"));
   }
+}
 
   Future<void> _addFilmToCollection(AddFilmToCollection event, Emitter emit) async {
     final currentState = state;
@@ -140,11 +140,11 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     }
   }
 
-  Future<void> _updateFilmUserRating(UpdateFilmUserRating event, Emitter emit) async {
+  Future<void> _updateUserFilmInformation(UpdateUserFilmInformation event, Emitter emit) async {
     final currentState = state;
     if(currentState is! FilmLoaded) return;
     try{
-      final filmWithUpdatedRating = await updateRatingFilmInformationUseCase.call(currentState.film, event.userRating);
+      final filmWithUpdatedRating = await updateUserFilmInformationUseCase.call(currentState.film, event.userRating, event.userComment);
       emit(FilmLoaded(film: filmWithUpdatedRating, filmImages: currentState.filmImages, collectionIds: currentState.collectionIds));
     } on LocalDataSourceException catch(e){
       emit(FilmActionFailure(message: e.message));

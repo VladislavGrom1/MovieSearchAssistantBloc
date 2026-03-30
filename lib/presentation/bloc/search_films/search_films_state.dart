@@ -4,7 +4,7 @@ sealed class SearchFilmsState extends Equatable {
   const SearchFilmsState();
   
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 final class SearchFilmsInitial extends SearchFilmsState {}
@@ -16,15 +16,14 @@ final class CollectionsFilmsLoadedSuccessful extends SearchFilmsState{
   const CollectionsFilmsLoadedSuccessful({required this.filmCollectionsMap});
 
   @override
-  List<Object> get props => [if (filmCollectionsMap != null) filmCollectionsMap!];
+  List<Object?> get props => [filmCollectionsMap];
 }
 
 final class CollectionsFilmsLoadedFailure extends SearchFilmsState{
-  final String exceptionType;
-  final int? statusCode;
+  final String message;
   
-  const CollectionsFilmsLoadedFailure({required this.exceptionType, this.statusCode});
+  const CollectionsFilmsLoadedFailure({required this.message});
 
   @override
-  List<Object> get props => [exceptionType, if (statusCode != null) statusCode!];
+  List<Object?> get props => [message];
 }

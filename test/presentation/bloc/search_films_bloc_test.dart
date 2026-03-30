@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:bloc_test/bloc_test.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
@@ -77,10 +74,7 @@ void main(){
     blocTest<SearchFilmsBloc, SearchFilmsState>(
       "emit CollectionsFilmsLoadedFailure when DisplayFilmCollectionsUseCase rethrow RemoteDataSourceException",
       setUp: () {
-        when(() => mockDisplayFilmCollectionsUseCase.call(FilmCollectionNames.filmCollectionNames)).thenThrow(RemoteDataSourceException(
-          DioExceptionType.values.first,
-          HttpStatus.badRequest
-        ));
+        when(() => mockDisplayFilmCollectionsUseCase.call(FilmCollectionNames.filmCollectionNames)).thenThrow(NetworkFailure());
       },
       build: () => SearchFilmsBloc(displayFilmCollectionsUseCase: mockDisplayFilmCollectionsUseCase),
       act: (bloc) => bloc.add(DisplayFilmCollections()),

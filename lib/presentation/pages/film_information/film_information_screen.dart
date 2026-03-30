@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_cache_manager.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
@@ -61,9 +62,6 @@ class _FilmInformationView extends StatelessWidget {
         BlocListener<FilmInformationBloc, FilmInformationState>(
             listener: _filmInformationBlocListener
         ),
-        BlocListener<CollectionsBloc, CollectionsState>(
-            listener: _collectionsBlocListener
-        )
       ],
       child: Scaffold(
         appBar: AppBar(
@@ -110,22 +108,14 @@ class _FilmInformationView extends StatelessWidget {
 
   void _filmInformationBlocListener(BuildContext context, FilmInformationState state) {
     if (state is FilmActionFailure) {
-      _showSnackBar(context, state.message, Colors.red);
+      _showToast(context, state.message, Colors.red);
     }
   }
 
-  void _collectionsBlocListener(BuildContext context, CollectionsState state) {
-    if (state is CollectionRemovedSuccess) {
-      _showSnackBar(context, state.message, Colors.green);
-    }
-  }
-
-  void _showSnackBar(BuildContext context, String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-      ),
+  void _showToast(BuildContext context, String message, Color color) {
+    Fluttertoast.showToast(
+      backgroundColor: color,
+      msg: message
     );
   }
 }
@@ -153,7 +143,7 @@ class _FilmInformationContent extends StatelessWidget {
                   imageUrl: film.posterUrlPreview ?? '',
                   cacheManager: FilmImageCacheManager.instance,
                   imageBuilder: (context, imageProvider) => Container(
-                    height: 200,
+                    height: 200.h,
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: imageProvider,
@@ -163,7 +153,7 @@ class _FilmInformationContent extends StatelessWidget {
                     ),
                   ),
                   placeholder: (context, url) => Container(
-                    height: 200,
+                    height: 200.h,
                     color: Colors.white
                   ),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -179,27 +169,39 @@ class _FilmInformationContent extends StatelessWidget {
                 BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
                   builder: (context, savedFilmIds) {
                     final isSaved = savedFilmIds.contains(film.kinopoiskId);
-                    if(isSaved){
-                      return TextButton(
-                        onPressed: () => _openRatingSheet(context, film.userRating),
-                        child: const Text("Оценить фильм", style: TextStyle(color: Colors.purple))
-                      );
-                    } else{
-                      return SizedBox();
-                    }
+                    return ElevatedButton(
+                      onPressed: !isSaved 
+                      ? null 
+                      : () {
+                        _openRatingSheet(context, film.userRating);
+                      },
+                      child: const Text("Оценить фильм")
+                    );
                   },
                 ),
-                SizedBox(height: 16),
+                BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
+                  builder: (context, savedFilmIds) {
+                    final isSaved = savedFilmIds.contains(film.kinopoiskId);
+                    return ElevatedButton(
+                      onPressed: !isSaved 
+                      ? null 
+                      : () {
+                        _openCommentDialog(context);
+                      },
+                      child: const Text("Изменить отзыв")
+                    );
+                  },
+                ),
+                SizedBox(height: 16.h),
                 Text(film.nameRu ?? film.nameOriginal ?? "Без названия"),
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(collectionIds.toString()),
                 SizedBox(height: 10.h),
                 if (film.nameOriginal != null) ...[
                   Text(film.nameOriginal!),
                   SizedBox(height: 10.h),
                 ],
-                Text(
-                  film.serial!
+                Text(film.serial!
                       ? "${film.startYear} - ${film.endYear ?? "настоящее время"}"
                       : "${film.year}",
                 ),
@@ -226,7 +228,8 @@ class _FilmInformationContent extends StatelessWidget {
                 SizedBox(height: 10.h),
                 Text("Пользовательский рейтинг, ${film.userRating}"),
                 SizedBox(height: 10.h),
-                Text(filmImages?.imageUrls.toString() ?? ""),
+                Text("Пользовательский комментарий: ${film.userComment}")
+                //Text(filmImages?.imageUrls.toString() ?? ""),
               ],
             ),
           ),
@@ -257,6 +260,16 @@ class _FilmInformationContent extends StatelessWidget {
           child: _RatingPickerSheet(currentUserRating: currentUserRating)));
   }
 
+  void _openCommentDialog(BuildContext context){
+    showDialog(
+      context: context, 
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<FilmInformationBloc>(),
+        child: _AddUserCommentDialog(film: film),
+      )
+    );
+  }
+
   String _getGenresString(List<String>? genres) {
     return genres?.join(', ') ?? "Данные отсутствуют";
   }
@@ -282,6 +295,60 @@ class _FilmInformationContent extends StatelessWidget {
       return [Text(nameOriginal), SizedBox(height: 10.h)];
     }
     return [SizedBox()];
+  }
+}
+
+class _AddUserCommentDialog extends StatefulWidget {
+  const _AddUserCommentDialog({required this.film});
+
+  final FilmEntity film;
+
+  @override
+  State<_AddUserCommentDialog> createState() => _AddUserCommentDialogState();
+}
+
+class _AddUserCommentDialogState extends State<_AddUserCommentDialog> {
+  final controller = TextEditingController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filmInformationBloc = context.read<FilmInformationBloc>();
+
+    return AlertDialog(
+          title: Text('Изменить пользовательский отзыв'),
+          content: TextField(
+            maxLines: 10,
+            maxLength: 200,
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: 'Новый отзыв',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+            onChanged: (_) => setState(() {})
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: controller.text.isEmpty
+                  ? null
+                  : () {
+                      filmInformationBloc.add(UpdateUserFilmInformation(userComment: controller.text));
+                      Navigator.pop(context);
+                    },
+              child: Text('Сохранить'),
+            ),
+          ],
+        );
   }
 }
 
@@ -375,7 +442,7 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
                   ),
                 ),
                 onPressed: () {
-                  context.read<FilmInformationBloc>().add(UpdateFilmUserRating(userRating: selectedRating));
+                  context.read<FilmInformationBloc>().add(UpdateUserFilmInformation(userRating: selectedRating));
                   Navigator.pop(context);
                 },
                 child: const Text("Поставить оценку", style: TextStyle(color: Colors.white)),

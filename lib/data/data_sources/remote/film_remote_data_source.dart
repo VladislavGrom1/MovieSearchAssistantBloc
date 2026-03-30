@@ -2,7 +2,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dio/dio.dart';
 import 'package:generated/generated.dart';
-import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
+import 'package:movie_search_assistant_bloc/app/exceptions/exception_mapper.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_base_model.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_images_model.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
@@ -27,7 +27,7 @@ class FilmRemoteDataSource {
       }
       return null; 
     } on DioException catch(e){
-      throw RemoteDataSourceException(e.type, e.response?.statusCode);
+      throw ExceptionMapper.mapDioException(e);
     } catch(e){
       rethrow;
     }
@@ -53,7 +53,7 @@ class FilmRemoteDataSource {
       }
       return null;
     } on DioException catch(e){
-      throw RemoteDataSourceException(e.type, e.response?.statusCode);
+      throw ExceptionMapper.mapDioException(e);
     } catch(e){
       rethrow;
     }
@@ -70,7 +70,7 @@ class FilmRemoteDataSource {
       }
       return null;
     } on DioException catch(e){
-      throw RemoteDataSourceException(e.type, e.response?.statusCode);
+      throw ExceptionMapper.mapDioException(e);
     } catch(e){
       rethrow;
     }
@@ -89,7 +89,7 @@ class FilmRemoteDataSource {
       }
       return null;
     } on DioException catch(e){
-      throw RemoteDataSourceException(e.type, e.response?.statusCode);
+      throw ExceptionMapper.mapDioException(e);
     } catch(e){
       rethrow;
     }

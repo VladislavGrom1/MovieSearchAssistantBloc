@@ -37,9 +37,7 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
       final films = await _fetchFilms(event, page: currentPage);
 
       if (films.isEmpty) {
-        emit(SearchedFilmsLoadedFailure(
-          exceptionType: "Ничего не найдено",
-        ));
+        emit(SearchedFilmsLoadedFailure(message: "Фильмы по запросу не найдены"));
       } else {
         emit(SearchedFilmsLoadedSuccessful(
           searchedFilms: films,
@@ -49,18 +47,11 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
       }
 
     } on RemoteDataSourceException catch (e) {
-      emit(SearchedFilmsLoadedFailure(
-        exceptionType: e.exceptionType.name,
-        statusCode: e.statusCode,
-      ));
+      emit(SearchedFilmsLoadedFailure(message: e.message));
     } on LocalDataSourceException catch (e) {
-      emit(SearchedFilmsLoadedFailure(
-        exceptionType: e.message,
-      ));
+      emit(SearchedFilmsLoadedFailure(message: e.message));
     } catch (e) {
-      emit(SearchedFilmsLoadedFailure(
-        exceptionType: "Неизвестная ошибка",
-      ));
+      emit(SearchedFilmsLoadedFailure(message: "Неизвестная ошибка"));
     }
   }
 

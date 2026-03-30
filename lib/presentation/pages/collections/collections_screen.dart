@@ -38,8 +38,7 @@ class _CollectionsView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
-                  child: BlocConsumer<CollectionsBloc, CollectionsState>(
-                    listener: _collectionBlocListener,
+                  child: BlocBuilder<CollectionsBloc, CollectionsState>(
                     builder: (context, state) {
                       if (state is CollectionsLoading) {
                         return Center(child: CircularProgressIndicator());
@@ -58,28 +57,6 @@ class _CollectionsView extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _collectionBlocListener(BuildContext context, CollectionsState state){
-    if(state is CollectionActionFailure){
-      _showSnackBar(context, state.message, Colors.red);
-    }
-
-    if(state is CollectionAddedSuccess ||
-       state is CollectionRemovedSuccess ||
-       state is CollectionClearedSuccess) {
-      final message = (state as dynamic).message;
-      _showSnackBar(context, message, Colors.green);
-    }
-  }
-
-  void _showSnackBar(BuildContext context, String message, Color color){
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
       ),
     );
   }

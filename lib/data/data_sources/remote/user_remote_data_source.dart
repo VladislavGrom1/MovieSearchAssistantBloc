@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:generated/generated.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
-import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
+import 'package:movie_search_assistant_bloc/app/exceptions/exception_mapper.dart';
 import 'package:movie_search_assistant_bloc/data/models/user_model.dart';
 
 class UserRemoteDataSource {
@@ -18,7 +18,7 @@ class UserRemoteDataSource {
       }
       return null;
     } on DioException catch(e){
-      throw RemoteDataSourceException(e.type, e.response?.statusCode);
+      throw ExceptionMapper.mapDioException(e);
     }
   }
 }

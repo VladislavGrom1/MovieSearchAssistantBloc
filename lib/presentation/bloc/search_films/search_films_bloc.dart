@@ -22,14 +22,14 @@ class SearchFilmsBloc extends Bloc<SearchFilmsEvent, SearchFilmsState> {
       if(filmCollectionsMap != null){
         emit(CollectionsFilmsLoadedSuccessful(filmCollectionsMap: filmCollectionsMap));
       } else{
-        emit(CollectionsFilmsLoadedFailure(exceptionType: "Коллекция фильмов пустая"));
+        emit(CollectionsFilmsLoadedFailure(message: "Коллекция фильмов пуста"));
       }
     } on RemoteDataSourceException catch(e){
-      emit(CollectionsFilmsLoadedFailure(exceptionType: e.exceptionType.name, statusCode: e.statusCode));
+      emit(CollectionsFilmsLoadedFailure(message: e.message));
     } on LocalDataSourceException catch(e){
-      emit(CollectionsFilmsLoadedFailure(exceptionType: e.message));
+      emit(CollectionsFilmsLoadedFailure(message: e.message));
     } catch(e){
-      emit(CollectionsFilmsLoadedFailure(exceptionType: "Неизвестная ошибка"));
+      emit(CollectionsFilmsLoadedFailure(message: "Неизвестная ошибка"));
     }
   }
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.dart';
+import 'package:movie_search_assistant_bloc/app/util/network_service/cubit/internet_cubit.dart';
+import 'package:movie_search_assistant_bloc/app/util/network_service/network_listener.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 
 void main() async {
@@ -22,20 +25,26 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(412, 927),
-      child: MaterialApp.router(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          appBarTheme: AppBarTheme(
-            backgroundColor: Colors.black,
-            iconTheme: IconThemeData( 
-              color: Colors.white
+      child: BlocProvider(
+        create: (_) => getIt<NetworkCubit>(),
+        child: MaterialApp.router(
+          builder: (context, child) {
+            return NetworkListener(child: child!);
+          },
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.black,
+              iconTheme: IconThemeData(color: Colors.white),
             ),
+            scaffoldBackgroundColor: Colors.black,
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           ),
-          scaffoldBackgroundColor: Colors.black,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          routerConfig: _router.config(),
         ),
-        routerConfig: _router.config(),
       ),
     );
   }
 }
+
+

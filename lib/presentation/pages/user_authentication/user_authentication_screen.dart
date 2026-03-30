@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
@@ -38,21 +39,19 @@ class _UserAuthenticationView extends StatelessWidget {
 
   void _userAuthenticationBlocListener(BuildContext context, AuthenticationState state) {
     if (state is AuthenticationSuccess) {
-      _showSnackBar(context, "Успешный вход", Colors.green);
+      _showToast(context, "Успешный вход", Colors.green);
       context.router.replace(HomeRoute());
     }
 
     if (state is AuthenticationFailure) {
-      _showSnackBar(context, "Не удалось выполнить вход: ${state.exceptionType}, ${state.statusCode}", Colors.red);
+      _showToast(context, "Не удалось выполнить вход: ${state.message}", Colors.red);
     }
   }
 
-  void _showSnackBar(BuildContext context, String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
+  void _showToast(BuildContext context, String message, Color color) {
+    Fluttertoast.showToast(
+      backgroundColor: color,
+      msg: message
     );
   }
 }

@@ -1,5 +1,8 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
+import 'package:movie_search_assistant_bloc/app/util/network_service/cubit/internet_cubit.dart';
+import 'package:movie_search_assistant_bloc/app/util/network_service/network_service.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/collection_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/film_collection_link_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/flim_local_data_source.dart';
@@ -30,7 +33,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_col
 import 'package:movie_search_assistant_bloc/domain/usecases/rename_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_collection_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_filter_films_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/update_rating_film_information_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/update_user_film_information_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_saved_film_from_server_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_collection_use_case.dart';
@@ -63,6 +66,10 @@ Future<void> initializeDependencies() async {
     getIt.registerSingleton(DioApiClient());
     getIt.registerSingleton(getIt<DioApiClient>().dio);
 
+    // Services
+    getIt.registerLazySingleton(() => Connectivity());
+    getIt.registerLazySingleton(() => NetworkService(getIt()));
+
     // RemoteDataSources
     getIt.registerLazySingleton(() => UserRemoteDataSource(dio: getIt()));
     getIt.registerLazySingleton(() => FilmRemoteDataSource(dio: getIt()));
@@ -84,7 +91,7 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => GetSavedFilmUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => AddFilmToCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => UpdateSavedFilmFromServerUseCase(filmRepository: getIt()));
-    getIt.registerLazySingleton(() => UpdateRatingFilmInformationUseCase(filmRepository: getIt()));
+    getIt.registerLazySingleton(() => UpdateUserFilmInformationUseCase(filmRepository: getIt()));
     getIt.registerLazySingleton(() => RemoveFilmFromCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => GetCollectionsUseCase(collectionRepository: getIt()));
     getIt.registerLazySingleton(() => AddCollectionUseCase(collectionRepository: getIt()));
@@ -108,7 +115,7 @@ Future<void> initializeDependencies() async {
       getFilmImagesUseCase: getIt(),
       addFilmToCollectionUseCase: getIt(),
       updateSavedFilmUseCase: getIt(),
-      updateRatingFilmInformationUseCase: getIt(),
+      updateUserFilmInformationUseCase: getIt(),
       removeFilmFromCollectionUseCase: getIt(),
       watchLinksByFilmUseCase: getIt()
     ));
@@ -130,4 +137,5 @@ Future<void> initializeDependencies() async {
     // Cubit
     getIt.registerFactory(() => SelectionFilmsCubit());
     getIt.registerFactory(() => WatchFilmCollectionLinksCubit(getIt()));
+    getIt.registerLazySingleton(() => NetworkCubit(getIt()));
 }

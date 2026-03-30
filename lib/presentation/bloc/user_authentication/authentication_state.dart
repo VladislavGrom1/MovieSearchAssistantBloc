@@ -4,7 +4,7 @@ sealed class AuthenticationState extends Equatable {
   const AuthenticationState();
   
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 final class AuthenticationInitial extends AuthenticationState {}
@@ -20,10 +20,9 @@ final class AuthenticationSuccess extends AuthenticationState{
 }
 
 final class AuthenticationFailure extends AuthenticationState{
-  final String exceptionType;
-  final int? statusCode;
-  const AuthenticationFailure({required this.exceptionType, this.statusCode});
+  final String message;  
+  const AuthenticationFailure({required this.message});
 
   @override
-  List<Object> get props => [exceptionType, if (statusCode != null) statusCode!];
+  List<Object?> get props => [message];
 }

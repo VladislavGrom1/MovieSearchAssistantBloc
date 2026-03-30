@@ -19,16 +19,16 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     try{
       final UserEntity? userInfo = await authenticationUseCase.call(apiKey: event.apiKey);
       if(userInfo == null){
-        emit(AuthenticationFailure(exceptionType: "Информация об ApiKey отсутствует"));
+        emit(AuthenticationFailure(message: "API ключ отсутствует"));
       } else{
         emit(AuthenticationSuccess(userInfo: userInfo));
       }
     } on RemoteDataSourceException catch(e){
-      emit(AuthenticationFailure(exceptionType: e.exceptionType.name, statusCode: e.statusCode));
+      emit(AuthenticationFailure(message: e.message));
     } on LocalDataSourceException catch(e) {
-      emit(AuthenticationFailure(exceptionType: e.message));
+      emit(AuthenticationFailure(message: e.message));
     } catch(e){
-      emit(AuthenticationFailure(exceptionType: "Неизвестная ошибка"));
+      emit(AuthenticationFailure(message: "Неизвестная ошибка"));
     }
   }
 

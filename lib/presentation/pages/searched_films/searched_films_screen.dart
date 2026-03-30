@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_cache_manager.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
@@ -104,33 +105,47 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: BlocBuilder<SearchedFilmsBloc, SearchedFilmsState>(
-            builder: (context, state) {
-              if (state is SearchedFilmsLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (state is SearchedFilmsLoadedFailure) {
-                return Center(
-                  child: Text("${state.exceptionType} ${state.statusCode}"),
-                );
-              }
-
-              if (state is SearchedFilmsLoadedSuccessful) {
-                return RefreshIndicator(
-                  onRefresh: _onRefresh,
-                  child: _FilmsList(
-                    state: state,
-                    controller: _scrollController,
-                  ),
-                );
-              }
-
-              return const SizedBox();
-            },
+          child: Expanded(
+            child: RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: BlocBuilder<SearchedFilmsBloc, SearchedFilmsState>(
+                builder: (context, state) {
+                  if (state is SearchedFilmsLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+              
+                  if (state is SearchedFilmsLoadedFailure) {
+                    return _buildError(state.message);
+                  }
+              
+                  if (state is SearchedFilmsLoadedSuccessful) {
+                    return _FilmsList(
+                        state: state,
+                        controller: _scrollController,
+                    );
+                  }
+              
+                  return const SizedBox();
+                },
+              ),
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildError(String message) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(child: Text(message)),
+          ),
+        );
+      },
     );
   }
 }
@@ -193,11 +208,9 @@ class _FilmCard extends StatelessWidget {
                 filmName: film.nameRu ?? film.nameOriginal.toString()),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Не удалось получить информацию о фильме"),
-              backgroundColor: Colors.red,
-            ),
+          Fluttertoast.showToast(
+            backgroundColor: Colors.red,
+            msg: "Не удалось получить информацию о фильме"
           );
         }
       },

@@ -15,7 +15,7 @@ class NetworkListener extends StatelessWidget {
         if (state == NetworkStatus.disconnected) {
           Fluttertoast.showToast(
             backgroundColor: Colors.red,
-            msg: "Интернет-соединение потеряно"
+            msg: "Интернет-соединение отсутствует"
           );
         }
         if (state == NetworkStatus.connected) {

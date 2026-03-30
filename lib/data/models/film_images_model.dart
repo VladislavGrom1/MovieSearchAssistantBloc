@@ -11,8 +11,8 @@ class FilmImagesModel {
 
   factory FilmImagesModel.fromImageResponse(ImageResponse imageFilmUrls){
     return FilmImagesModel(
-      imageUrls: imageFilmUrls.items.where((imageUrl) => imageUrl.imageUrl != null).map((imageUrl) => imageUrl.imageUrl!).toList(),
-      previewUrls: imageFilmUrls.items.where((previewUrl) => previewUrl.previewUrl != null).map((previewUrl) => previewUrl.previewUrl!).toList(),
+      imageUrls: imageFilmUrls.items.where((imageUrl) => imageUrl.imageUrl != null).take(5).map((imageUrl) => imageUrl.imageUrl!).toList(),
+      previewUrls: imageFilmUrls.items.where((previewUrl) => previewUrl.previewUrl != null).take(5).map((previewUrl) => previewUrl.previewUrl!).toList(),
     );
   }
 }

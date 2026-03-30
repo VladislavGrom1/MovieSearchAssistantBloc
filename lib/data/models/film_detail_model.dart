@@ -147,7 +147,9 @@ class FilmDetailModel {
         posterUrl: filmEntity.posterUrl,
         posterUrlPreview: filmEntity.posterUrlPreview,
         userComment: filmEntity.userComment,
-        userRating: filmEntity.userRating
+        userRating: filmEntity.userRating,
+        localPosterImagePath: filmEntity.localPosterImagePath,
+        localScreenshotPaths: filmEntity.localScreenshotPaths
       ),
       kinopoiskHDId: filmEntity.kinopoiskHDId,
       imdbId: filmEntity.imdbId,

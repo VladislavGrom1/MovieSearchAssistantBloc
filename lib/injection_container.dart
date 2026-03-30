@@ -114,7 +114,7 @@ Future<void> initializeDependencies() async {
       getSavedFilmUseCase: getIt(), 
       getFilmImagesUseCase: getIt(),
       addFilmToCollectionUseCase: getIt(),
-      updateSavedFilmUseCase: getIt(),
+      updateSavedFilmFromServerUseCase: getIt(),
       updateUserFilmInformationUseCase: getIt(),
       removeFilmFromCollectionUseCase: getIt(),
       watchLinksByFilmUseCase: getIt()

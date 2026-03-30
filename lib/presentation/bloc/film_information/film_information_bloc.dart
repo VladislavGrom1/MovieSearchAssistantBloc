@@ -22,7 +22,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   final GetSavedFilmUseCase getSavedFilmUseCase;
   final GetFilmImagesUseCase getFilmImagesUseCase;
   final AddFilmToCollectionUseCase addFilmToCollectionUseCase;
-  final UpdateSavedFilmFromServerUseCase updateSavedFilmUseCase;
+  final UpdateSavedFilmFromServerUseCase updateSavedFilmFromServerUseCase;
   final UpdateUserFilmInformationUseCase updateUserFilmInformationUseCase;
   final RemoveFilmFromCollectionUseCase removeFilmFromCollectionUseCase;
   final WatchLinksByFilmUseCase watchLinksByFilmUseCase;
@@ -33,7 +33,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     required this.getSavedFilmUseCase,
     required this.getFilmImagesUseCase,
     required this.addFilmToCollectionUseCase,
-    required this.updateSavedFilmUseCase,
+    required this.updateSavedFilmFromServerUseCase,
     required this.updateUserFilmInformationUseCase,
     required this.removeFilmFromCollectionUseCase,
     required this.watchLinksByFilmUseCase
@@ -80,6 +80,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       film: film,
       filmImages: filmImages,
       collectionIds: collectionIds,
+      status: FilmStatus.success
     ));
 
     await _collectionIdsSubscription?.cancel();
@@ -101,8 +102,9 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   Future<void> _addFilmToCollection(AddFilmToCollection event, Emitter emit) async {
     final currentState = state;
     if(currentState is! FilmLoaded) return;
+    emit(currentState.copyWith(status: FilmStatus.loading));
     try {
-      await addFilmToCollectionUseCase(currentState.film, event.collectionId);
+      await addFilmToCollectionUseCase(currentState.film, currentState.filmImages, event.collectionId);
     } on LocalDataSourceException catch(e){
       emit(FilmActionFailure(message: e.message));
       emit(currentState);
@@ -130,7 +132,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     final currentState = state;
     if(currentState is! FilmLoaded) return;
     try{
-      emit(FilmLoaded(film: currentState.film, filmImages: currentState.filmImages, collectionIds: event.updatedCollectionIds));
+      emit(currentState.copyWith(film: currentState.film, filmImages: currentState.filmImages, collectionIds: event.updatedCollectionIds, status: FilmStatus.success));
     } on LocalDataSourceException catch(e){
       emit(FilmActionFailure(message: e.message));
       emit(currentState);
@@ -145,7 +147,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     if(currentState is! FilmLoaded) return;
     try{
       final filmWithUpdatedRating = await updateUserFilmInformationUseCase.call(currentState.film, event.userRating, event.userComment);
-      emit(FilmLoaded(film: filmWithUpdatedRating, filmImages: currentState.filmImages, collectionIds: currentState.collectionIds));
+      emit(currentState.copyWith(film: filmWithUpdatedRating, filmImages: currentState.filmImages, collectionIds: currentState.collectionIds, status: FilmStatus.success));
     } on LocalDataSourceException catch(e){
       emit(FilmActionFailure(message: e.message));
       emit(currentState);
@@ -162,22 +164,19 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       final newFilmImages = await getFilmImagesUseCase.call(event.film.kinopoiskId!);
       
       if(currentState is FilmLoaded) {
+        emit(FilmLoading());
         if(newFilm == null){
           emit(FilmActionFailure(message: "Не удалось обновить информацию о фильме"));
           emit(currentState);
           return;
         }
-        if(newFilm.equalsWithoutUserData(event.film)){
-          emit(currentState);
-          return;
-        }
-        await updateSavedFilmUseCase.call(event.film, newFilm);
-        emit(FilmLoaded(film: newFilm, filmImages: newFilmImages, collectionIds: collectionIds));
+        final updatedFilm = await updateSavedFilmFromServerUseCase.call(event.film, newFilm, newFilmImages);
+        emit(currentState.copyWith(film: updatedFilm, filmImages: newFilmImages, collectionIds: collectionIds, status: FilmStatus.success));
       }
 
       if(currentState is FilmFailure){
         if(newFilm != null) {
-          emit(FilmLoaded(film: newFilm, filmImages: newFilmImages, collectionIds: collectionIds));
+          emit(FilmLoaded(film: newFilm, filmImages: newFilmImages, collectionIds: collectionIds, status: FilmStatus.success));
         } else{
           emit(currentState);
         }

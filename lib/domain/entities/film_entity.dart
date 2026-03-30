@@ -19,6 +19,8 @@ class FilmEntity extends Equatable {
   final String? posterUrlPreview;
   final String? userComment;
   final int? userRating;
+  final String? localPosterImagePath;
+  final List<String>? localScreenshotPaths;
   // FilmDetailInformation
   final String? kinopoiskHDId;
   final String? imdbId;
@@ -70,6 +72,8 @@ class FilmEntity extends Equatable {
     this.posterUrlPreview,
     this.userComment,
     this.userRating,
+    this.localPosterImagePath,
+    this.localScreenshotPaths,
     // FilmDetailInformation
     this.kinopoiskHDId,
     this.imdbId,
@@ -122,6 +126,8 @@ class FilmEntity extends Equatable {
     String? posterUrlPreview,
     String? userComment,
     int? userRating,
+    String? localPosterImagePath,
+    List<String>? localScreenshotPaths,
     // FilmDetailInformation
     String? kinopoiskHDId,
     String? imdbId,
@@ -173,6 +179,8 @@ class FilmEntity extends Equatable {
       posterUrlPreview: posterUrlPreview ?? this.posterUrlPreview,
       userComment: userComment ?? this.userComment,
       userRating: userRating ?? this.userRating,
+      localPosterImagePath: localPosterImagePath ?? this.localPosterImagePath,
+      localScreenshotPaths: localScreenshotPaths ?? this.localScreenshotPaths,
       // FilmDetailInformation
       kinopoiskHDId: kinopoiskHDId ?? this.kinopoiskHDId,
       imdbId: imdbId ?? this.imdbId,
@@ -247,6 +255,8 @@ class FilmEntity extends Equatable {
       posterUrlPreview: filmDetailModel.filmBaseModel.posterUrlPreview,
       userComment: filmDetailModel.filmBaseModel.userComment,
       userRating: filmDetailModel.filmBaseModel.userRating,
+      localPosterImagePath: filmDetailModel.filmBaseModel.localPosterImagePath,
+      localScreenshotPaths: filmDetailModel.filmBaseModel.localScreenshotPaths,
       // FilmDetailInformation
       kinopoiskHDId: filmDetailModel.kinopoiskHDId,
       imdbId: filmDetailModel.imdbId,

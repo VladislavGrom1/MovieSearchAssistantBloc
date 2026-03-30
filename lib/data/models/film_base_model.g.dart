@@ -31,13 +31,15 @@ class FilmBaseModelAdapter extends TypeAdapter<FilmBaseModel> {
       posterUrlPreview: fields[11] as String?,
       userComment: fields[12] as String?,
       userRating: fields[13] as int?,
+      localPosterImagePath: fields[14] as String?,
+      localScreenshotPaths: (fields[15] as List?)?.cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, FilmBaseModel obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.kinopoiskId)
       ..writeByte(1)
@@ -65,7 +67,11 @@ class FilmBaseModelAdapter extends TypeAdapter<FilmBaseModel> {
       ..writeByte(12)
       ..write(obj.userComment)
       ..writeByte(13)
-      ..write(obj.userRating);
+      ..write(obj.userRating)
+      ..writeByte(14)
+      ..write(obj.localPosterImagePath)
+      ..writeByte(15)
+      ..write(obj.localScreenshotPaths);
   }
 
   @override

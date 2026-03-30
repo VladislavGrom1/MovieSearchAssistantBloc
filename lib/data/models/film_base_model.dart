@@ -19,6 +19,8 @@ class FilmBaseModel {
   @HiveField(11) String? posterUrlPreview;
   @HiveField(12) String? userComment;
   @HiveField(13) int? userRating;
+  @HiveField(14) String? localPosterImagePath;
+  @HiveField(15) List<String>? localScreenshotPaths;
 
   FilmBaseModel({
     this.kinopoiskId,
@@ -34,7 +36,9 @@ class FilmBaseModel {
     this.posterUrl,
     this.posterUrlPreview,
     this.userComment,
-    this.userRating
+    this.userRating,
+    this.localPosterImagePath,
+    this.localScreenshotPaths
   });
 
   factory FilmBaseModel.fromFilmCollectionResponseItems(FilmCollectionResponseItems film){

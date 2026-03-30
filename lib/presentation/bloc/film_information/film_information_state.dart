@@ -1,5 +1,12 @@
 part of 'film_information_bloc.dart';
 
+enum FilmStatus {
+  initial,
+  loading,
+  success,
+  failure,
+}
+
 sealed class FilmInformationState extends Equatable {
   const FilmInformationState();
 
@@ -15,27 +22,31 @@ class FilmLoaded extends FilmInformationState{
   final FilmEntity film;
   final FilmImagesEntity? filmImages;
   final List<String> collectionIds;
+  final FilmStatus status;
 
   const FilmLoaded({
     required this.film,
     required this.filmImages,
-    required this.collectionIds
+    required this.collectionIds,
+    required this.status
   });
 
   FilmLoaded copyWith({
     FilmEntity? film,
     FilmImagesEntity? filmImages,
     List<String>? collectionIds,
+    FilmStatus? status
   }) {
     return FilmLoaded(
       film: film ?? this.film,
       filmImages: filmImages ?? this.filmImages,
       collectionIds: collectionIds ?? this.collectionIds,
+      status: status ?? this.status
     );
   }
 
   @override
-  List<Object?> get props => [film, filmImages, collectionIds];
+  List<Object?> get props => [film, filmImages, collectionIds, status];
 }
 
 class FilmFailure extends FilmInformationState {

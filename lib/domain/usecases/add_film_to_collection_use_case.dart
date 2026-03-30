@@ -1,7 +1,9 @@
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
+import 'package:movie_search_assistant_bloc/data/data_sources/local/image_storage_service.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_collection_link.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_collection_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 
@@ -14,15 +16,18 @@ class AddFilmToCollectionUseCase {
     required this.filmCollectionRepository
   });
 
-  Future<FilmEntity> call(FilmEntity film, String collectionId) async {
+  Future<void> call(FilmEntity film, FilmImagesEntity? filmImages, String collectionId) async {
     try{
       final idFilm = film.kinopoiskId!;
       final filmIsSaved = await filmRepository.filmIsSaved(idFilm);
       if(!filmIsSaved){
-        await filmRepository.addFilmInLocalDataSource(FilmDetailModel.fromFilmEntity(film));
+        String? posterImagePath;
+        List<String>? screenshotPaths;
+        (posterImagePath, screenshotPaths) = await ImageStorageService().saveFilmImagesInDirectory(film.posterUrl, filmImages?.imageUrls, film.kinopoiskId!);
+        final updatedFilmWithImagePaths = film.copyWith(localPosterImagePath: posterImagePath, localScreenshotPaths: screenshotPaths);
+        await filmRepository.addFilmInLocalDataSource(FilmDetailModel.fromFilmEntity(updatedFilmWithImagePaths));
       }
       await filmCollectionRepository.addFilmCollectionLink(FilmCollectionLink(filmId: idFilm, collectionId: collectionId));
-      return film;
     } on LocalDataSourceException{
       rethrow; 
     } catch(e){

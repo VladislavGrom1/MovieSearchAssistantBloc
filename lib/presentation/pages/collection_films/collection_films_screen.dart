@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -188,7 +190,7 @@ class _FilmCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _CachedImageWidget(urlImage: savedFilm.posterUrlPreview),
+            _PosterImageWidget(film: savedFilm),
             SizedBox(width: 16.w),
             Expanded(
                 child: Column(
@@ -245,28 +247,44 @@ class _FilmCard extends StatelessWidget {
   }
 }
 
-class _CachedImageWidget extends StatelessWidget {
-  final String? urlImage;
+class _PosterImageWidget extends StatelessWidget {
+  final FilmEntity film;
 
-  const _CachedImageWidget({required this.urlImage});
+  const _PosterImageWidget({required this.film});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16.w),
-      child: RepaintBoundary(
-        child: CachedNetworkImage(
-          imageUrl: urlImage ?? '',
-          cacheManager: FilmImageCacheManager.instance,
-          memCacheHeight: 140,
-          memCacheWidth: 100,
-          fit: BoxFit.fill,
+    if(film.localPosterImagePath != null){
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(16.w),
+        child: SizedBox(
           height: 140.h,
           width: 100.w,
-          placeholder: (context, url) => Container(color: Colors.grey[200]),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
+          child: RepaintBoundary(
+            child: Image.file(
+              File(film.localPosterImagePath!), 
+              fit: BoxFit.fill,
+            ),
+          ),
         ),
-      ),
-    );
+      );
+    } else{
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(16.w),
+        child: RepaintBoundary(
+          child: CachedNetworkImage(
+            imageUrl: film.posterUrlPreview ?? '',
+            cacheManager: FilmImageCacheManager.instance,
+            memCacheHeight: 140,
+            memCacheWidth: 100,
+            fit: BoxFit.fill,
+            height: 140.h,
+            width: 100.w,
+            placeholder: (context, url) => Container(color: Colors.grey[200]),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
+          ),
+        ),
+      );
+    }
   }
 }

@@ -27,9 +27,6 @@ class _CollectionsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text("Коллекции", style: TextStyle(color: Colors.white, overflow: TextOverflow.ellipsis)),
-      ),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
@@ -37,6 +34,7 @@ class _CollectionsView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              SizedBox(height: 20.h),
               Expanded(
                   child: BlocBuilder<CollectionsBloc, CollectionsState>(
                     builder: (context, state) {

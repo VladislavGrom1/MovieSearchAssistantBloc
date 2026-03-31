@@ -4,11 +4,11 @@ import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exc
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 
-class AuthenticationUseCase {
+class UpdateUserApiKeyInfoUseCase {
   final UserRepository userRepository;
   final DioApiClient apiClient;
   
-  AuthenticationUseCase({
+  UpdateUserApiKeyInfoUseCase({
     required this.userRepository, 
     required this.apiClient
   });

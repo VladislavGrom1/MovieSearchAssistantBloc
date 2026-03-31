@@ -105,7 +105,6 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Expanded(
             child: RefreshIndicator(
               onRefresh: _onRefresh,
               child: BlocBuilder<SearchedFilmsBloc, SearchedFilmsState>(
@@ -131,7 +130,6 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -236,7 +234,7 @@ class _FilmCard extends StatelessWidget {
                     Text(film.nameOriginal ?? "-"),
                     SizedBox(height: 10.h),
                     Text(
-                      film.countries!.isEmpty
+                      film.countries?.isEmpty == true
                           ? "${film.year}"
                           : "${film.countries}, ${film.year}",
                     ),

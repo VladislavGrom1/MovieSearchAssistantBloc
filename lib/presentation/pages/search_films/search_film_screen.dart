@@ -51,6 +51,7 @@ class _SearchFilmView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                SizedBox(height: 20.h),
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async {

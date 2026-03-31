@@ -19,9 +19,10 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_collection_re
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collection_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/authentication_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_api_key_info_from_storage_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_film_images_use_case.dart';
@@ -81,7 +82,7 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton<FilmCollectionRepository>(() => FilmCollectionRepositoryImpl(filmCollectionLinkLocalDataSource: getIt()));
 
     // UseCases
-    getIt.registerLazySingleton(() => AuthenticationUseCase(userRepository: getIt(), apiClient: getIt()));
+    getIt.registerLazySingleton(() => UpdateUserApiKeyInfoUseCase(userRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => GetCollectionsFilmsUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => SearchFilterFilmsUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => SearchCollectionFilmsUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
@@ -89,6 +90,7 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => GetFilmImagesUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => GetSavedFilmsUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => GetSavedFilmUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
+    getIt.registerLazySingleton(() => GetApiKeyInfoFromStorageUseCase(userRepository: getIt()));
     getIt.registerLazySingleton(() => AddFilmToCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => UpdateSavedFilmFromServerUseCase(filmRepository: getIt()));
     getIt.registerLazySingleton(() => UpdateUserFilmInformationUseCase(filmRepository: getIt()));
@@ -132,7 +134,10 @@ Future<void> initializeDependencies() async {
       removeFilmFromCollectionUseCase: getIt(), 
       watchFilmsUseCase: getIt()
     ));
-    getIt.registerFactory(() => UserProfileBloc());
+    getIt.registerFactory(() => UserProfileBloc(
+      getApiKeyInfoFromStorageUseCase: getIt(),
+      updateUserApiKeyInfoUseCase: getIt()
+    ));
 
     // Cubit
     getIt.registerFactory(() => SelectionFilmsCubit());

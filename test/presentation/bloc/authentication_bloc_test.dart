@@ -5,10 +5,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/authentication_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
 
-class MockAuthenticationUseCase extends Mock implements AuthenticationUseCase {}
+class MockAuthenticationUseCase extends Mock implements UpdateUserApiKeyInfoUseCase {}
 
 UserEntity _buildUserEntity({
   String? apiKey = "TestApiKey",

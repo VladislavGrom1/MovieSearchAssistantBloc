@@ -10,10 +10,12 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_repository.da
 class AddFilmToCollectionUseCase {
   final FilmRepository filmRepository;
   final FilmCollectionRepository filmCollectionRepository;
+  final ImageStorageService imageStorageService;
 
   AddFilmToCollectionUseCase({
     required this.filmRepository,
-    required this.filmCollectionRepository
+    required this.filmCollectionRepository,
+    required this.imageStorageService
   });
 
   Future<void> call(FilmEntity film, FilmImagesEntity? filmImages, String collectionId) async {
@@ -23,7 +25,7 @@ class AddFilmToCollectionUseCase {
       if(!filmIsSaved){
         String? posterImagePath;
         List<String>? screenshotPaths;
-        (posterImagePath, screenshotPaths) = await ImageStorageService().saveFilmImagesInDirectory(film.posterUrl, filmImages?.imageUrls, film.kinopoiskId!);
+        (posterImagePath, screenshotPaths) = await imageStorageService.saveFilmImagesInDirectory(film.posterUrl, filmImages?.imageUrls, film.kinopoiskId!);
         final updatedFilmWithImagePaths = film.copyWith(localPosterImagePath: posterImagePath, localScreenshotPaths: screenshotPaths);
         await filmRepository.addFilmInLocalDataSource(FilmDetailModel.fromFilmEntity(updatedFilmWithImagePaths));
       }

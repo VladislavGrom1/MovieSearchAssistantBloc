@@ -8,10 +8,12 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_repository.da
 class RemoveFilmFromCollectionUseCase {
   final FilmRepository filmRepository;
   final FilmCollectionRepository filmCollectionRepository;
+  final ImageStorageService imageStorageService;
 
   RemoveFilmFromCollectionUseCase({
     required this.filmRepository,
-    required this.filmCollectionRepository
+    required this.filmCollectionRepository,
+    required this.imageStorageService
   });
 
   // TODO: Реализовать удаление рейтинга/комментария при удалении фильма из локального хранилища
@@ -27,7 +29,7 @@ class RemoveFilmFromCollectionUseCase {
       bool filmHasOtherLinks = allFilmCollectionLinks.any((link) => link.filmId == filmId);
 
       if(!filmHasOtherLinks){
-        await ImageStorageService().deleteFilmImages(filmId);
+        await imageStorageService.deleteFilmImages(filmId);
         await filmRepository.removeFilmFromLocalDataSource(filmId);
       }
     } on LocalDataSourceException{

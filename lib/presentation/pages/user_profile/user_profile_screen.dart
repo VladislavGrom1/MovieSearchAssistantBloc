@@ -155,7 +155,7 @@ class _UserProfileContent extends StatelessWidget {
                 "Импорт библиотеки",
                 "Экспорт библиотеки",
                 "Очистить кэш",
-                "Очистить данные о фильмах",
+                "Очистить библиотеку",
               ];
               final icons = [
                 Icons.key,
@@ -176,16 +176,16 @@ class _UserProfileContent extends StatelessWidget {
                         _changeApiKey(context);
                         break;
                       case 1:
-                        _importMovies(context);
+                        _importLibrary(context);
                         break;
                       case 2:
-                        _exportMovies(context);
+                        _exportLibrary(context);
                         break;
                       case 3:
                         _clearCacheDirectory(context);
                         break;
                       case 4:
-                        _clearMoviesData(context);
+                        _clearLibrary(context);
                         break;
                     }
                   });
@@ -208,11 +208,11 @@ class _UserProfileContent extends StatelessWidget {
     );
   }
 
-  void _importMovies(BuildContext context) {
+  void _importLibrary(BuildContext context) {
     // TODO: реализовать импорт фильмов
   }
 
-  void _exportMovies(BuildContext context) {
+  void _exportLibrary(BuildContext context) {
     context.read<UserProfileBloc>().add(ExportLibrary());
   }
 
@@ -220,8 +220,8 @@ class _UserProfileContent extends StatelessWidget {
     context.read<UserProfileBloc>().add(ClearCacheDirectory());
   }
 
-  void _clearMoviesData(BuildContext context) {
-    // TODO: реализовать очистку данных о фильмах
+  void _clearLibrary(BuildContext context) {
+    context.read<UserProfileBloc>().add(ClearLibrary());
   }
 }
 
@@ -249,6 +249,8 @@ class _UpdateApiKeyDialogState extends State<_UpdateApiKeyDialog> {
       title: Text('Изменение API Key'),
       content: TextField(
           controller: controller,
+          maxLength: 40,
+          maxLines: 2,
           decoration: InputDecoration(
             hintText: 'Введите новый API Key',
             border: OutlineInputBorder(),

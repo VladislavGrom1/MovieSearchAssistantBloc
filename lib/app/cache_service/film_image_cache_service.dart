@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
 
-class FilmImageCacheManager {
+class FilmImageCacheService {
   static const key = 'filmImageCache';
 
   static final CacheManager instance = CacheManager(

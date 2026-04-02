@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 
 class ZipService {
 
-  static Future<String> zipDirectory(String sourceDirPath) async {
+  Future<String> zipDirectory(String sourceDirPath) async {
     final dir = Directory(sourceDirPath);
     final files = dir.listSync(recursive: true)
         .whereType<File>()
@@ -18,7 +18,7 @@ class ZipService {
     });
   }
 
-  static Future<String> _zipFilesIsolate(Map<String, dynamic> args) async {
+  Future<String> _zipFilesIsolate(Map<String, dynamic> args) async {
     final root = args["root"];
     final files = List<String>.from(args["files"]);
 

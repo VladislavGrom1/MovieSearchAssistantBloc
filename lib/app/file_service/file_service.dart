@@ -3,9 +3,9 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 
 
-class FileManagerService {
+class FileService {
 
-  static Future<String?> saveFile(Uint8List fileBytes, String fileName) async {
+  Future<String?> saveFile(Uint8List fileBytes, String fileName) async {
     final filePath = await FilePicker.platform.saveFile(
       dialogTitle: "Сохранить архив",
       fileName: fileName,
@@ -21,7 +21,7 @@ class FileManagerService {
     return filePath;
   }
 
-  static Future<File?> pickZipFile() async {
+  Future<File?> pickZipFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['zip'],

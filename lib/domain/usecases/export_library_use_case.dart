@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:movie_search_assistant_bloc/app/file_manager.dart/file_manager_service.dart';
-import 'package:movie_search_assistant_bloc/app/file_manager.dart/zip_service.dart';
+import 'package:movie_search_assistant_bloc/app/file_service/file_service.dart';
+import 'package:movie_search_assistant_bloc/app/file_service/zip_service.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/image_storage_service.dart';
 import 'package:movie_search_assistant_bloc/data/models/collection_model.dart';
 import 'package:movie_search_assistant_bloc/data/models/export_data_model.dart';
@@ -15,11 +15,17 @@ class ExportLibraryUseCase {
   final FilmRepository filmRepository;
   final CollectionRepository collectionRepository;
   final FilmCollectionRepository filmCollectionRepository;
+  final ImageStorageService imageStorageService;
+  final FileService fileManagerService;
+  final ZipService zipService;
 
   ExportLibraryUseCase({
     required this.filmRepository, 
     required this.collectionRepository, 
-    required this.filmCollectionRepository
+    required this.filmCollectionRepository,
+    required this.imageStorageService,
+    required this.fileManagerService,
+    required this.zipService
   });
 
   Future<String?> call() async {
@@ -28,10 +34,8 @@ class ExportLibraryUseCase {
       final collectionEntities = await collectionRepository.getAllCollections();
       final links = await filmCollectionRepository.getAllFilmCollectionLinks();
 
-      if (filmEntities.isEmpty &&
-          collectionEntities.isEmpty &&
-          links.isEmpty) {
-        return null;
+      if (filmEntities.isEmpty) {
+        return "Нет сохранённых фильмов";
       }
 
       final exportData = ExportDataModel(
@@ -55,15 +59,15 @@ class ExportLibraryUseCase {
       final imagesDir = Directory("${exportDir.path}/images");
       await imagesDir.create();
 
-      await ImageStorageService().copyAllImagesTo(imagesDir.path);
+      await imageStorageService.copyAllImagesTo(imagesDir.path);
 
-      final zipPath = await ZipService.zipDirectory(exportDir.path);
+      final zipPath = await zipService.zipDirectory(exportDir.path);
 
       final zipBytes = await File(zipPath).readAsBytes();
 
       final date = DateTime.now();
 
-      final savedPath = await FileManagerService.saveFile(
+      final savedPath = await fileManagerService.saveFile(
         zipBytes,
         "FilmLibrary_${date.day}_${date.month}_${date.year}_${date.hour}${date.minute}${date.second}.zip",
       );

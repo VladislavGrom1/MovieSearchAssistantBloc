@@ -4,9 +4,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:movie_search_assistant_bloc/app/cache_manager/image_path_resolver.dart';
+import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
-import 'package:movie_search_assistant_bloc/app/cache_manager/film_image_cache_manager.dart';
+import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
@@ -276,7 +276,7 @@ class _PosterImageWidget extends StatelessWidget {
         child: RepaintBoundary(
           child: CachedNetworkImage(
             imageUrl: film.posterUrlPreview ?? '',
-            cacheManager: FilmImageCacheManager.instance,
+            cacheManager: FilmImageCacheService.instance,
             memCacheHeight: 140,
             memCacheWidth: 100,
             fit: BoxFit.fill,

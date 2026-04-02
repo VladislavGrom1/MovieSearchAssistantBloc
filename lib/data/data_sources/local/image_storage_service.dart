@@ -81,6 +81,20 @@ class ImageStorageService {
     }
   }
 
+  Future<void> deleteAllFilmImages() async {
+    try {
+      final baseDir = await getApplicationDocumentsDirectory();
+      final filmsDir = Directory('${baseDir.path}/films');
+      
+      if (await filmsDir.exists()) {
+        await filmsDir.delete(recursive: true);
+      }
+      
+    } catch(e) {
+      rethrow;
+    }
+  }
+
   Future<void> copyAllImagesTo(String destinationPath) async {
     final baseDir = await getApplicationDocumentsDirectory();
     final filmsDir = Directory('${baseDir.path}/films');

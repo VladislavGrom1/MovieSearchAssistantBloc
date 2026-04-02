@@ -97,6 +97,17 @@ class FilmCollectionLinkLocalDataSource {
     }
   }
 
+  Future<void> removeAllLinks() async {
+    try{
+      final filmCollectionLinkBox = Hive.box<FilmCollectionLink>(HiveStorageKeys.filmCollectionLinkBox);
+      filmCollectionLinkBox.clear();
+    } on HiveError catch(e){
+      throw LocalDataSourceException(message: e.message);
+    } catch(e){
+      rethrow;
+    }
+  }
+
   Future<List<FilmCollectionLink>> getAllLinks() async {
     try{
       final filmCollectionLinkBox = Hive.box<FilmCollectionLink>(HiveStorageKeys.filmCollectionLinkBox);

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:movie_search_assistant_bloc/app/cache_manager/film_image_cache_manager.dart';
-import 'package:movie_search_assistant_bloc/app/cache_manager/image_path_resolver.dart';
+import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
+import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
@@ -284,7 +284,7 @@ class _PosterImageWidget extends StatelessWidget {
     } else {
       return CachedNetworkImage(
         imageUrl: film.posterUrlPreview ?? '',
-        cacheManager: FilmImageCacheManager.instance,
+        cacheManager: FilmImageCacheService.instance,
         imageBuilder: (context, imageProvider) => Container(
           height: 200.h,
           decoration: BoxDecoration(
@@ -605,6 +605,7 @@ class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
       title: Text('Новая коллекция'),
       content: TextField(
           controller: controller,
+          maxLength: 24,
           decoration: InputDecoration(
             hintText: 'Придумайте название',
             border: OutlineInputBorder(),

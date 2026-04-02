@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
-import 'package:movie_search_assistant_bloc/app/cache_manager/film_image_cache_manager.dart';
+import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
@@ -253,7 +253,7 @@ class _CachedImageWidget extends StatelessWidget {
       child: RepaintBoundary(
         child: CachedNetworkImage(
           imageUrl: urlImage ?? '',
-          cacheManager: FilmImageCacheManager.instance,
+          cacheManager: FilmImageCacheService.instance,
           memCacheWidth: 100,
           memCacheHeight: 140,
           fit: BoxFit.cover,

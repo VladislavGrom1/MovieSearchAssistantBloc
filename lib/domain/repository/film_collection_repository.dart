@@ -15,6 +15,8 @@ abstract class FilmCollectionRepository {
 
   Future<void> removeAllLinksByCollectionId(String collectionId);
 
+  Future<void> removeAllLinks();
+
   Future<List<FilmCollectionLink>> getAllFilmCollectionLinks();
 
   Future<List<int>> getFilmIdsByCollectionId(String collectionId);

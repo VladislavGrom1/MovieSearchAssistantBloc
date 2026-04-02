@@ -7,14 +7,18 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_repository.da
 
 class UpdateSavedFilmFromServerUseCase {
   final FilmRepository filmRepository;
+  final ImageStorageService imageStorageService;
 
-  UpdateSavedFilmFromServerUseCase({required this.filmRepository});
+  UpdateSavedFilmFromServerUseCase({
+    required this.filmRepository,
+    required this.imageStorageService
+  });
 
   Future<FilmEntity> call(FilmEntity oldfilm, FilmEntity newFilm, FilmImagesEntity? filmImages) async {
     try{
       String? posterImagePath;
       List<String>? screenshotPaths;
-      (posterImagePath, screenshotPaths) = await ImageStorageService().saveFilmImagesInDirectory(newFilm.posterUrl, filmImages?.imageUrls, newFilm.kinopoiskId!);
+      (posterImagePath, screenshotPaths) = await imageStorageService.saveFilmImagesInDirectory(newFilm.posterUrl, filmImages?.imageUrls, newFilm.kinopoiskId!);
       
       FilmEntity updatedFilm = newFilm.copyWith(
         userComment: oldfilm.userComment, 

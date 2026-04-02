@@ -75,6 +75,17 @@ class FilmCollectionRepositoryImpl implements FilmCollectionRepository{
   }
 
   @override
+  Future<void> removeAllLinks() async {
+    try{
+      await filmCollectionLinkLocalDataSource.removeAllLinks();
+    } on LocalDataSourceException {
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  @override
   Future<List<FilmCollectionLink>> getAllFilmCollectionLinks() async {
     try{
       return await filmCollectionLinkLocalDataSource.getAllLinks();
@@ -106,4 +117,5 @@ class FilmCollectionRepositoryImpl implements FilmCollectionRepository{
       rethrow;
     }    
   }
+
 }

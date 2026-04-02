@@ -1,8 +1,9 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
-import 'package:movie_search_assistant_bloc/app/util/network_service/cubit/internet_cubit.dart';
-import 'package:movie_search_assistant_bloc/app/util/network_service/network_service.dart';
+import 'package:movie_search_assistant_bloc/app/cache_manager/image_path_resolver.dart';
+import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_cubit.dart';
+import 'package:movie_search_assistant_bloc/app/network_service/network_service.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/collection_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/film_collection_link_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/flim_local_data_source.dart';
@@ -19,6 +20,7 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_collection_re
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_collection_use_case.dart';
@@ -50,10 +52,13 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/searc
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_profile_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 final getIt = GetIt.instance;
 
 Future<void> initializeDependencies() async {
+    final dir = await getApplicationDocumentsDirectory();
+    ImagePathResolver.init(dir.path);
 
     await HiveInit.init();
 
@@ -104,6 +109,11 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => WatchLinksByCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchLinksUseCase(filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchCollectionsUseCase(collectionRepository: getIt(), filmCollectionRepository: getIt()));
+    getIt.registerLazySingleton(() => ExportLibraryUseCase(
+      filmRepository: getIt(), 
+      collectionRepository: getIt(), 
+      filmCollectionRepository: getIt())
+    );
     
 
     // Blocs
@@ -136,7 +146,8 @@ Future<void> initializeDependencies() async {
     ));
     getIt.registerFactory(() => UserProfileBloc(
       getApiKeyInfoFromStorageUseCase: getIt(),
-      updateUserApiKeyInfoUseCase: getIt()
+      updateUserApiKeyInfoUseCase: getIt(),
+      exportLibraryUseCase: getIt()
     ));
 
     // Cubit

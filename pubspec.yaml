@@ -40,6 +40,12 @@ dependencies:
   path_provider: ^2.1.5
   connectivity_plus: ^7.0.0
   fluttertoast: ^9.0.0
+  archive: ^4.0.9
+  path: ^1.9.1
+  share_plus: ^12.0.2
+  file_picker: ^10.3.10
+  #device_info_plus: ^12.4.0
+  #permission_handler: ^12.0.1
 
 dev_dependencies:
   build_runner: ^2.4.6

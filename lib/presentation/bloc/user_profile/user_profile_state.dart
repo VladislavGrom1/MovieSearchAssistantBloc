@@ -49,6 +49,8 @@ final class UserProfileActionFailure extends UserProfileState{
   List<Object> get props => [message];
 }
 
+class ExportInProgress extends UserProfileState{}
+
 final class UserProfileActionSuccess extends UserProfileState{
   final String message;
 

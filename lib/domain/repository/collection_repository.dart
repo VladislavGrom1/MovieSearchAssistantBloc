@@ -7,7 +7,7 @@ abstract class CollectionRepository {
 
   Future<void> addCollection(CollectionModel collection);
 
-  Future<List<CollectionEntity>?> getAllCollections();
+  Future<List<CollectionEntity>> getAllCollections();
 
   Future<void> removeCollection(String collectionId);
 

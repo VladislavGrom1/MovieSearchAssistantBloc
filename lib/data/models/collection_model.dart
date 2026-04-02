@@ -22,4 +22,20 @@ class CollectionModel {
       createdAt: collectionEntity.createdAt,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "createdAt": createdAt?.toIso8601String(),
+  };
+
+  factory CollectionModel.fromJson(Map<String, dynamic> json) {
+    return CollectionModel(
+      id: json["id"],
+      name: json["name"],
+      createdAt: json["createdAt"] != null 
+          ? DateTime.parse(json["createdAt"]) 
+          : null,
+    );
+  }
 }

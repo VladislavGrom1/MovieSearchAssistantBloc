@@ -20,6 +20,8 @@ class UpdateApiKey extends UserProfileEvent{
   List<Object?> get props => [updatedApiKey];
 }
 
+class ExportLibrary extends UserProfileEvent{}
+
 class GetCacheSize extends UserProfileEvent{}
 
 class ClearCacheDirectory extends UserProfileEvent{}

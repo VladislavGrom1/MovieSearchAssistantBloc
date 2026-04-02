@@ -28,6 +28,8 @@ abstract class FilmRepository {
 
   Future<List<FilmEntity>> getFilmsFromLocalDataSource(List<int> filmIds);
 
+  Future<List<FilmEntity>> getAllFilmsFromLocalDataSource();
+
   Future<void> removeFilmFromLocalDataSource(int idFilm);
 
   Future<void> removeAllFilmsFromLocalDataSource();

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:movie_search_assistant_bloc/app/util/network_service/network_service.dart';
+import 'package:movie_search_assistant_bloc/app/network_service/network_service.dart';
 
 enum NetworkStatus { initial, connected, disconnected }
 

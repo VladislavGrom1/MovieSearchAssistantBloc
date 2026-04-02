@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:movie_search_assistant_bloc/app/util/cache_manager/film_image_cache_manager.dart';
+import 'package:movie_search_assistant_bloc/app/cache_manager/film_image_cache_manager.dart';
+import 'package:movie_search_assistant_bloc/app/cache_manager/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
@@ -14,7 +15,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collec
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 
-// TODO: Реализовать карусель скриншотов + выбор откуда загружать фото (с ЛХ или с сервера)
+// TODO: Реализовать карусель скриншотов
 
 @RoutePage()
 class FilmInformationScreen extends StatelessWidget {
@@ -271,12 +272,14 @@ class _PosterImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (film.localPosterImagePath != null) {
+      final fullPosterImagePath = ImagePathResolver.resolve(film.localPosterImagePath!);
+
       return Container(
         height: 200.h,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.w),
         ),
-        child: Image.file(File(film.localPosterImagePath!), fit: BoxFit.cover),
+        child: Image.file(File(fullPosterImagePath), fit: BoxFit.cover),
       );
     } else {
       return CachedNetworkImage(
@@ -471,7 +474,6 @@ class _CollectionPickerSheet extends StatelessWidget {
         expand: false,
         builder: (context, scrollController) {
           return BlocBuilder<FilmInformationBloc, FilmInformationState>(
-            //buildWhen: (previous, current) => current is FilmLoaded,
             builder: (context, filmState) {
               final collectionIds = (filmState as FilmLoaded).collectionIds;
 

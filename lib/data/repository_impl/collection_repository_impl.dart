@@ -40,7 +40,7 @@ class CollectionRepositoryImpl implements CollectionRepository{
   }
 
   @override
-  Future<List<CollectionEntity>?> getAllCollections() async {
+  Future<List<CollectionEntity>> getAllCollections() async {
     try{
       List<CollectionEntity> collectionsEntity = [];
       List<CollectionModel>? collectionsModel = await collectionLocalDataSource.getAllCollections();
@@ -48,9 +48,8 @@ class CollectionRepositoryImpl implements CollectionRepository{
         for(var collectionModel in collectionsModel){
           collectionsEntity.add(CollectionEntity.fromCollectionModel(collectionModel));
         }
-        return collectionsEntity;
       }
-      return null;
+      return collectionsEntity;
     } on LocalDataSourceException {
       rethrow;
     } catch(e){

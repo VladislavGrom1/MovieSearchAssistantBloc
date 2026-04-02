@@ -74,4 +74,46 @@ class FilmBaseModel {
       posterUrlPreview: film.posterUrlPreview
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    "kinopoiskId": kinopoiskId,
+    "nameRu": nameRu,
+    "nameEn": nameEn,
+    "nameOriginal": nameOriginal,
+    "countries": countries,
+    "genres": genres,
+    "ratingKinopoisk": ratingKinopoisk,
+    "ratingImbd": ratingImbd,
+    "year": year,
+    "type": type,
+    "posterUrl": posterUrl,
+    "posterUrlPreview": posterUrlPreview,
+    "userComment": userComment,
+    "userRating": userRating,
+    "localPosterImagePath": localPosterImagePath,
+    "localScreenshotPaths": localScreenshotPaths,
+  };
+
+  factory FilmBaseModel.fromJson(Map<String, dynamic> json) {
+    return FilmBaseModel(
+      kinopoiskId: json["kinopoiskId"],
+      nameRu: json["nameRu"],
+      nameEn: json["nameEn"],
+      nameOriginal: json["nameOriginal"],
+      countries: json["countries"] != null ? List<String>.from(json["countries"]) : null,
+      genres: json["genres"] != null ? List<String>.from(json["genres"]) : null,
+      ratingKinopoisk: json["ratingKinopoisk"],
+      ratingImbd: json["ratingImbd"],
+      year: json["year"],
+      type: json["type"],
+      posterUrl: json["posterUrl"],
+      posterUrlPreview: json["posterUrlPreview"],
+      userComment: json["userComment"],
+      userRating: json["userRating"],
+      localPosterImagePath: json["localPosterImagePath"],
+      localScreenshotPaths: json["localScreenshotPaths"] != null 
+          ? List<String>.from(json["localScreenshotPaths"]) 
+          : null,
+    );
+  }
 }

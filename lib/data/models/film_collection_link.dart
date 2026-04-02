@@ -10,4 +10,16 @@ class FilmCollectionLink {
     required this.filmId,
     required this.collectionId
   });
+
+  Map<String, dynamic> toJson() => {
+    "filmId": filmId,
+    "collectionId": collectionId,
+  };
+
+  factory FilmCollectionLink.fromJson(Map<String, dynamic> json) {
+    return FilmCollectionLink(
+      filmId: json["filmId"],
+      collectionId: json["collectionId"],
+    );
+  }
 }

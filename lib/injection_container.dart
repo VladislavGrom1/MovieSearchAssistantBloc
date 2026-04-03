@@ -25,6 +25,7 @@ import 'package:movie_search_assistant_bloc/domain/repository/user_repository.da
 import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_collection_use_case.dart';
@@ -114,8 +115,13 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => RemoveFilmFromCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt(), imageStorageService: getIt()));
     getIt.registerLazySingleton(() => GetCollectionsUseCase(collectionRepository: getIt()));
     getIt.registerLazySingleton(() => AddCollectionUseCase(collectionRepository: getIt()));
-    getIt.registerLazySingleton(() => RemoveCollectionUseCase(collectionRepository: getIt(), filmRepository: getIt(), filmCollectionRepository: getIt()));
-    getIt.registerLazySingleton(() => ClearCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
+    getIt.registerLazySingleton(() => RemoveCollectionUseCase(
+      collectionRepository: getIt(), 
+      filmRepository: getIt(), 
+      filmCollectionRepository: getIt(),
+      imageStorageService: getIt()
+    ));
+    getIt.registerLazySingleton(() => ClearCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt(), imageStorageService: getIt()));
     getIt.registerLazySingleton(() => ClearLibraryUseCase(
       filmRepository: getIt(), 
       collectionRepository: getIt(), 
@@ -134,6 +140,12 @@ Future<void> initializeDependencies() async {
       imageStorageService: getIt(),
       fileManagerService: getIt(),
       zipService: getIt()
+    ));
+    getIt.registerLazySingleton(() => ImportLibraryUseCase(
+      fileService: getIt(), 
+      filmRepository: getIt(), 
+      collectionRepository: getIt(), 
+      filmCollectionRepository: getIt()
     ));
     
 
@@ -168,6 +180,7 @@ Future<void> initializeDependencies() async {
     getIt.registerFactory(() => UserProfileBloc(
       getApiKeyInfoFromStorageUseCase: getIt(),
       updateUserApiKeyInfoUseCase: getIt(),
+      importLibraryUseCase: getIt(),
       exportLibraryUseCase: getIt(),
       clearLibraryUseCase: getIt()
     ));

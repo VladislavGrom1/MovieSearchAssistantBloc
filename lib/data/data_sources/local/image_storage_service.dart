@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImageStorageService {
@@ -22,7 +24,7 @@ class ImageStorageService {
     try{
       final dir = await _getFilmDir(filmId);
       final filePath = '${dir.path}/poster.jpg';
-      await _downloadAndSaveImage(url, filePath);
+      await _downloadAndSaveImage(url, filePath, true);
       return "$filmId/poster.jpg";
     } catch(e){
       rethrow;
@@ -33,11 +35,12 @@ class ImageStorageService {
     final dir = await _getFilmDir(filmId);
 
     final paths = <String>[];
+    final limitedUrs = urls.take(3).toList();
 
-    for (int i = 0; i < urls.length; i++) {
+    for (int i = 0; i < limitedUrs.length; i++) {
       final filePath = '${dir.path}/screenshot_$i.jpg';
 
-      await _downloadAndSaveImage(urls[i], filePath);
+      await _downloadAndSaveImage(urls[i], filePath, false);
 
       paths.add("$filmId/screenshot_$i.jpg");
     }
@@ -45,13 +48,17 @@ class ImageStorageService {
     return paths;
   }
 
-  Future<String> _downloadAndSaveImage(String url, String filePath) async {
+  Future<String> _downloadAndSaveImage(String url, String filePath, bool isPoster) async {
     final response = await Dio().get(
       url,
       options: Options(responseType: ResponseType.bytes),
     );
+
+    final originalBytes = response.data;
+    final compressedBytes = await _compressImage(originalBytes, isPoster: isPoster);
+
     final file = File(filePath);
-    await file.writeAsBytes(response.data);
+    await file.writeAsBytes(compressedBytes);
     return file.path;
   }
 
@@ -118,5 +125,14 @@ class ImageStorageService {
         }
       }
     }
+  }
+
+  Future<Uint8List> _compressImage(Uint8List bytes, {bool isPoster = false}) async {
+    return await FlutterImageCompress.compressWithList(
+      bytes,
+      quality: isPoster ? 80 : 60,
+      minWidth: isPoster ? 600 : 800,
+      minHeight: isPoster ? 900 : 800,
+    );
   }
 }

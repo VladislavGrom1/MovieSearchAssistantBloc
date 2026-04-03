@@ -62,6 +62,10 @@ class _UserProfileView extends StatelessWidget {
                             return Center(child: CircularProgressIndicator());
                           }
 
+                          if (state is ImportInProgress){
+                            return Center(child: CircularProgressIndicator());
+                          }
+
                           if (state is UserProfileLoaded) {
                             return _UserProfileContent(
                                 userEntity: state.userEntity,
@@ -209,7 +213,7 @@ class _UserProfileContent extends StatelessWidget {
   }
 
   void _importLibrary(BuildContext context) {
-    // TODO: реализовать импорт фильмов
+    context.read<UserProfileBloc>().add(ImportLibrary());
   }
 
   void _exportLibrary(BuildContext context) {

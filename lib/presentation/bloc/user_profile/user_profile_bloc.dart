@@ -7,7 +7,7 @@ import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_api_key_info_from_storage_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_films_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 
 part 'user_profile_event.dart';
@@ -16,12 +16,14 @@ part 'user_profile_state.dart';
 class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   final GetApiKeyInfoFromStorageUseCase getApiKeyInfoFromStorageUseCase;
   final UpdateUserApiKeyInfoUseCase updateUserApiKeyInfoUseCase;
+  final ImportLibraryUseCase importLibraryUseCase;
   final ExportLibraryUseCase exportLibraryUseCase;
   final ClearLibraryUseCase clearLibraryUseCase;
 
   UserProfileBloc({
     required this.getApiKeyInfoFromStorageUseCase,
     required this.updateUserApiKeyInfoUseCase,
+    required this.importLibraryUseCase,
     required this.exportLibraryUseCase,
     required this.clearLibraryUseCase
   }) : super(UserProfileInitial()) {
@@ -31,6 +33,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<ClearCacheDirectory>(_clearCacheDirectory);
     on<ClearLibrary>(_clearLibrary);
     on<ExportLibrary>(_exportLibrary);
+    on<ImportLibrary>(_importLibrary);
   }
 
   Future<void> _getUserProfileInfo(GetUserProfileInfo event, Emitter emit) async {
@@ -90,7 +93,6 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   Future<void> _clearCacheDirectory(ClearCacheDirectory event, Emitter emit) async {
     final currentState = state;
     if(currentState is! UserProfileLoaded) return;
-    emit(UserProfileLoading());
     try{
       final currentCache = await FilmImageCacheService.getCacheSizeInMB();
       if(currentCache == 0){
@@ -146,6 +148,29 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(currentState);
     } catch(e){
       emit(UserProfileActionFailure(message: "Ошибка экспорта: ${e.toString()}"));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _importLibrary(ImportLibrary event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! UserProfileLoaded) return;
+    emit(ImportInProgress());
+    try{
+      final result = await importLibraryUseCase.call();
+
+      if(result == null){
+        emit(UserProfileActionFailure(message: "Операция импорта отменена"));
+        emit(currentState);
+        return;
+      }
+      emit(UserProfileActionSuccess(message: "Данные успешно импортированы"));
+      emit(currentState);
+    } on LocalDataSourceException{
+      emit(UserProfileActionFailure(message: "Не удалось импортировать данные"));
+      emit(currentState);
+    } catch(e){
+      emit(UserProfileActionFailure(message: "Не удалось импортировать данные"));
       emit(currentState);
     }
   }

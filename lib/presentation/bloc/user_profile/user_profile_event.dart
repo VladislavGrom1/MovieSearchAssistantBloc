@@ -22,6 +22,8 @@ class UpdateApiKey extends UserProfileEvent{
 
 class ExportLibrary extends UserProfileEvent{}
 
+class ImportLibrary extends UserProfileEvent{}
+
 class GetCacheSize extends UserProfileEvent{}
 
 class ClearCacheDirectory extends UserProfileEvent{}

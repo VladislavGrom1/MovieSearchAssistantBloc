@@ -51,6 +51,8 @@ final class UserProfileActionFailure extends UserProfileState{
 
 class ExportInProgress extends UserProfileState{}
 
+class ImportInProgress extends UserProfileState{}
+
 final class UserProfileActionSuccess extends UserProfileState{
   final String message;
 

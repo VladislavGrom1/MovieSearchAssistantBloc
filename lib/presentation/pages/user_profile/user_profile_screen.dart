@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_profile_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 
 @RoutePage()
 class UserProfileScreen extends StatelessWidget {
@@ -188,7 +189,7 @@ class _UserProfileContent extends StatelessWidget {
                   onTap: () {
                     switch (index) {
                       case 0:
-                        _changeApiKey(context);
+                        _showChangeApiKeyDialog(context);
                         break;
                       case 1:
                         _importLibrary(context);
@@ -203,7 +204,13 @@ class _UserProfileContent extends StatelessWidget {
                         _clearCacheDirectory(context);
                         break;
                       case 5:
-                        _clearLibrary(context);
+                        _showConfirmActionDialog(
+                          context, 
+                          "Очищение библиотеки", 
+                          "Вы уверены, что хотите очистить библиотеку? В случае очищения все коллекции и сохранённые фильмы будут удалены.", 
+                          "Очистить", 
+                          () => _clearLibrary(context)
+                        );
                         break;
                     }
                   });
@@ -214,7 +221,7 @@ class _UserProfileContent extends StatelessWidget {
     );
   }
 
-  void _changeApiKey(BuildContext context) {
+  void _showChangeApiKeyDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -223,6 +230,26 @@ class _UserProfileContent extends StatelessWidget {
           child: _UpdateApiKeyDialog(),
         );
       },
+    );
+  }
+
+  void _showConfirmActionDialog(
+    BuildContext context, 
+    String titleText, 
+    String contentText, 
+    String actionText, 
+    VoidCallback actionFunc
+    ){
+    showDialog(
+      context: context, 
+      builder: (dialogContext) {
+        return ConfirmAlertDialog(
+          titleText: titleText, 
+          contentText: contentText, 
+          actionText: actionText, 
+          actionFunc: actionFunc
+        );
+      }
     );
   }
 
@@ -297,3 +324,5 @@ class _UpdateApiKeyDialogState extends State<_UpdateApiKeyDialog> {
     );
   }
 }
+
+

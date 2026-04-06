@@ -6,6 +6,7 @@ import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 
 @RoutePage()
 class CollectionsScreen extends StatelessWidget {
@@ -66,8 +67,6 @@ class _CollectionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final collectionBloc = context.read<CollectionsBloc>();
-
     return ListView.separated(
       itemCount: collections.length + 1,
       separatorBuilder: (_, __) => SizedBox(height: 12.h), 
@@ -87,11 +86,50 @@ class _CollectionsList extends StatelessWidget {
               );
             }
           ),
-          onClear: () => collectionBloc.add(ClearCollection(collectionId: collection.id!)),
-          onRemove: () => collectionBloc.add(RemoveCollection(collectionId: collection.id!)),
-          
+          onClear: () => _showConfirmActionDialog(
+            context,
+            "Очищение коллекции",
+            "Вы действительно хотите очистить коллекцию? Содержимое коллекции будет удалено.",
+            "Очистить",
+            () => _clearCollection(context, collection.id!)
+          ),
+          onRemove: () => _showConfirmActionDialog(
+            context, 
+            "Удаление коллекции", 
+            "Вы действительно хотите удалить коллекцию? Коллекция и её содержимое будут удалены.", 
+            "Удалить", 
+            () => _removeCollection(context, collection.id!)
+          )
         );
       },
+    );
+  }
+
+  void _clearCollection(BuildContext context, String collectionId){
+    context.read<CollectionsBloc>().add(ClearCollection(collectionId: collectionId));  
+  }
+
+  void _removeCollection(BuildContext context, String collectionId){
+    context.read<CollectionsBloc>().add(RemoveCollection(collectionId: collectionId));
+  }
+
+  void _showConfirmActionDialog(
+    BuildContext context, 
+    String titleText, 
+    String contentText, 
+    String actionText, 
+    VoidCallback actionFunc
+    ){
+    showDialog(
+      context: context, 
+      builder: (dialogContext) {
+        return ConfirmAlertDialog(
+          titleText: titleText, 
+          contentText: contentText, 
+          actionText: actionText, 
+          actionFunc: actionFunc
+        );
+      }
     );
   }
 }

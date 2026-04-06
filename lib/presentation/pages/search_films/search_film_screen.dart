@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -103,8 +102,7 @@ class _SearchFilmContent extends StatelessWidget {
   const _SearchFilmContent({required this.filmCollectionsMap});
 
   void onSearchSubmitted(String keyword, BuildContext context) {
-    context.router.push(
-        SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
+    context.router.push(SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
   }
 
   void onFilterSubmitted(BuildContext context) {
@@ -120,8 +118,7 @@ class _SearchFilmContent extends StatelessWidget {
             onSearchSubmitted: onSearchSubmitted,
             onFilterSubmitted: onFilterSubmitted),
         SizedBox(height: 10.h),
-        Expanded(
-            child: _CollectionsList(filmCollectionsMap: filmCollectionsMap)),
+        Expanded(child: _CollectionsList(filmCollectionsMap: filmCollectionsMap)),
       ],
     );
   }
@@ -219,7 +216,7 @@ class _FilmCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CachedImageWidget(urlImage: film.posterUrlPreview),
+          _CachedImageWidget(urlImage: film.posterUrl),
           SizedBox(height: 5.h),
           Container(
             width: 96.w,
@@ -254,9 +251,9 @@ class _CachedImageWidget extends StatelessWidget {
         child: CachedNetworkImage(
           imageUrl: urlImage ?? '',
           cacheManager: FilmImageCacheService.instance,
-          memCacheWidth: 100,
-          memCacheHeight: 140,
-          fit: BoxFit.cover,
+          memCacheWidth: 200,
+          memCacheHeight: 280,
+          fit: BoxFit.fill,
           width: 100.w,
           height: 140.h,
           placeholder: (context, url) => Container(color: Colors.grey[200]),

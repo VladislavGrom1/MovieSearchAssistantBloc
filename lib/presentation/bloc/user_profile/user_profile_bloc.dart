@@ -173,6 +173,9 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       }
       emit(UserProfileActionSuccess(message: "Данные успешно импортированы"));
       emit(currentState);
+    } on RemoteDataSourceException{
+      emit(UserProfileActionFailure(message: "Операция импорта прервана"));
+      emit(currentState);
     } on LocalDataSourceException{
       emit(UserProfileActionFailure(message: "Не удалось импортировать данные"));
       emit(currentState);
@@ -199,8 +202,8 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       }
       emit(UserProfileActionSuccess(message: "Данные успешно импортированы"));
       emit(currentState);
-    } on RemoteDataSourceException catch(e){
-      emit(UserProfileActionFailure(message: "Операция импорта прервана: ${e.message}"));
+    } on RemoteDataSourceException {
+      emit(UserProfileActionFailure(message: "Операция импорта прервана"));
       emit(currentState);
     } on LocalDataSourceException{
       emit(UserProfileActionFailure(message: "Не удалось импортировать данные"));

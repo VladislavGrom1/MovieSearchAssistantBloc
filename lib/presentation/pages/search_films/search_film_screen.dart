@@ -7,6 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
@@ -42,7 +44,7 @@ class _SearchFilmView extends StatelessWidget {
     final searchFilmBloc = context.read<SearchFilmsBloc>();
 
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primaryThemeBlack,
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.only(left: 20.w, right: 20.w),
@@ -74,7 +76,6 @@ class _SearchFilmView extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 20.h),
               ],
             ),
           ),
@@ -86,10 +87,17 @@ class _SearchFilmView extends StatelessWidget {
       builder: (context, constraints) {
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Center(child: Text(message)),
-          ),
+          child: Column(
+            children: [
+              Image.asset("assets/icons/errorIcon.png", fit: BoxFit.cover),
+              Text(
+                message, 
+                style: CustomTextStyles.m3TitleLarge(), 
+                textAlign: TextAlign.center
+              ),
+              SizedBox(height: 20.h),
+            ],
+          )
         );
       },
     );
@@ -139,14 +147,17 @@ class _CollectionsList extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(filmCollectionsNamesList[index]),
+                  Text(
+                    _switchCollectionName(filmCollectionsNamesList[index]),
+                    style: CustomTextStyles.m3TitleLarge()
+                  ),
                   IconButton(
                       onPressed: () {
                         context.router.push(SearchedFilmsRoute(
                             nameCollection: filmCollectionsNamesList[index],
                             appBarTitle: filmCollectionsNamesList[index]));
                       },
-                      icon: Icon(Icons.arrow_forward, color: Colors.purple))
+                      icon: Icon(Icons.arrow_forward, color: AppColors.primaryScheme))
                 ],
               ),
               SizedBox(
@@ -160,14 +171,25 @@ class _CollectionsList extends StatelessWidget {
         separatorBuilder: (context, index) => SizedBox(height: 12.h),
         itemCount: FilmCollectionNames.filmCollectionNames.length);
   }
+
+  String _switchCollectionName(String collectionName){
+    String collectionNameFormated;
+    switch(collectionName){
+      case("TOP_POPULAR_MOVIES"): collectionNameFormated = "Популярные фильмы"; break;
+      case("POPULAR_SERIES"): collectionNameFormated = "Популярные сериалы"; break;
+      case("TOP_250_MOVIES"): collectionNameFormated = "Топ 250: фильмы"; break;
+      case("TOP_250_TV_SHOWS"): collectionNameFormated = "Топ 250: сериалы"; break;
+      default: collectionNameFormated = collectionName;
+    }
+    return collectionNameFormated;
+  }
 }
 
 class _CollectionFilmsList extends StatelessWidget {
   final Map<String, List<FilmEntity>?>? filmCollectionsMap;
   final String filmCollectionsName;
 
-  const _CollectionFilmsList(
-      {required this.filmCollectionsMap, required this.filmCollectionsName});
+  const _CollectionFilmsList({required this.filmCollectionsMap, required this.filmCollectionsName});
 
   @override
   Widget build(BuildContext context) {
@@ -201,63 +223,142 @@ class _FilmCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        if (film.kinopoiskId != null) {
-          context.router.push(FilmInformationRoute(
-              filmId: film.kinopoiskId!,
-              filmName: film.nameRu ?? film.nameOriginal.toString()));
-        } else {
-          Fluttertoast.showToast(
-            backgroundColor: Colors.red,
-            msg: "Не удалось получить информацию о фильме"
-          );
-        }
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _CachedImageWidget(urlImage: film.posterUrl),
-          SizedBox(height: 5.h),
-          Container(
-            width: 96.w,
-            color: isSaved ? Colors.green : Colors.white,
-            child: Text(
-              film.nameRu!,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 3,
-              style: TextStyle(
-                  fontSize: 11,
-                  height: 11 / 9,
-                  letterSpacing: 0,
-                  fontWeight: FontWeight.bold),
+        enableFeedback: false,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        onTap: () {
+          if (film.kinopoiskId != null) {
+            context.router.push(FilmInformationRoute(
+                filmId: film.kinopoiskId!,
+                filmName: film.nameRu ?? film.nameOriginal.toString()));
+          } else {
+            Fluttertoast.showToast(
+              backgroundColor: Colors.red,
+              msg: "Не удалось получить информацию о фильме"
+            );
+          }
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _CachedImageWidget(
+              urlImage: film.posterUrl, 
+              rating: film.ratingKinopoisk,
+              filmIsSaved: isSaved,
             ),
-          )
-        ],
-      ),
+            SizedBox(height: 5.h),
+            SizedBox(
+              width: 96.w,
+              child: Text(
+                film.nameRu!,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 3,
+                style: CustomTextStyles.m3LabelLarge()
+              ),
+            )
+          ],
+        ),
     );
   }
 }
 
 class _CachedImageWidget extends StatelessWidget {
   final String? urlImage;
+  final num? rating;
+  final bool filmIsSaved;
 
-  const _CachedImageWidget({required this.urlImage});
+  const _CachedImageWidget({
+    required this.urlImage,
+    required this.rating,
+    required this.filmIsSaved
+  });
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.w),
       child: RepaintBoundary(
-        child: CachedNetworkImage(
-          imageUrl: urlImage ?? '',
-          cacheManager: FilmImageCacheService.instance,
-          memCacheWidth: 200,
-          memCacheHeight: 280,
-          fit: BoxFit.fill,
-          width: 100.w,
-          height: 140.h,
-          placeholder: (context, url) => Container(color: Colors.grey[200]),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
+        child: Stack(
+          children: [
+            CachedNetworkImage(
+              imageUrl: urlImage ?? '',
+              cacheManager: FilmImageCacheService.instance,
+              memCacheWidth: 200,
+              memCacheHeight: 280,
+              fit: BoxFit.fill,
+              width: 100.w,
+              height: 140.h,
+              placeholder: (context, url) => Container(color: AppColors.secondaryThemeGrey),
+              errorWidget: (context, url, error) => const Icon(Icons.error, color: AppColors.secondaryThemeGrey,),
+            ),
+            _RatingIcon(rating: rating),
+            if(filmIsSaved)
+            Positioned(
+              top: 6.h,
+              left: 4.w,
+              child: Container(
+                width: 22.w,
+                height: 20.h,
+                decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(5.0.h)),
+                child: Icon(
+                  Icons.save_rounded, 
+                  color: Colors.white,
+                  size: 19.w,
+                )
+              )
+            ),
+          ] 
+        ),
+      ),
+    );
+  }
+}
+
+class _RatingIcon extends StatelessWidget {
+  final num? rating;
+
+  const _RatingIcon({required this.rating});
+
+  @override
+  Widget build(BuildContext context) {
+    Color backgroundColor;
+    String ratingText;
+    
+    if (rating == null) {
+      backgroundColor = AppColors.ratingGrey;
+      ratingText = "-";
+    } else {
+      if (rating! >= 7 && rating! <= 10) {
+        backgroundColor = AppColors.ratingGreen;
+      }
+      else if (rating! >= 6 && rating! < 7) {
+        backgroundColor = AppColors.ratingOrange;
+      }
+      else if (rating! >= 5 && rating! < 6) {
+        backgroundColor = AppColors.ratingGrey;
+      }
+      else if (rating! >= 0 && rating! < 5) {
+        backgroundColor = AppColors.ratingRed;
+      } else {
+        backgroundColor = AppColors.ratingGrey;
+      }
+      ratingText = rating.toString();
+    }
+
+    return Positioned(
+      bottom: 6.h,
+      right: 4.w,
+      child: Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(5.0.h),
+        ),
+        width: 22.w,
+        height: 20.h,
+        child: Center(
+          child: Text(ratingText, style: CustomTextStyles.m3LabelSmall(color: AppColors.textWhite))
         ),
       ),
     );

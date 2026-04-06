@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 
 @RoutePage()
 class HomeScreen extends StatelessWidget {
@@ -20,26 +21,26 @@ class HomeScreen extends StatelessWidget {
           body: child,
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.shifting,
-            backgroundColor: Colors.black,
-            selectedItemColor: Colors.purple,
-            unselectedItemColor: Colors.white,
+            backgroundColor: AppColors.primaryThemeBlack,
+            selectedItemColor: AppColors.primaryScheme,
+            unselectedItemColor: AppColors.primaryThemeGrey,
             currentIndex: tabsRouter.activeIndex,
             onTap: tabsRouter.setActiveIndex,
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.search),
                 label: "Поиск",
-                backgroundColor: Colors.black
+                backgroundColor: AppColors.primaryThemeBlack
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.library_books_outlined),
                 label: "Коллекции",
-                backgroundColor: Colors.black
+                backgroundColor: AppColors.primaryThemeBlack
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.account_circle),
                 label: "Профиль",
-                backgroundColor: Colors.black
+                backgroundColor: AppColors.primaryThemeBlack
               ),
             ],
           ),

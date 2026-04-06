@@ -369,6 +369,8 @@ class FilmEntity extends Equatable {
     posterUrlPreview,
     userComment,
     userRating,
+    localPosterImagePath,
+    localScreenshotPaths,
     // FilmDetailInformation
     kinopoiskHDId,
     imdbId,

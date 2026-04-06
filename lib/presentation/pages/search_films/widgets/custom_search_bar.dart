@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 
 class CustomSearchBar extends StatefulWidget {
   const CustomSearchBar({
@@ -51,7 +53,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       height: 50.h,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey,
+          color: AppColors.primaryThemeGrey,
           borderRadius: BorderRadius.circular(8.w),
         ),
         child: Row(
@@ -63,10 +65,10 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                     onPressed: () {
                       _focusNode.unfocus();
                     }, 
-                    icon: Icon(Icons.arrow_back, color: Colors.purple))
+                    icon: Icon(Icons.arrow_back, color: AppColors.primaryScheme))
                   : Padding(
                     padding: EdgeInsets.only(left: 10.w),
-                    child: Icon(Icons.search, color: Colors.black),
+                    child: Icon(Icons.search, color: AppColors.secondaryThemeGrey),
                   )
             ),
             Expanded(
@@ -88,9 +90,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                   _clearText();
                 }
               },
-              cursorColor: Colors.black,
-              style:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              cursorColor: AppColors.primaryScheme,
+              style: CustomTextStyles.m3TitleMedium(),
               decoration: InputDecoration(border: InputBorder.none),
             )),
             Padding(
@@ -103,7 +104,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                         onPressed: () {
                           _clearText();
                         },
-                        icon: Icon(Icons.clear, color: Colors.purple)
+                        icon: Icon(Icons.clear, color: AppColors.primaryScheme)
                       )
                     : IconButton(
                         key: ValueKey('filter'),
@@ -111,7 +112,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                           _clearText();
                           widget.onFilterSubmitted(context);
                         },
-                        icon: Icon(Icons.filter_alt_outlined, color: Colors.purple)
+                        icon: Icon(Icons.filter_alt_outlined, color: AppColors.primaryScheme)
                       )
             ))
           ],

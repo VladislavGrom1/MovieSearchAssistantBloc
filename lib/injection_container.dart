@@ -26,6 +26,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collecti
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_collection_use_case.dart';
@@ -147,6 +148,13 @@ Future<void> initializeDependencies() async {
       collectionRepository: getIt(), 
       filmCollectionRepository: getIt()
     ));
+    getIt.registerLazySingleton(() => ImportOldLibraryUseCase(
+      fileService: getIt(),
+      filmRepository: getIt(),
+      collectionRepository: getIt(),
+      filmCollectionRepository: getIt(),
+      imageStorageService: getIt()
+    ));
     
 
     // Blocs
@@ -181,6 +189,7 @@ Future<void> initializeDependencies() async {
       getApiKeyInfoFromStorageUseCase: getIt(),
       updateUserApiKeyInfoUseCase: getIt(),
       importLibraryUseCase: getIt(),
+      importOldLibraryUseCase: getIt(),
       exportLibraryUseCase: getIt(),
       clearLibraryUseCase: getIt()
     ));

@@ -24,6 +24,8 @@ class ExportLibrary extends UserProfileEvent{}
 
 class ImportLibrary extends UserProfileEvent{}
 
+class ImportOldLibrary extends UserProfileEvent{}
+
 class GetCacheSize extends UserProfileEvent{}
 
 class ClearCacheDirectory extends UserProfileEvent{}

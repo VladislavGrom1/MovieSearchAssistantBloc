@@ -33,6 +33,19 @@ class FileService {
 
     return File(result.files.single.path!);
   }
+
+  Future<File?> pickJsonFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json']
+    );
+
+    if (result == null || result.files.single.path == null) {
+      return null;
+    }
+
+    return File(result.files.single.path!);
+  }
 }
 
   // static Future<String> shareZip(File zipFile) async {

@@ -51,7 +51,17 @@ final class UserProfileActionFailure extends UserProfileState{
 
 class ExportInProgress extends UserProfileState{}
 
-class ImportInProgress extends UserProfileState{}
+class ImportInProgress extends UserProfileState{
+  final int current;
+  final int total;
+
+  const ImportInProgress({required this.current, required this.total});
+
+  double get progress => total == 0 ? 0 : current/total;
+
+  @override
+  List<Object> get props => [current, total];
+}
 
 final class UserProfileActionSuccess extends UserProfileState{
   final String message;

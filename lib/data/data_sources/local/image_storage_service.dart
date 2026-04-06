@@ -2,9 +2,13 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:movie_search_assistant_bloc/app/exceptions/exception_mapper.dart';
+import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImageStorageService {
+  final Dio _dio = Dio();
+
   Future<Directory> _getFilmDir(int filmId) async {
     try{
       final baseDir = await getApplicationDocumentsDirectory();
@@ -20,57 +24,101 @@ class ImageStorageService {
     }
   }
 
-  Future<String> _savePoster(String url, int filmId) async {
+  Future<String?> _savePoster(String url, int filmId) async {
     try{
       final dir = await _getFilmDir(filmId);
       final filePath = '${dir.path}/poster.jpg';
-      await _downloadAndSaveImage(url, filePath, true);
-      return "$filmId/poster.jpg";
-    } catch(e){
+
+      final result = await _downloadAndSaveImage(url, filePath, true);
+
+      return result != null ? "$filmId/poster.jpg" : null;
+    } on RemoteDataSourceException {
       rethrow;
-    }
-  }
-
-  Future<List<String>> _saveScreenshots(List<String> urls, int filmId) async {
-    final dir = await _getFilmDir(filmId);
-
-    final paths = <String>[];
-    final limitedUrs = urls.take(3).toList();
-
-    for (int i = 0; i < limitedUrs.length; i++) {
-      final filePath = '${dir.path}/screenshot_$i.jpg';
-
-      await _downloadAndSaveImage(urls[i], filePath, false);
-
-      paths.add("$filmId/screenshot_$i.jpg");
-    }
-
-    return paths;
-  }
-
-  Future<String> _downloadAndSaveImage(String url, String filePath, bool isPoster) async {
-    final response = await Dio().get(
-      url,
-      options: Options(responseType: ResponseType.bytes),
-    );
-
-    final originalBytes = response.data;
-    final compressedBytes = await _compressImage(originalBytes, isPoster: isPoster);
-
-    final file = File(filePath);
-    await file.writeAsBytes(compressedBytes);
-    return file.path;
-  }
-
-  Future<(String?, List<String>?)> saveFilmImagesInDirectory(String? posterUrl, List<String>? screenshotUrls, int filmId) async {
-    try{
-      final posterImagePath = posterUrl != null ? await _savePoster(posterUrl, filmId) : null;
-      final screenshotPaths = screenshotUrls != null ? await _saveScreenshots(screenshotUrls, filmId) : null;
-      return (posterImagePath, screenshotPaths);
     } catch(e){
       rethrow;
     }
   } 
+
+  Future<List<String>> _saveScreenshots(List<String> urls, int filmId) async {
+    try{
+      final dir = await _getFilmDir(filmId);
+
+      final limitedUrls = urls.take(3).toList();
+
+      final futures = List.generate(limitedUrls.length, (i) async {
+        final filePath = '${dir.path}/screenshot_$i.jpg';
+
+        final result = await _downloadAndSaveImage(
+          limitedUrls[i],
+          filePath,
+          false,
+        );
+
+        if (result != null) {
+          return "$filmId/screenshot_$i.jpg";
+        }
+        return null;
+      });
+
+      final results = await Future.wait(futures);
+      return results.whereType<String>().toList();
+    } on RemoteDataSourceException {
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  Future<String?> _downloadAndSaveImage(String url, String filePath, bool isPoster) async {
+    try {
+      final response = await _dio.get(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      final originalBytes = response.data;
+
+      if (originalBytes == null) return null;
+
+      final compressedBytes = await _compressImage(originalBytes, isPoster: isPoster);
+
+      final file = File(filePath);
+      await file.writeAsBytes(compressedBytes);
+
+      return file.path;
+    } on DioException catch(e){
+      if(e.response?.statusCode == 404){
+        return null;
+      }
+      throw ExceptionMapper.mapDioException(e);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<(String?, List<String>?)> saveFilmImagesInDirectory(String? posterUrl, List<String>? screenshotUrls, int filmId) async {
+    try {
+      final posterFuture = posterUrl != null
+          ? _savePoster(posterUrl, filmId)
+          : Future.value(null);
+
+      final screenshotsFuture = screenshotUrls != null
+          ? _saveScreenshots(screenshotUrls, filmId)
+          : Future.value(null);
+
+      final results = await Future.wait([
+        posterFuture,
+        screenshotsFuture,
+      ]);
+
+      return (
+        results[0] as String?,
+        results[1] as List<String>?,
+      );
+    } on RemoteDataSourceException {
+      rethrow;
+    }
+  }
 
   Future<String> getFullImagePath(String relativePath) async {
     final baseDir = await getApplicationDocumentsDirectory();
@@ -96,7 +144,6 @@ class ImageStorageService {
       if (await filmsDir.exists()) {
         await filmsDir.delete(recursive: true);
       }
-      
     } catch(e) {
       rethrow;
     }

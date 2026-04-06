@@ -63,7 +63,16 @@ class _UserProfileView extends StatelessWidget {
                           }
 
                           if (state is ImportInProgress){
-                            return Center(child: CircularProgressIndicator());
+                            return Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircularProgressIndicator(value: state.progress),
+                                  SizedBox(height: 16),
+                                  Text("${state.current} / ${state.total}"),
+                                ],
+                              ),
+                            );
                           }
 
                           if (state is UserProfileLoaded) {
@@ -145,7 +154,7 @@ class _UserProfileContent extends StatelessWidget {
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: 5,
+            itemCount: 6,
             separatorBuilder: (context, index) => Divider(
               height: 1,
               thickness: 1,
@@ -157,12 +166,14 @@ class _UserProfileContent extends StatelessWidget {
               final items = [
                 "Изменить API Key",
                 "Импорт библиотеки",
+                "Импорт старой библиотеки",
                 "Экспорт библиотеки",
                 "Очистить кэш",
                 "Очистить библиотеку",
               ];
               final icons = [
                 Icons.key,
+                Icons.file_download,
                 Icons.file_download,
                 Icons.file_upload,
                 Icons.cleaning_services,
@@ -183,12 +194,15 @@ class _UserProfileContent extends StatelessWidget {
                         _importLibrary(context);
                         break;
                       case 2:
-                        _exportLibrary(context);
+                        _importOldLibrary(context);
                         break;
                       case 3:
-                        _clearCacheDirectory(context);
+                        _exportLibrary(context);
                         break;
                       case 4:
+                        _clearCacheDirectory(context);
+                        break;
+                      case 5:
                         _clearLibrary(context);
                         break;
                     }
@@ -214,6 +228,10 @@ class _UserProfileContent extends StatelessWidget {
 
   void _importLibrary(BuildContext context) {
     context.read<UserProfileBloc>().add(ImportLibrary());
+  }
+
+  void _importOldLibrary(BuildContext context) {
+    context.read<UserProfileBloc>().add(ImportOldLibrary());
   }
 
   void _exportLibrary(BuildContext context) {

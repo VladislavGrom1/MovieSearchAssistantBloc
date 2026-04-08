@@ -15,6 +15,9 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/search_films/widgets/custom_search_bar.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/poster_film_image.dart';
 
 @RoutePage()
 class SearchFilmScreen extends StatelessWidget {
@@ -54,7 +57,7 @@ class _SearchFilmView extends StatelessWidget {
               children: [
                 SizedBox(height: 20.h),
                 Expanded(
-                  child: RefreshIndicator(
+                  child: CustomRefreshIndicator(
                     onRefresh: () async {
                       searchFilmBloc.add(DisplayFilmCollections());
                     },
@@ -65,7 +68,7 @@ class _SearchFilmView extends StatelessWidget {
                         }
 
                         if (state is CollectionsFilmsLoadedFailure) {
-                          return _buildError(state.message);
+                          return ErrorMessageWidget(message: state.message);
                         }
 
                         if (state is CollectionsFilmsLoadedSuccessful) {
@@ -80,27 +83,6 @@ class _SearchFilmView extends StatelessWidget {
             ),
           ),
         ));
-  }
-
-  Widget _buildError(String message) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            children: [
-              Image.asset("assets/icons/errorIcon.png", fit: BoxFit.cover),
-              Text(
-                message, 
-                style: CustomTextStyles.m3TitleLarge(), 
-                textAlign: TextAlign.center
-              ),
-              SizedBox(height: 20.h),
-            ],
-          )
-        );
-      },
-    );
   }
 }
 
@@ -152,10 +134,11 @@ class _CollectionsList extends StatelessWidget {
                     style: CustomTextStyles.m3TitleLarge()
                   ),
                   IconButton(
+                      highlightColor: AppColors.primaryThemeGrey,
                       onPressed: () {
                         context.router.push(SearchedFilmsRoute(
                             nameCollection: filmCollectionsNamesList[index],
-                            appBarTitle: filmCollectionsNamesList[index]));
+                            appBarTitle: _switchCollectionName(filmCollectionsNamesList[index])));
                       },
                       icon: Icon(Icons.arrow_forward, color: AppColors.primaryScheme))
                 ],
@@ -241,8 +224,8 @@ class _FilmCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _CachedImageWidget(
-              urlImage: film.posterUrl, 
+            PosterFilmImage(
+              urlImage: film.posterUrlPreview, 
               rating: film.ratingKinopoisk,
               filmIsSaved: isSaved,
             ),
@@ -258,109 +241,6 @@ class _FilmCard extends StatelessWidget {
             )
           ],
         ),
-    );
-  }
-}
-
-class _CachedImageWidget extends StatelessWidget {
-  final String? urlImage;
-  final num? rating;
-  final bool filmIsSaved;
-
-  const _CachedImageWidget({
-    required this.urlImage,
-    required this.rating,
-    required this.filmIsSaved
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16.w),
-      child: RepaintBoundary(
-        child: Stack(
-          children: [
-            CachedNetworkImage(
-              imageUrl: urlImage ?? '',
-              cacheManager: FilmImageCacheService.instance,
-              memCacheWidth: 200,
-              memCacheHeight: 280,
-              fit: BoxFit.fill,
-              width: 100.w,
-              height: 140.h,
-              placeholder: (context, url) => Container(color: AppColors.secondaryThemeGrey),
-              errorWidget: (context, url, error) => const Icon(Icons.error, color: AppColors.secondaryThemeGrey,),
-            ),
-            _RatingIcon(rating: rating),
-            if(filmIsSaved)
-            Positioned(
-              top: 6.h,
-              left: 4.w,
-              child: Container(
-                width: 22.w,
-                height: 20.h,
-                decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(5.0.h)),
-                child: Icon(
-                  Icons.save_rounded, 
-                  color: Colors.white,
-                  size: 19.w,
-                )
-              )
-            ),
-          ] 
-        ),
-      ),
-    );
-  }
-}
-
-class _RatingIcon extends StatelessWidget {
-  final num? rating;
-
-  const _RatingIcon({required this.rating});
-
-  @override
-  Widget build(BuildContext context) {
-    Color backgroundColor;
-    String ratingText;
-    
-    if (rating == null) {
-      backgroundColor = AppColors.ratingGrey;
-      ratingText = "-";
-    } else {
-      if (rating! >= 7 && rating! <= 10) {
-        backgroundColor = AppColors.ratingGreen;
-      }
-      else if (rating! >= 6 && rating! < 7) {
-        backgroundColor = AppColors.ratingOrange;
-      }
-      else if (rating! >= 5 && rating! < 6) {
-        backgroundColor = AppColors.ratingGrey;
-      }
-      else if (rating! >= 0 && rating! < 5) {
-        backgroundColor = AppColors.ratingRed;
-      } else {
-        backgroundColor = AppColors.ratingGrey;
-      }
-      ratingText = rating.toString();
-    }
-
-    return Positioned(
-      bottom: 6.h,
-      right: 4.w,
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(5.0.h),
-        ),
-        width: 22.w,
-        height: 20.h,
-        child: Center(
-          child: Text(ratingText, style: CustomTextStyles.m3LabelSmall(color: AppColors.textWhite))
-        ),
-      ),
     );
   }
 }

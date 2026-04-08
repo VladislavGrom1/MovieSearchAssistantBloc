@@ -14,6 +14,7 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
 
 // TODO: Реализовать карусель скриншотов
 
@@ -61,7 +62,7 @@ class _FilmInformationView extends StatelessWidget {
             backgroundColor: Colors.black),
         backgroundColor: Colors.white,
         body: SafeArea(
-            child: RefreshIndicator(
+            child: CustomRefreshIndicator(
           onRefresh: () async {
             final filmInformationBloc = context.read<FilmInformationBloc>();
             final state = filmInformationBloc.state;

@@ -7,6 +7,7 @@ import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
 
 @RoutePage()
 class UserProfileScreen extends StatelessWidget {
@@ -49,7 +50,7 @@ class _UserProfileView extends StatelessWidget {
                 children: [
                   SizedBox(height: 20.h),
                   Expanded(
-                    child: RefreshIndicator(
+                    child: CustomRefreshIndicator(
                       onRefresh: () async {
                         userProfileBloc.add(UpdateUserProfileInfo());
                       },

@@ -25,4 +25,9 @@ class AppRouter extends RootStackRouter{
       path: '/authentication',
     ),
   ];
+
+  @override
+  RouteType get defaultRouteType => RouteType.custom(
+    transitionsBuilder: TransitionsBuilders.noTransition,
+  );
 }

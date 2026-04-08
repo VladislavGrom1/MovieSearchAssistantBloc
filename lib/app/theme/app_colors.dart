@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 class AppColors {
   static const Color primaryScheme = Color(0xFF8d75f8);
   static const Color primaryThemeBlack = Color(0xFF151313);
@@ -13,4 +15,6 @@ class AppColors {
 
   static const Color textGrey = Color(0xFFbfbfbf);
   static const Color textWhite = Color(0xFFefeeee);
+
+  static const Color savedFilmIcon = Colors.deepOrange;
 }

@@ -6,10 +6,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/poster_film_image.dart';
 
 @RoutePage()
 class SearchedFilmsScreen extends StatelessWidget {
@@ -92,20 +97,22 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primaryThemeBlack,
       appBar: AppBar(
+        backgroundColor: AppColors.primaryThemeBlack,
         title: Text(
           widget.appBarTitle,
-          style: const TextStyle(
-            color: Colors.white,
-            overflow: TextOverflow.ellipsis,
-          ),
+          style: CustomTextStyles.m3TitleLarge(),
+          overflow: TextOverflow.ellipsis,
+        ),
+        iconTheme: IconThemeData(
+          color: AppColors.primaryScheme
         ),
       ),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: RefreshIndicator(
+            child: CustomRefreshIndicator(
               onRefresh: _onRefresh,
               child: BlocBuilder<SearchedFilmsBloc, SearchedFilmsState>(
                 builder: (context, state) {
@@ -114,7 +121,7 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
                   }
               
                   if (state is SearchedFilmsLoadedFailure) {
-                    return _buildError(state.message);
+                    return ErrorMessageWidget(message: state.message);
                   }
               
                   if (state is SearchedFilmsLoadedSuccessful) {
@@ -130,20 +137,6 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
             ),
           ),
         ),
-    );
-  }
-
-  Widget _buildError(String message) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Center(child: Text(message)),
-          ),
-        );
-      },
     );
   }
 }
@@ -195,9 +188,40 @@ class _FilmCard extends StatelessWidget {
 
   const _FilmCard({required this.film, required this.isSaved});
 
+  String _formatCountriesAndYear() {
+    final List<String> parts = [];
+    
+    if (film.countries != null && film.countries!.isNotEmpty) {
+      final limitedCountries = film.countries!.take(2);
+      final countriesStr = limitedCountries.join(', ');
+      parts.add(countriesStr);
+    }
+    
+    if (film.year != null) {
+      parts.add(film.year.toString());
+    }
+    
+    return parts.isEmpty ? '-' : parts.join(', ');
+  }
+
+  String _formatGenres() {
+    final List<String> parts = [];
+    
+    if (film.genres != null && film.genres!.isNotEmpty) {
+      final limitedGenres = film.genres!.take(3);
+      final genresStr = limitedGenres.join(', ');
+      parts.add(genresStr);
+    }
+    
+    return parts.isEmpty ? '-' : parts.join(', ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      enableFeedback: false,
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
       onTap: () {
         if (film.kinopoiskId != null) {
           context.router.push(
@@ -213,12 +237,20 @@ class _FilmCard extends StatelessWidget {
         }
       },
       child: Card(
-        color: isSaved ? Colors.green : Colors.grey,
+        color: AppColors.primaryThemeGrey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.w),
+        ),
+        clipBehavior: Clip.antiAlias,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _CachedImageWidget(urlImage: film.posterUrlPreview),
-            SizedBox(width: 16.w),
+            PosterFilmImage(
+              urlImage: film.posterUrl,
+              filmIsSaved: isSaved,
+              rating: film.ratingKinopoisk,
+            ),
+            SizedBox(width: 10.w),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.only(top: 5.h),
@@ -228,48 +260,36 @@ class _FilmCard extends StatelessWidget {
                     Text(
                       film.nameRu ?? film.nameOriginal ?? "-",
                       maxLines: 2,
+                      style: CustomTextStyles.m3TitleLarge2(),
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 10.h),
-                    Text(film.nameOriginal ?? "-"),
+                    Text(
+                      film.nameOriginal ?? film.nameRu ?? "-",
+                      maxLines: 2,
+                      style: CustomTextStyles.m3BodyMedium(),
+                      overflow: TextOverflow.ellipsis,
+                      ),
                     SizedBox(height: 10.h),
                     Text(
-                      film.countries?.isEmpty == true
-                          ? "${film.year}"
-                          : "${film.countries}, ${film.year}",
+                      _formatCountriesAndYear(),
+                      maxLines: 1,
+                      style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 10.h),
+                    Text(
+                      _formatGenres(),
+                      maxLines: 1,
+                      style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
             ),
+            SizedBox(width: 7.w)
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CachedImageWidget extends StatelessWidget {
-  final String? urlImage;
-
-  const _CachedImageWidget({required this.urlImage});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16.w),
-      child: RepaintBoundary(
-        child: CachedNetworkImage(
-          imageUrl: urlImage ?? '',
-          cacheManager: FilmImageCacheService.instance,
-          memCacheHeight: 140,
-          memCacheWidth: 100,
-          fit: BoxFit.fill,
-          height: 140.h,
-          width: 100.w,
-          placeholder: (context, url) => Container(color: Colors.grey[200]),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
         ),
       ),
     );

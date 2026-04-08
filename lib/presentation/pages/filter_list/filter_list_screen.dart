@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/filter_data.dart';
 
 @RoutePage()
@@ -16,44 +18,43 @@ class FilterListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final filterData = FilterData.fromType(filterType);
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primaryThemeBlack,
         appBar: AppBar(
-          title: Text(_filterTypeToString(), style: TextStyle(color: Colors.white)),
+          title: Text(_filterTypeToString(), style: CustomTextStyles.m3TitleLarge()),
         ),
         body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(left: 20.w, right: 20.w),
-            child: Column(
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Expanded(
               child: ListView.separated(
+                  physics: BouncingScrollPhysics(),
                   itemBuilder: (context, index) => InkWell(
                     onTap: () {
                       context.router.pop(filterData.items.values.elementAt(index));
                     },
-                    child: Container(
-                        height: 48.h,
-                        width: double.maxFinite,
-                        color: Colors.purple,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(filterData.items.keys.elementAt(index), style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
+                    child: Padding(
+                      padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
+                      child: Container(
+                          height: 48.h,
+                          width: double.maxFinite,
+                          color: AppColors.primaryThemeBlack,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(filterData.items.keys.elementAt(index), style: CustomTextStyles.m3BodyLarge()),
+                            ],
+                          ),
+                      ),
                     ),
                   ),
-                  separatorBuilder: (context, index) => Divider(
-                    color: Colors.white,
-                  ), 
+                  separatorBuilder: (context, index) => Divider(color: AppColors.primaryScheme), 
                   itemCount: filterData.items.length
                 ),
             )
           ]
         ),
-          ),
         ));
   }
 

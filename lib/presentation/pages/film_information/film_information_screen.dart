@@ -58,8 +58,8 @@ class _FilmInformationView extends StatelessWidget {
       ],
       child: Scaffold(
         appBar: AppBar(
-            title: Text(filmName, style: TextStyle(color: Colors.white)),
-            backgroundColor: Colors.black),
+          title: Text(filmName, style: TextStyle(color: Colors.white))
+        ),
         backgroundColor: Colors.white,
         body: SafeArea(
             child: CustomRefreshIndicator(
@@ -257,12 +257,12 @@ class _FilmInformationContent extends StatelessWidget {
     return Text("$resourceName, $ratingText, $voteCountText");
   }
 
-  List<Widget> _nameOriginal(String? nameOriginal) {
-    if (nameOriginal != null) {
-      return [Text(nameOriginal), SizedBox(height: 10.h)];
-    }
-    return [SizedBox()];
-  }
+  // List<Widget> _nameOriginal(String? nameOriginal) {
+  //   if (nameOriginal != null) {
+  //     return [Text(nameOriginal), SizedBox(height: 10.h)];
+  //   }
+  //   return [SizedBox()];
+  // }
 }
 
 class _PosterImageWidget extends StatelessWidget {

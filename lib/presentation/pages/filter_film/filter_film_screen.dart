@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/country_ids.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/genre_ids.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/filter_data.dart';
@@ -26,14 +28,15 @@ class _FilterFilmView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primaryThemeBlack,
         appBar: AppBar(
-          title: Text("Поиск фильмов", style: TextStyle(color: Colors.white)),
+          title: Text(
+            "Поиск фильмов", 
+            style: CustomTextStyles.m3TitleLarge()
+          ),
         ),
         body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(left: 20.w, right: 20.w),
-            child: BlocBuilder<FilterFilmBloc, FilterFilmState>(
+          child: BlocBuilder<FilterFilmBloc, FilterFilmState>(
               builder: (context, state) {
                 if (state is FiltersLoaded) {
                   return _FilterFilmContent(
@@ -45,7 +48,6 @@ class _FilterFilmView extends StatelessWidget {
                 return const SizedBox();
               },
             ),
-          ),
         ));
   }
 }
@@ -84,25 +86,32 @@ class _FilterFilmContent extends StatelessWidget {
           yearRange: yearRange,
         ),
         SizedBox(height: 20.h),
-        ElevatedButton(
-          style: ButtonStyle(
-              minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
-              alignment: AlignmentGeometry.center,
-              backgroundColor: WidgetStatePropertyAll(Colors.purple)),
-          onPressed: () {
-            goToSearchedFilmsScreen(context, country, genre, yearRange);
-          },
-          child: Text("Показать", style: TextStyle(color: Colors.white)),
+        Padding(
+          padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
+          child: ElevatedButton(
+            style: ButtonStyle(
+                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
+                alignment: AlignmentGeometry.center,
+                backgroundColor: WidgetStatePropertyAll(AppColors.primaryScheme)),
+            onPressed: () {
+              goToSearchedFilmsScreen(context, country, genre, yearRange);
+            },
+            child: Text("Показать", style: CustomTextStyles.m3BodyLarge(color: AppColors.textWhite)),
+          ),
         ),
-        ElevatedButton(
-          style: ButtonStyle(
-              minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
-              alignment: AlignmentGeometry.center,
-              backgroundColor: WidgetStatePropertyAll(Colors.purple)),
-          onPressed: () {
-            filterFilmBloc.add(ResetFilters());
-          },
-          child: Text("Сбросить поиск", style: TextStyle(color: Colors.white)),
+        SizedBox(height: 10.h),
+        Padding(
+          padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
+          child: ElevatedButton(
+            style: ButtonStyle(
+                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
+                alignment: AlignmentGeometry.center,
+                backgroundColor: WidgetStatePropertyAll(AppColors.primaryThemeGrey)),
+            onPressed: () {
+              filterFilmBloc.add(ResetFilters());
+            },
+            child: Text("Сбросить поиск", style: CustomTextStyles.m3BodyLarge(color: AppColors.textWhite)),
+          ),
         ),
       ],
     );
@@ -127,6 +136,9 @@ class _FilterButtonsList extends StatelessWidget {
           itemBuilder: (context, index) {
             final filterType = FilterType.values[index];
             return InkWell(
+              enableFeedback: false,
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
               onTap: () async {
                 final filterTypeString = filterType.toString().split('.').last;
                 final result = await context.router.push<dynamic>(
@@ -134,27 +146,27 @@ class _FilterButtonsList extends StatelessWidget {
                 filterFilmBloc.add(
                     UpdateFilterValue(filterType: filterType, value: result));
               },
-              child: Container(
-                height: 48.h,
-                width: double.infinity,
-                color: Colors.purple,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(_filterTypeToString(filterType),
-                        style: TextStyle(color: Colors.white)),
-                    Text(
-                        _showSelectedFilter(
-                            filterType, country, genre, yearRange),
-                        style: TextStyle(color: Colors.white)),
-                  ],
+              child: Padding(
+                padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
+                child: Container(
+                  height: 48.h,
+                  width: double.infinity,
+                  color: AppColors.primaryThemeBlack,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(_filterTypeToString(filterType),
+                          style: CustomTextStyles.m3BodyLarge()),
+                      Text(
+                          _showSelectedFilter(filterType, country, genre, yearRange),
+                          style: CustomTextStyles.m3BodyLarge(color: AppColors.primaryScheme)),
+                    ],
+                  ),
                 ),
               ),
             );
           },
-          separatorBuilder: (context, index) => Divider(
-                color: Colors.purple,
-              ),
+          separatorBuilder: (context, index) => Divider(color: AppColors.primaryScheme),
           itemCount: 3),
     );
   }

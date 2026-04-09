@@ -16,8 +16,6 @@ class RemoveFilmFromCollectionUseCase {
     required this.imageStorageService
   });
 
-  // TODO: Реализовать удаление рейтинга/комментария при удалении фильма из локального хранилища
-
   Future<void> call(FilmEntity film, String collectionId) async {
     try{
       final filmId = film.kinopoiskId!;
@@ -30,6 +28,7 @@ class RemoveFilmFromCollectionUseCase {
 
       if(!filmHasOtherLinks){
         await imageStorageService.deleteFilmImages(filmId);
+        await filmRepository.clearUserData(filmId);
         await filmRepository.removeFilmFromLocalDataSource(filmId);
       }
     } on LocalDataSourceException{

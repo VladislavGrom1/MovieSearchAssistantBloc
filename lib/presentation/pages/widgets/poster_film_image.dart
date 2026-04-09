@@ -1,20 +1,28 @@
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
+import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 
-class PosterFilmImage extends StatelessWidget {
-  final String? urlImage;
-  final num? rating;
-  final bool filmIsSaved;
-
-  const PosterFilmImage({
+class FilmPosterImage extends StatelessWidget {
+  final String? networkImageUrl;
+  final String? localImagePath;
+  final num? kinopoiskRating;
+  final num? userRating;
+  final bool showSavedIcon;
+  final bool showUserRating;
+  
+  const FilmPosterImage({
     super.key,
-    this.urlImage,
-    this.rating,
-    required this.filmIsSaved
+    this.networkImageUrl,
+    this.localImagePath,
+    this.kinopoiskRating,
+    this.userRating,
+    this.showSavedIcon = false,
+    this.showUserRating = false,
   });
 
   @override
@@ -24,46 +32,66 @@ class PosterFilmImage extends StatelessWidget {
       child: RepaintBoundary(
         child: Stack(
           children: [
-            CachedNetworkImage(
-              imageUrl: urlImage ?? '',
-              cacheManager: FilmImageCacheService.instance,
-              memCacheWidth: 200,
-              memCacheHeight: 280,
-              fit: BoxFit.fill,
-              width: 100.w,
-              height: 140.h,
-              placeholder: (context, url) => Container(color: AppColors.primaryThemeGrey),
-              errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+            _buildImage(),
+            
+            _RatingIcon(
+              rating: kinopoiskRating,
+              position: RatingPosition.bottomRight,
             ),
-            _RatingIcon(rating: rating),
-            if(filmIsSaved)
-            Positioned(
-              top: 6.h,
-              left: 4.w,
-              child: Container(
-                width: 20.w,
-                height: 20.h,
-                decoration: BoxDecoration(
-                color: AppColors.savedFilmIcon,
-                borderRadius: BorderRadius.circular(5.0.h)),
-                child: Icon(
-                  Icons.bookmark,
-                  color: Colors.white,
-                  size: 19.w,
-                )
-              )
-            ),
-          ] 
+            
+            if (showSavedIcon)
+              _SavedIcon(),
+            
+            if (showUserRating)
+              _UserRatingIcon(rating: userRating),
+          ],
         ),
       ),
     );
   }
+
+  Widget _buildImage() {
+    if (localImagePath != null && localImagePath!.isNotEmpty) {
+      final fullPath = ImagePathResolver.resolve(localImagePath!);
+      final file = File(fullPath);
+      return Image.file(
+          file,
+          fit: BoxFit.cover,
+          width: 100.w,
+          height: 140.h,
+          errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme)
+        );
+    } else {
+      return CachedNetworkImage(
+        imageUrl: networkImageUrl ?? '',
+        cacheManager: FilmImageCacheService.instance,
+        memCacheWidth: 200,
+        memCacheHeight: 280,
+        fit: BoxFit.cover,
+        width: 100.w,
+        height: 140.h,
+        placeholder: (context, url) => Container(color: AppColors.primaryThemeGrey),
+        errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+      );
+    }
+  }
+}
+
+enum RatingPosition {
+  bottomRight,
+  bottomLeft,
+  topRight,
+  topLeft,
 }
 
 class _RatingIcon extends StatelessWidget {
   final num? rating;
+  final RatingPosition position;
 
-  const _RatingIcon({required this.rating});
+  const _RatingIcon({
+    required this.rating,
+    this.position = RatingPosition.bottomRight,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -74,26 +102,15 @@ class _RatingIcon extends StatelessWidget {
       backgroundColor = AppColors.ratingGrey;
       ratingText = "-";
     } else {
-      if (rating! >= 7 && rating! <= 10) {
-        backgroundColor = AppColors.ratingGreen;
-      }
-      else if (rating! >= 6 && rating! < 7) {
-        backgroundColor = AppColors.ratingOrange;
-      }
-      else if (rating! >= 5 && rating! < 6) {
-        backgroundColor = AppColors.ratingGrey;
-      }
-      else if (rating! >= 0 && rating! < 5) {
-        backgroundColor = AppColors.ratingRed;
-      } else {
-        backgroundColor = AppColors.ratingGrey;
-      }
+      backgroundColor = _getRatingColor(rating!);
       ratingText = rating.toString();
     }
 
     return Positioned(
-      bottom: 6.h,
-      right: 4.w,
+      bottom: position == RatingPosition.bottomRight || position == RatingPosition.bottomLeft ? 6.h : null,
+      top: position == RatingPosition.topRight || position == RatingPosition.topLeft ? 6.h : null,
+      right: position == RatingPosition.bottomRight || position == RatingPosition.topRight ? 4.w : null,
+      left: position == RatingPosition.bottomLeft || position == RatingPosition.topLeft ? 4.w : null,
       child: Container(
         decoration: BoxDecoration(
           color: backgroundColor,
@@ -102,7 +119,69 @@ class _RatingIcon extends StatelessWidget {
         width: 22.w,
         height: 20.h,
         child: Center(
-          child: Text(ratingText, style: CustomTextStyles.m3LabelSmall(color: AppColors.textWhite))
+          child: Text(
+            ratingText,
+            style: CustomTextStyles.m3LabelSmall(color: AppColors.textWhite),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getRatingColor(num rating) {
+    if (rating >= 7 && rating <= 10) return AppColors.ratingGreen;
+    if (rating >= 6 && rating < 7) return AppColors.ratingOrange;
+    if (rating >= 5 && rating < 6) return AppColors.ratingGrey;
+    if (rating >= 0 && rating < 5) return AppColors.ratingRed;
+    return AppColors.ratingGrey;
+  }
+}
+
+class _SavedIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 6.h,
+      left: 4.w,
+      child: Container(
+        width: 20.w,
+        height: 20.h,
+        decoration: BoxDecoration(
+          color: AppColors.savedFilmIcon,
+          borderRadius: BorderRadius.circular(5.0.h),
+        ),
+        child: Icon(
+          Icons.bookmark,
+          color: Colors.white,
+          size: 19.w,
+        ),
+      ),
+    );
+  }
+}
+
+class _UserRatingIcon extends StatelessWidget {
+  final num? rating;
+
+  const _UserRatingIcon({required this.rating});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 6.h,
+      right: 30.w,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.savedFilmIcon,
+          borderRadius: BorderRadius.circular(5.0.h),
+        ),
+        width: 22.w,
+        height: 20.h,
+        child: Center(
+          child: Text(
+            "${rating ?? "-"}",
+            style: CustomTextStyles.m3LabelSmall(color: AppColors.textWhite),
+          ),
         ),
       ),
     );

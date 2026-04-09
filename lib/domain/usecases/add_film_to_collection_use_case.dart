@@ -26,7 +26,12 @@ class AddFilmToCollectionUseCase {
         String? posterImagePath;
         List<String>? screenshotPaths;
         (posterImagePath, screenshotPaths) = await imageStorageService.saveFilmImagesInDirectory(film.posterUrl, filmImages?.imageUrls, film.kinopoiskId!);
-        final updatedFilmWithImagePaths = film.copyWith(localPosterImagePath: posterImagePath, localScreenshotPaths: screenshotPaths);
+        final updatedFilmWithImagePaths = film.copyWith(
+          localPosterImagePath: posterImagePath, 
+          localScreenshotPaths: screenshotPaths,
+          userRating: null,
+          userComment: null
+        );
         await filmRepository.addFilmInLocalDataSource(FilmDetailModel.fromFilmEntity(updatedFilmWithImagePaths));
       }
       await filmCollectionRepository.addFilmCollectionLink(FilmCollectionLink(filmId: idFilm, collectionId: collectionId));

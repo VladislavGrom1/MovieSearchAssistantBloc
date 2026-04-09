@@ -33,4 +33,6 @@ abstract class FilmRepository {
   Future<void> removeFilmFromLocalDataSource(int idFilm);
 
   Future<void> removeAllFilmsFromLocalDataSource();
+
+  Future<void> clearUserData(int idFilm);
 }

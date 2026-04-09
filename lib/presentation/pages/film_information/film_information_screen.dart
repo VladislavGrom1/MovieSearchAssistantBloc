@@ -32,8 +32,7 @@ class FilmInformationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(providers: [
       BlocProvider(
-        create: (_) => getIt<FilmInformationBloc>()
-          ..add(GetFilmInformation(idFilm: filmId)),
+        create: (_) => getIt<FilmInformationBloc>()..add(GetFilmInformation(idFilm: filmId)),
       ),
       BlocProvider(
         create: (_) => getIt<CollectionsBloc>()..add(GetCollections()),

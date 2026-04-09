@@ -146,13 +146,18 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     final currentState = state;
     if(currentState is! FilmLoaded) return;
     try{
-      final filmWithUpdatedRating = await updateUserFilmInformationUseCase.call(currentState.film, event.userRating, event.userComment);
-      emit(currentState.copyWith(film: filmWithUpdatedRating, filmImages: currentState.filmImages, collectionIds: currentState.collectionIds, status: FilmStatus.success));
+      final filmWithUpdatedUserInformation = await updateUserFilmInformationUseCase.call(currentState.film, event.userRating, event.userComment);
+      emit(currentState.copyWith(
+        film: filmWithUpdatedUserInformation, 
+        filmImages: currentState.filmImages, 
+        collectionIds: currentState.collectionIds, 
+        status: FilmStatus.success
+      ));
     } on LocalDataSourceException catch(e){
       emit(FilmActionFailure(message: e.message));
       emit(currentState);
     } catch(e){
-      emit(FilmActionFailure(message: "Не удалось обновить пользовательский рейтинг"));
+      emit(FilmActionFailure(message: "Не удалось обновить пользовательскую информацию"));
       emit(currentState);
     }
   }

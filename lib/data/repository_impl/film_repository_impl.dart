@@ -189,6 +189,17 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
+  Future<void> clearUserData(int idFilm) async {
+    try{
+      await filmLocalDataSource.clearUserData(idFilm);
+    } on LocalDataSourceException{
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  @override
   Future<FilmImagesEntity?> getFilmImages(int idFilm) async{
     try{
       FilmImagesModel? filmImagesModel = await filmRemoteDataSource.getFilmImageUrls(idFilm);
@@ -207,7 +218,6 @@ class FilmRepositoryImpl implements FilmRepository{
   Future<FilmBaseModel> initUserDataForFilmBaseModel(FilmBaseModel filmBaseModel) async {
     Map<String, dynamic>? userDataAboutFilm = await filmLocalDataSource.getUserDataAboutFilm(filmBaseModel.kinopoiskId!);
     if(userDataAboutFilm != null){
-      //filmBaseModel.collectionIds = userDataAboutFilm["collectionTag"];
       filmBaseModel.userComment = userDataAboutFilm["userComment"];
       filmBaseModel.userRating = userDataAboutFilm["userRating"];
     }
@@ -218,7 +228,6 @@ class FilmRepositoryImpl implements FilmRepository{
   Future<FilmDetailModel> initUserDataForFilmDetailModel(FilmDetailModel filmDetailModel) async {
     Map<String, dynamic>? userDataAboutFilm = await filmLocalDataSource.getUserDataAboutFilm(filmDetailModel.filmBaseModel.kinopoiskId!);
     if(userDataAboutFilm != null){
-      //filmDetailModel.filmBaseModel.collectionIds = userDataAboutFilm["collectionTag"];
       filmDetailModel.filmBaseModel.userComment = userDataAboutFilm["userComment"];
       filmDetailModel.filmBaseModel.userRating = userDataAboutFilm["userRating"];
     }

@@ -1,23 +1,25 @@
-import 'dart:io';
 import 'package:auto_route/auto_route.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
-import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
+import 'package:movie_search_assistant_bloc/app/util/data_formatter.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_films_cubit/selection_films_cubit.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/poster_film_image.dart';
 
 @RoutePage()
 class CollectionFilmsScreen extends StatelessWidget {
-  const CollectionFilmsScreen(
-      {super.key,
-      @PathParam('collectionId') required this.collectionId,
-      @PathParam('collectionName') required this.collectionName});
+  const CollectionFilmsScreen({
+    super.key,
+    @PathParam('collectionId') required this.collectionId,
+    @PathParam('collectionName') required this.collectionName
+  });
 
   final String collectionId;
   final String collectionName;
@@ -31,8 +33,6 @@ class CollectionFilmsScreen extends StatelessWidget {
   }
 }
 
-// TODO: если выбрано 2 фильма и удалить 1 фильм из коллекции, то в multiselect будет отображаться "выбрано 2 фильма" а не "1"
-
 class _CollectionFilmsView extends StatelessWidget {
   const _CollectionFilmsView({required this.collectionName});
 
@@ -41,14 +41,14 @@ class _CollectionFilmsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primaryThemeBlack,
       appBar: AppBar(
         title: BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
           builder: (context, state) {
             if (!state.isSelectionMode) {
-              return Text(collectionName, style: TextStyle(color: Colors.white));
+              return Text(collectionName, style: CustomTextStyles.m3TitleLarge());
             } 
-            return Text("Выбрано: ${state.selectedFilmIds.length}", style: TextStyle(color: Colors.white));
+            return Text("Выбрано: ${state.selectedFilmIds.length}", style: CustomTextStyles.m3TitleLarge());
           },
         ),
         actions: [
@@ -108,12 +108,14 @@ class _CollectionFilmsView extends StatelessWidget {
             }
 
             if (state is CollectionFilmsLoaded) {
+              if(state.savedFilms.isEmpty){
+                return ErrorMessageWidget(message: "Коллекция пуста");
+              }
               return _CollectionFilmsList(
                 savedFilms: state.savedFilms,
                 collectionId: state.collectionId,
               );
             }
-
             return SizedBox();
           },
         ),
@@ -170,6 +172,9 @@ class _FilmCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      enableFeedback: false,
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
       onTap: () {
         final selectionFilmsCubit = context.read<SelectionFilmsCubit>();
         final selectionFilmsState = selectionFilmsCubit.state;
@@ -186,51 +191,71 @@ class _FilmCard extends StatelessWidget {
         context.read<SelectionFilmsCubit>().enterSelection(savedFilm.kinopoiskId!);
       },
       child: Card(
-        color: Colors.grey,
+        color: AppColors.primaryThemeGrey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.w),
+        ),
+        clipBehavior: Clip.antiAlias,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _PosterImageWidget(film: savedFilm),
+            FilmPosterImage(
+              localImagePath: savedFilm.localPosterImagePath,
+              kinopoiskRating: savedFilm.ratingKinopoisk,
+              userRating: savedFilm.userRating,
+              showUserRating: true,
+            ),
             SizedBox(width: 16.w),
             Expanded(
                 child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(height: 5.h),
-                Text(
-                  savedFilm.nameRu == null
-                      ? savedFilm.nameOriginal.toString()
-                      : savedFilm.nameRu.toString(),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
-                SizedBox(height: 10.h),
-                Text(
-                  savedFilm.nameOriginal == null
-                      ? "-"
-                      : savedFilm.nameOriginal.toString(),
-                ),
-                SizedBox(height: 10.h),
-                Text(savedFilm.countries!.isEmpty
-                    ? "${savedFilm.year}"
-                    : "${savedFilm.countries.toString()}, ${savedFilm.year}"),
-                SizedBox(height: 10.h)
-              ],
-            )),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(height: 5.h),
+                  Text(
+                    savedFilm.nameRu ?? savedFilm.nameOriginal ?? "-",
+                    maxLines: 2,
+                    style: CustomTextStyles.m3TitleLarge2(),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    savedFilm.nameOriginal ?? savedFilm.nameRu ?? "-",
+                    maxLines: 2,
+                    style: CustomTextStyles.m3BodyMedium(),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    DataFormatter.formatCountriesAndYear(savedFilm.countries, savedFilm.year),
+                    maxLines: 1,
+                    style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    DataFormatter.formatGenres(savedFilm.genres),
+                    maxLines: 1,
+                    style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              )
+            ),
             BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
               builder: (context, state) {
                 if (!state.isSelectionMode) {
-                  return PopupMenuButton(
-                      icon: Icon(Icons.more_vert, color: Colors.purple),
-                      onSelected: (value) {
-                        if (value == "removeFilm") onRemove();
-                      },
-                      itemBuilder: (_) => const [
-                            PopupMenuItem(
-                                value: 'removeFilm',
-                                child: Text("Удалить фильм")),
-                          ]);
+                  return SizedBox(
+                    width: 40.w,
+                    child: PopupMenuButton(
+                        color: AppColors.primaryThemeGrey,
+                        enableFeedback: false,
+                        icon: Icon(Icons.more_vert, color: AppColors.primaryScheme),
+                        onSelected: (value) {
+                          if (value == "removeFilm") onRemove();
+                        },
+                        itemBuilder: (_) => [PopupMenuItem(value: 'removeFilm', child: Text("Удалить фильм", style: CustomTextStyles.m3BodyMedium()))]),
+                  );
                 }
                 final isSelected = state.selectedFilmIds.contains(savedFilm.kinopoiskId!);
                 return Checkbox(
@@ -244,49 +269,5 @@ class _FilmCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _PosterImageWidget extends StatelessWidget {
-  final FilmEntity film;
-
-  const _PosterImageWidget({required this.film});
-
-  @override
-  Widget build(BuildContext context) {
-    if(film.localPosterImagePath != null){
-      final fullPosterImagePath = ImagePathResolver.resolve(film.localPosterImagePath!);
-
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(16.w),
-        child: SizedBox(
-          height: 140.h,
-          width: 100.w,
-          child: RepaintBoundary(
-            child: Image.file(
-              File(fullPosterImagePath), 
-              fit: BoxFit.fill,
-            ),
-          ),
-        ),
-      );
-    } else{
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(16.w),
-        child: RepaintBoundary(
-          child: CachedNetworkImage(
-            imageUrl: film.posterUrlPreview ?? '',
-            cacheManager: FilmImageCacheService.instance,
-            memCacheHeight: 140,
-            memCacheWidth: 100,
-            fit: BoxFit.fill,
-            height: 140.h,
-            width: 100.w,
-            placeholder: (context, url) => Container(color: Colors.grey[200]),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
-          ),
-        ),
-      );
-    }
   }
 }

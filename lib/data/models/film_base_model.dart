@@ -116,4 +116,42 @@ class FilmBaseModel {
           : null,
     );
   }
+
+  FilmBaseModel copyWith({
+    int? kinopoiskId,
+    String? nameRu,
+    String? nameEn,
+    String? nameOriginal,
+    List<String>? countries,
+    List<String>? genres,
+    num? ratingKinopoisk,
+    num? ratingImbd,
+    int? year,
+    String? type,
+    String? posterUrl,
+    String? posterUrlPreview,
+    String? userComment,
+    int? userRating,
+    String? localPosterImagePath,
+    List<String>? localScreenshotPaths,
+  }) {
+    return FilmBaseModel(
+      kinopoiskId: kinopoiskId ?? this.kinopoiskId,
+      nameRu: nameRu ?? this.nameRu,
+      nameEn: nameEn ?? this.nameEn,
+      nameOriginal: nameOriginal ?? this.nameOriginal,
+      countries: countries ?? this.countries,
+      genres: genres ?? this.genres,
+      ratingKinopoisk: ratingKinopoisk ?? this.ratingKinopoisk,
+      ratingImbd: ratingImbd ?? this.ratingImbd,
+      year: year ?? this.year,
+      type: type ?? this.type,
+      posterUrl: posterUrl ?? this.posterUrl,
+      posterUrlPreview: posterUrlPreview ?? this.posterUrlPreview,
+      userComment: userComment ?? this.userComment,
+      userRating: userRating ?? this.userRating,
+      localPosterImagePath: localPosterImagePath ?? this.localPosterImagePath,
+      localScreenshotPaths: localScreenshotPaths ?? this.localScreenshotPaths,
+    );
+  }
 }

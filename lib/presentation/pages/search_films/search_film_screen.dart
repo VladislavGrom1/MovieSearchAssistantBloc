@@ -222,10 +222,10 @@ class _FilmCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PosterFilmImage(
-              urlImage: film.posterUrlPreview, 
-              rating: film.ratingKinopoisk,
-              filmIsSaved: isSaved,
+            FilmPosterImage(
+              networkImageUrl: film.posterUrlPreview,
+              kinopoiskRating: film.ratingKinopoisk,
+              showSavedIcon: isSaved,
             ),
             SizedBox(height: 5.h),
             SizedBox(

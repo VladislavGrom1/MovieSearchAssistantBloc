@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
+import 'package:movie_search_assistant_bloc/app/util/data_formatter.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
@@ -182,34 +183,6 @@ class _FilmCard extends StatelessWidget {
 
   const _FilmCard({required this.film, required this.isSaved});
 
-  String _formatCountriesAndYear() {
-    final List<String> parts = [];
-    
-    if (film.countries != null && film.countries!.isNotEmpty) {
-      final limitedCountries = film.countries!.take(2);
-      final countriesStr = limitedCountries.join(', ');
-      parts.add(countriesStr);
-    }
-    
-    if (film.year != null) {
-      parts.add(film.year.toString());
-    }
-    
-    return parts.isEmpty ? '-' : parts.join(', ');
-  }
-
-  String _formatGenres() {
-    final List<String> parts = [];
-    
-    if (film.genres != null && film.genres!.isNotEmpty) {
-      final limitedGenres = film.genres!.take(3);
-      final genresStr = limitedGenres.join(', ');
-      parts.add(genresStr);
-    }
-    
-    return parts.isEmpty ? '-' : parts.join(', ');
-  }
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -239,10 +212,10 @@ class _FilmCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PosterFilmImage(
-              urlImage: film.posterUrl,
-              filmIsSaved: isSaved,
-              rating: film.ratingKinopoisk,
+            FilmPosterImage(
+              networkImageUrl: film.posterUrlPreview,
+              kinopoiskRating: film.ratingKinopoisk,
+              showSavedIcon: isSaved,
             ),
             SizedBox(width: 10.w),
             Expanded(
@@ -266,14 +239,14 @@ class _FilmCard extends StatelessWidget {
                       ),
                     SizedBox(height: 10.h),
                     Text(
-                      _formatCountriesAndYear(),
+                      DataFormatter.formatCountriesAndYear(film.countries, film.year),
                       maxLines: 1,
                       style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 10.h),
                     Text(
-                      _formatGenres(),
+                      DataFormatter.formatGenres(film.genres),
                       maxLines: 1,
                       style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
                       overflow: TextOverflow.ellipsis,

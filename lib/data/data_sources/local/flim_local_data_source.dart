@@ -119,5 +119,25 @@ class FilmLocalDataSource{
     } catch(e){
       rethrow;
     }
+  }
+
+  Future<void> clearUserData(int idFilm) async {
+    try {
+      final box = Hive.box<FilmDetailModel>(HiveStorageKeys.filmDetailModelBox);
+      final film = box.get(idFilm);
+
+      if (film != null) {
+        final updatedFilm = film.copyWith(
+          filmBaseModel: film.filmBaseModel.copyWith(
+            userRating: null,
+            userComment: null,
+          ),
+        );
+
+        await box.put(idFilm, updatedFilm);
+      }
+    } catch (e) {
+      rethrow;
+    }
   } 
 }

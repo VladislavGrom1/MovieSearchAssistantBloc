@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
+import 'package:movie_search_assistant_bloc/app/util/plural_forms.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
@@ -27,7 +30,7 @@ class _CollectionsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primaryThemeBlack,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
@@ -68,6 +71,7 @@ class _CollectionsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      physics: BouncingScrollPhysics(),
       itemCount: collections.length + 1,
       separatorBuilder: (_, __) => SizedBox(height: 12.h), 
       itemBuilder: (context, index) {
@@ -149,7 +153,12 @@ class _CollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final date = collection.createdAt;
+
     return InkWell(
+      enableFeedback: false,
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
       onTap: () {
         context.router.push(CollectionFilmsRoute(
           collectionId: collection.id!,
@@ -157,17 +166,18 @@ class _CollectionCard extends StatelessWidget {
           ));
         },
           child: Card(
-            color: Colors.white,
+            color: AppColors.primaryThemeGrey,
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   height: 120.h,
                   width: 120.w,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.w),
-                    color: Colors.purple,
+                    color: AppColors.primaryScheme,
                     ),
+                  child: Icon(Icons.image_not_supported, color: AppColors.primaryThemeGrey, size: 60.w),
                   ),
                   SizedBox(width: 16.w),
                   Expanded(
@@ -176,30 +186,50 @@ class _CollectionCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(height: 5.h),
-                        Text(collection.name ?? "Название отсутствует", overflow: TextOverflow.ellipsis, maxLines: 2),
+                        Text(
+                          collection.name ?? "Название отсутствует", 
+                          overflow: TextOverflow.ellipsis, 
+                          maxLines: 2,
+                          style: CustomTextStyles.m3TitleLarge2(),
+                        ),
                         SizedBox(height: 10.h),
-                        Text("${collection.filmCount} фильмов"),
+                        Text(PluralForms.films(collection.filmCount ?? 0), style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)),
                         SizedBox(height: 10.h),
-                        Text(collection.createdAt.toString()),
+                        Text("Дата создания: ${_formatDateTime(date)}", style: CustomTextStyles.m3BodyMedium()),
                         ]
                       ),
                   ),
                   PopupMenuButton(
-                    icon: Icon(Icons.more_vert, color: Colors.purple),
+                    color: AppColors.primaryThemeGrey,
+                    icon: Icon(Icons.more_vert, color: AppColors.primaryScheme),
+                    enableFeedback: false,
                     onSelected: (value) {
                       if(value == "renameCollection") onRename(collection);
                       if(value == "removeCollection") onRemove();
                       if(value == "clearCollection") onClear();
                       },
-                      itemBuilder: (_) => const [
-                        PopupMenuItem(value: 'renameCollection', child: Text("Переименовать коллекцию")),
-                        PopupMenuItem(value: 'removeCollection', child: Text("Удалить коллекцию")),
-                        PopupMenuItem(value: 'clearCollection',child: Text("Очистить коллекцию"))]
+                      itemBuilder: (_) => [
+                        PopupMenuItem(value: 'renameCollection', child: Text("Переименовать коллекцию", style: CustomTextStyles.m3BodyMedium())),
+                        PopupMenuItem(value: 'removeCollection', child: Text("Удалить коллекцию", style: CustomTextStyles.m3BodyMedium())),
+                        PopupMenuItem(value: 'clearCollection',child: Text("Очистить коллекцию", style: CustomTextStyles.m3BodyMedium()))]
                         )
                       ],
               ),
             ),
           );
+  }
+
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return 'Дата не указана';
+    
+    // Форматируем дату и время
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final year = dateTime.year;
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    
+    return '$day.$month.$year $hour:$minute';
   }
 }
 
@@ -209,6 +239,9 @@ class _CreateCollectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+        enableFeedback: false,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
         onTap: () => showDialog(
           context: context,
           builder: (dialogContext) {
@@ -219,7 +252,7 @@ class _CreateCollectionCard extends StatelessWidget {
           },
         ),
         child: Card(
-            color: Colors.white,
+            color: AppColors.primaryThemeGrey,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -228,8 +261,9 @@ class _CreateCollectionCard extends StatelessWidget {
                   width: 120.w,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.w),
-                    color: Colors.purple,
+                    color: AppColors.primaryScheme,
                     ),
+                  child: Icon(Icons.add, color: AppColors.primaryThemeGrey, size: 60.w),
                   ),
                   SizedBox(width: 16.w),
                   Expanded(
@@ -238,7 +272,7 @@ class _CreateCollectionCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(height: 5.h),
-                        Text("Новая коллекция"),
+                        Text("Новая коллекция", style: CustomTextStyles.m3TitleLarge2()),
                         ]
                       ),
                   ),
@@ -270,30 +304,38 @@ class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
     final collectionBloc = context.read<CollectionsBloc>();
 
     return AlertDialog(
-          title: Text('Новая коллекция'),
+          backgroundColor: AppColors.primaryThemeBlack,
+          title: Text('Новая коллекция', style: CustomTextStyles.m3TitleLarge()),
           content: TextField(
+            maxLength: 24,
             controller: controller,
             decoration: InputDecoration(
               hintText: 'Придумайте название',
               border: OutlineInputBorder(),
             ),
+            style: CustomTextStyles.m3TitleMedium(),
             autofocus: true,
             onChanged: (_) => setState(() {})
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Отмена'),
+              child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: controller.text.isEmpty
-                  ? null
-                  : () {
-                      collectionBloc.add(AddNewCollection(collectionName: controller.text));
-                      Navigator.pop(context);
-                    },
-              child: Text('Сохранить'),
-            ),
+              ? null
+              : () {
+                collectionBloc.add(AddNewCollection(collectionName: controller.text));
+                Navigator.pop(context);
+              },
+              child: Text(
+                "Сохранить",
+                style: controller.text.isEmpty
+                ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeGrey)
+                : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
+              )
+            )
           ],
         );
   }
@@ -323,29 +365,37 @@ class _RenameCollectionDialogState extends State<_RenameCollectionDialog> {
     final collectionBloc = context.read<CollectionsBloc>();
 
     return AlertDialog(
-          title: Text('Переименовать коллекцию'),
+          backgroundColor: AppColors.primaryThemeBlack,
+          title: Text('Переименовать коллекцию', style: CustomTextStyles.m3TitleLarge()),
           content: TextField(
+            maxLength: 24,
             controller: controller,
             decoration: InputDecoration(
               hintText: 'Новое название коллекции',
               border: OutlineInputBorder(),
             ),
+            style: CustomTextStyles.m3TitleMedium(),
             autofocus: true,
             onChanged: (_) => setState(() {})
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Отмена'),
+              child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
             ),
-            ElevatedButton(
-              onPressed: controller.text.isEmpty
-                  ? null
-                  : () {
-                      collectionBloc.add(RenameCollection(collection: widget.collection, updatedName: controller.text));
-                      Navigator.pop(context);
-                    },
-              child: Text('Сохранить'),
+            TextButton(
+              onPressed: controller.text.isEmpty 
+              ? null 
+              : () {
+                collectionBloc.add(RenameCollection(collection: widget.collection, updatedName: controller.text));
+                Navigator.pop(context);
+              }, 
+              child: Text(
+                "Сохранить", 
+                style: controller.text.isEmpty 
+                ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeGrey)
+                : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
+              )
             ),
           ],
         );

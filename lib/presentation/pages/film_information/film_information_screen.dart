@@ -403,8 +403,7 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(height: 12.h),
-            Text("Оценить",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text("Оценить", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             SizedBox(height: 20.h),
             SizedBox(
               height: 80.h,
@@ -549,8 +548,7 @@ class _CollectionTile extends StatelessWidget {
   final CollectionEntity collection;
   final bool isInCollection;
 
-  const _CollectionTile(
-      {required this.collection, required this.isInCollection});
+  const _CollectionTile({required this.collection, required this.isInCollection});
 
   @override
   Widget build(BuildContext context) {

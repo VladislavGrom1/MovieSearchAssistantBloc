@@ -47,7 +47,6 @@ class PosterFilmImage extends StatelessWidget {
                 color: AppColors.savedFilmIcon,
                 borderRadius: BorderRadius.circular(5.0.h)),
                 child: Icon(
-                  //Icons.save_rounded, 
                   Icons.bookmark,
                   color: Colors.white,
                   size: 19.w,

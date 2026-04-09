@@ -31,6 +31,9 @@ class FilterListScreen extends StatelessWidget {
               child: ListView.separated(
                   physics: BouncingScrollPhysics(),
                   itemBuilder: (context, index) => InkWell(
+                    enableFeedback: false,
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
                     onTap: () {
                       context.router.pop(filterData.items.values.elementAt(index));
                     },

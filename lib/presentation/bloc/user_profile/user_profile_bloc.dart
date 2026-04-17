@@ -4,9 +4,11 @@ import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exc
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/clear_cache_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_api_key_info_from_storage_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_cache_size_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
@@ -21,6 +23,8 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   final ImportOldLibraryUseCase importOldLibraryUseCase;
   final ExportLibraryUseCase exportLibraryUseCase;
   final ClearLibraryUseCase clearLibraryUseCase;
+  final GetCacheSizeUseCase getCacheSizeUseCase;
+  final ClearCacheUseCase clearCacheUseCase;
 
   UserProfileBloc({
     required this.getApiKeyInfoFromStorageUseCase,
@@ -28,7 +32,9 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     required this.importLibraryUseCase,
     required this.importOldLibraryUseCase,
     required this.exportLibraryUseCase,
-    required this.clearLibraryUseCase
+    required this.clearLibraryUseCase,
+    required this.getCacheSizeUseCase,
+    required this.clearCacheUseCase
   }) : super(UserProfileInitial()) {
     on<GetUserProfileInfo>(_getUserProfileInfo);
     on<UpdateUserProfileInfo>(_updateUserProfileInfo);
@@ -44,7 +50,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     emit(UserProfileLoading());
     try{
       UserEntity? userEntity = await getApiKeyInfoFromStorageUseCase.call();
-      double? cacheSizeMb = await FilmImageCacheService.getCacheSizeInMB();
+      double? cacheSizeMb = await getCacheSizeUseCase.call();
       emit(UserProfileLoaded(userEntity: userEntity, cacheSizeMB: cacheSizeMb));
     } on LocalDataSourceException {
       emit(UserProfileActionFailure(message: "Не удалось загрузить информацию о пользователе"));
@@ -61,7 +67,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     emit(UserProfileLoading());
     try{
       UserEntity? updatedUserEntity = await updateUserApiKeyInfoUseCase.call(apiKey: currentState.userEntity?.apiKey ?? "");
-      double? cacheSizeMb = await FilmImageCacheService.getCacheSizeInMB();
+      double? cacheSizeMb = await getCacheSizeUseCase.call();
       emit(currentState.copyWith(userEntity: updatedUserEntity, cacheSizeMB: cacheSizeMb)); 
     } on RemoteDataSourceException catch(e) {
       emit(UserProfileActionFailure(message: e.message));
@@ -98,14 +104,14 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     final currentState = state;
     if(currentState is! UserProfileLoaded) return;
     try{
-      final currentCache = await FilmImageCacheService.getCacheSizeInMB();
+      final currentCache = await getCacheSizeUseCase.call();
       if(currentCache == 0){
         emit(UserProfileActionSuccess(message: "Кэш отсутствует"));
         emit(currentState);
         return;
       }
-      await FilmImageCacheService.clearCache();
-      final sizeMB = await FilmImageCacheService.getCacheSizeInMB();
+      await clearCacheUseCase.call();
+      final sizeMB = await getCacheSizeUseCase.call();
       emit(UserProfileActionSuccess(message: "Очищено ${currentCache.toStringAsFixed(1)} МБ"));
       emit(currentState.copyWith(cacheSizeMB: sizeMB));
     } catch(e){

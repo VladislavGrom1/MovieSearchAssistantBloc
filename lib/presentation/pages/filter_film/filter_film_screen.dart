@@ -99,7 +99,7 @@ class _FilterFilmContent extends StatelessWidget {
             child: Text("Показать", style: CustomTextStyles.m3BodyLarge(color: AppColors.textWhite)),
           ),
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: 5.h),
         Padding(
           padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
           child: ElevatedButton(
@@ -166,7 +166,7 @@ class _FilterButtonsList extends StatelessWidget {
               ),
             );
           },
-          separatorBuilder: (context, index) => Divider(color: AppColors.primaryScheme),
+          separatorBuilder: (context, index) => Divider(color: AppColors.primaryThemeGrey),
           itemCount: 3),
     );
   }

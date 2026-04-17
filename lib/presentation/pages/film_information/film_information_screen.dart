@@ -7,6 +7,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
+import 'package:movie_search_assistant_bloc/app/util/data_formatter.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
@@ -16,7 +19,8 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/f
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
 
-// TODO: Реализовать карусель скриншотов
+// TODO: Настроить отображение фото (сейчас растягиваются)
+// TODO: Декомпозировать виджеты
 
 @RoutePage()
 class FilmInformationScreen extends StatelessWidget {
@@ -56,10 +60,7 @@ class _FilmInformationView extends StatelessWidget {
             listener: _filmInformationBlocListener),
       ],
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(filmName, style: TextStyle(color: Colors.white))
-        ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primaryThemeBlack,
         body: SafeArea(
             child: CustomRefreshIndicator(
           onRefresh: () async {
@@ -121,82 +122,279 @@ class _FilmInformationContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
+        SliverAppBar(
+          backgroundColor: AppColors.primaryThemeBlack,
+          surfaceTintColor: Colors.transparent,
+          pinned: true,
+          floating: false,
+          expandedHeight: 500.h,
+          elevation: 0,
+          iconTheme: IconThemeData(color: AppColors.primaryScheme),
+          flexibleSpace: FlexibleSpaceBar(
+            background: _PosterImageWidget(film: film),
+          ),
+        ),
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.only(left: 20.w, right: 20.w),
             child: Column(
               children: [
-                _PosterImageWidget(film: film),
-                TextButton(
-                  onPressed: () => _openCollectionSheet(context),
-                  child: const Text(
-                    "Добавить в коллекцию",
-                    style: TextStyle(color: Colors.purple),
-                  ),
+                SizedBox(height: 20.h),
+                Text(
+                  film.nameRu ?? film.nameOriginal ?? "Без названия",
+                  maxLines: 5,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center, 
+                  style: CustomTextStyles.m3HeadlineMedium().copyWith(fontWeight: FontWeight.w800)
                 ),
-                BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
-                  builder: (context, savedFilmIds) {
-                    final isSaved = savedFilmIds.contains(film.kinopoiskId);
-                    return ElevatedButton(
-                        onPressed: !isSaved
-                            ? null
-                            : () {
-                                _openRatingSheet(context, film.userRating);
-                              },
-                        child: const Text("Оценить фильм"));
-                  },
+                SizedBox(height: 20.h),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "${film.ratingKinopoisk ?? "-"}", 
+                      style: CustomTextStyles.m3BodyMedium(color: AppColors.ratingGreen)
+                    ),
+                    SizedBox(width: 5.w),
+                    Text(
+                      film.ratingKinopoiskVoteCount == null 
+                      ? "-"
+                      : DataFormatter.formatVoteCount(film.ratingKinopoiskVoteCount!),
+                      style: CustomTextStyles.m3BodyMedium(color: AppColors.textDarkGrey),
+                    ),
+                    SizedBox(width: 5.w),
+                    Text(
+                      "${film.nameOriginal ?? film.nameRu ?? film.nameEn}",
+                      style: CustomTextStyles.m3BodyMedium(),
+                    )
+                  ]
                 ),
-                BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
-                  builder: (context, savedFilmIds) {
-                    final isSaved = savedFilmIds.contains(film.kinopoiskId);
-                    return ElevatedButton(
-                        onPressed: !isSaved
-                            ? null
-                            : () {
-                                _openCommentDialog(context);
-                              },
-                        child: const Text("Изменить отзыв"));
-                  },
-                ),
-                SizedBox(height: 16.h),
-                Text(film.nameRu ?? film.nameOriginal ?? "Без названия"),
-                SizedBox(height: 8.h),
-                Text(collectionIds.toString()),
                 SizedBox(height: 10.h),
-                if (film.nameOriginal != null) ...[
-                  Text(film.nameOriginal!),
-                  SizedBox(height: 10.h),
-                ],
                 Text(
                   film.serial!
-                      ? "${film.startYear} - ${film.endYear ?? "настоящее время"}"
-                      : "${film.year}",
+                    ? "${film.startYear} - ${film.endYear ?? "настоящее время"}"
+                    : "${film.year}",
+                  style: CustomTextStyles.m3BodyMedium(color: AppColors.textDarkGrey),
                 ),
                 SizedBox(height: 10.h),
-                Text(_getCountriesString(film.countries)),
-                SizedBox(height: 10.h),
-                Text(_getGenresString(film.genres)),
-                SizedBox(height: 10.h),
-                Text(film.description.toString()),
-                SizedBox(height: 10.h),
-                Text(_getSloganString(film.slogan)),
-                SizedBox(height: 10.h),
-                _filmRatingAndReviewCount(
-                  "Рейтинг KP",
-                  film.ratingKinopoisk,
-                  film.ratingKinopoiskVoteCount,
+                Text(
+                  DataFormatter.formatCountries(film.countries), 
+                  style: CustomTextStyles.m3BodyMedium(color: AppColors.textDarkGrey)
                 ),
                 SizedBox(height: 10.h),
-                _filmRatingAndReviewCount(
-                  "Рейтинг IMDB",
-                  film.ratingImbd,
-                  film.ratingImdbVoteCount,
+                Text(
+                  DataFormatter.formatGenres(film.genres),
+                  style: CustomTextStyles.m3BodyMedium(),
+                ),
+                SizedBox(height: 20.h),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    InkWell(
+                      enableFeedback: false,
+                      highlightColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onTap: () => _openCollectionSheet(context),
+                      borderRadius: BorderRadius.circular(8.w),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 10.h),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.bookmark_add_outlined,
+                              color: AppColors.primaryScheme,
+                              size: 28.sp,
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              "Коллекции",
+                              style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
+                      builder: (context, savedFilmIds) {
+                        final isSaved = savedFilmIds.contains(film.kinopoiskId);
+                        final color = !isSaved ? AppColors.primaryThemeGrey : AppColors.primaryScheme;
+                        return InkWell(
+                          enableFeedback: false,
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          onTap: !isSaved ? null : () {
+                            _openCommentDialog(context);
+                          },
+                          borderRadius: BorderRadius.circular(8.w),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.comment_outlined,
+                                  color: color,
+                                  size: 30.sp,
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  "Отзыв",
+                                  style: CustomTextStyles.m3BodyMedium(color: color),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                    ),
+                    BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
+                      builder: (context, savedFilmIds) {
+                        final isSaved = savedFilmIds.contains(film.kinopoiskId);
+                        final color = !isSaved ? AppColors.primaryThemeGrey : AppColors.primaryScheme;
+                        return InkWell(
+                          enableFeedback: false,
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          onTap: !isSaved ? null : () {
+                            _openRatingSheet(context, film.userRating);
+                          },
+                          borderRadius: BorderRadius.circular(8.w),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.star_border,
+                                  color: color,
+                                  size: 30.sp,
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  "Оценить",
+                                  style: CustomTextStyles.m3BodyMedium(color: color),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    InkWell(
+                      enableFeedback: false,
+                      highlightColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onTap: () {
+                        context.read<FilmInformationBloc>().add(LaunchUrl(url: film.webUrl));
+                      },
+                      borderRadius: BorderRadius.circular(8.w),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.public,
+                              color: AppColors.primaryScheme,
+                              size: 28.sp,
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              "Подробнее",
+                              style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.h),
+                Divider(color: AppColors.primaryScheme, thickness: 2),
+                SizedBox(height: 20.h),
+                Text(
+                  film.slogan ?? "Слоган отсутствует",
+                  textAlign: TextAlign.left, 
+                  style: CustomTextStyles.m3BodyLarge(),
+                ),
+                SizedBox(height: 20.h),
+                Text(
+                  textAlign: TextAlign.left,
+                  film.description ?? "Описание отсутствует", 
+                  style: CustomTextStyles.m3BodyLarge(),
+                ),
+                SizedBox(height: 20.h),
+                Divider(color: AppColors.primaryScheme, thickness: 2),
+                SizedBox(height: 20.h),
+                Align(
+                  alignment: AlignmentGeometry.centerLeft,
+                  child: Text(
+                    "Рейтинг", 
+                    style: CustomTextStyles.m3HeadlineMedium(), 
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                _FilmRatingWidget(
+                  imagePath: "assets/icons/kp.jpg", 
+                  resourseName: "КиноПоиск", 
+                  rating: film.ratingKinopoisk, 
+                  voteCount: film.ratingKinopoiskVoteCount,
+                  isUserRating: false,
                 ),
                 SizedBox(height: 10.h),
-                Text("Пользовательский рейтинг, ${film.userRating}"),
+                _FilmRatingWidget(
+                  imagePath: "assets/icons/imdb.png", 
+                  resourseName: "IMDB", 
+                  rating: film.ratingImbd, 
+                  voteCount: film.ratingImdbVoteCount,
+                  isUserRating: false,
+                ),
                 SizedBox(height: 10.h),
-                Text("Пользовательский комментарий: ${film.userComment}")
-                //Text(filmImages?.imageUrls.toString() ?? ""),
+                _FilmRatingWidget(
+                  imagePath: "assets/icons/movie_search_assistant_icon.png", 
+                  resourseName: "Ваша оценка", 
+                  rating: film.userRating, 
+                  isUserRating: true,
+                ),
+                SizedBox(height: 20.h),
+                Align(
+                  alignment: AlignmentGeometry.centerLeft,
+                  child: Text(
+                    "Отзыв", 
+                    style: CustomTextStyles.m3HeadlineMedium(), 
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Align(
+                  alignment: AlignmentGeometry.centerLeft,
+                  child: Text(
+                    textAlign: TextAlign.left,
+                    film.userComment ?? "Отзыв отсутствует", 
+                    style: CustomTextStyles.m3BodyLarge(),
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Divider(color: AppColors.primaryScheme, thickness: 2),
+                SizedBox(height: 20.h),
+                Align(
+                  alignment: AlignmentGeometry.centerLeft,
+                  child: Text(
+                    "Кадры из фильма", 
+                    style: CustomTextStyles.m3HeadlineMedium(), 
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                _FilmScreenshotsWidget(
+                  imageUrls: filmImages?.imageUrls, 
+                  localImagePaths: film.localScreenshotPaths
+                ),
+                SizedBox(height: 20.h),
               ],
             ),
           ),
@@ -207,15 +405,31 @@ class _FilmInformationContent extends StatelessWidget {
 
   void _openCollectionSheet(BuildContext context) {
     showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (bottomSheetContext) => MultiBlocProvider(
-              providers: [
-                BlocProvider.value(value: context.read<FilmInformationBloc>()),
-                BlocProvider.value(value: context.read<CollectionsBloc>()),
-              ],
-              child: const _CollectionPickerSheet(),
-            ));
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.primaryThemeBlack,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (bottomSheetContext) {
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider.value(
+              value: context.read<FilmInformationBloc>(),
+            ),
+            BlocProvider.value(
+              value: context.read<CollectionsBloc>(),
+            ),
+          ],
+          child: SafeArea(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(bottomSheetContext).size.height * 0.8),
+              child: const _CollectionPickerSheet()
+              ),
+            ),
+        );
+      },
+    );
   }
 
   void _openRatingSheet(BuildContext context, int? currentUserRating) {
@@ -235,33 +449,6 @@ class _FilmInformationContent extends StatelessWidget {
               child: _AddUserCommentDialog(film: film),
             ));
   }
-
-  String _getGenresString(List<String>? genres) {
-    return genres?.join(', ') ?? "Данные отсутствуют";
-  }
-
-  String _getCountriesString(List<String>? countries) {
-    return countries?.join(', ') ?? "Данные отсутствуют";
-  }
-
-  String _getSloganString(String? slogan) {
-    return slogan ?? "Слоган отсутствует";
-  }
-
-  Widget _filmRatingAndReviewCount(
-      String resourceName, num? rating, int? voteCount) {
-    final ratingText = rating == null ? "-" : rating.toString();
-    final voteCountText =
-        "${voteCount == null ? 0 : voteCount.toString()} оценок";
-    return Text("$resourceName, $ratingText, $voteCountText");
-  }
-
-  // List<Widget> _nameOriginal(String? nameOriginal) {
-  //   if (nameOriginal != null) {
-  //     return [Text(nameOriginal), SizedBox(height: 10.h)];
-  //   }
-  //   return [SizedBox()];
-  // }
 }
 
 class _PosterImageWidget extends StatelessWidget {
@@ -273,34 +460,223 @@ class _PosterImageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (film.localPosterImagePath != null) {
       final fullPosterImagePath = ImagePathResolver.resolve(film.localPosterImagePath!);
-
-      return Container(
+      return SizedBox(
+        width: 320.w,
         height: 200.h,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16.w),
+        child: Image.file(
+          File(fullPosterImagePath),
+          fit: BoxFit.cover,
         ),
-        child: Image.file(File(fullPosterImagePath), fit: BoxFit.cover),
       );
     } else {
       return CachedNetworkImage(
-        imageUrl: film.posterUrlPreview ?? '',
-        cacheManager: FilmImageCacheService.instance,
-        imageBuilder: (context, imageProvider) => Container(
-          height: 200.h,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: imageProvider,
-              fit: BoxFit.cover,
-              opacity: 1.0,
-            ),
+        imageUrl: film.posterUrl ?? "",
+        cacheManager: getIt<FilmImageCacheService>().instance,
+        fit: BoxFit.cover,
+        memCacheHeight: 500,
+        width: 320.w,
+        height: 200.h,
+        placeholder: (context, url) => Container(
+          color: AppColors.primaryThemeBlack,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.primaryThemeBlack,
+          width: double.infinity,
+          height: double.infinity,
+          child: Icon(
+            Icons.image_not_supported, 
+            color: AppColors.primaryScheme,
+            size: 40.w
           ),
         ),
-        placeholder: (context, url) =>
-            Container(height: 200.h, color: Colors.white),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-        fit: BoxFit.cover,
       );
     }
+  }
+}
+
+class _FilmRatingWidget extends StatelessWidget {
+  final String imagePath;
+  final String resourseName;
+  final num? rating;
+  final int? voteCount;
+  final bool isUserRating;
+
+  const _FilmRatingWidget({
+    required this.imagePath,
+    required this.resourseName,
+    this.rating,
+    this.voteCount,
+    required this.isUserRating
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: AppColors.primaryThemeGrey,
+      clipBehavior: Clip.antiAlias,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width - 40.w,
+          maxHeight: 90.h,
+          minHeight: 80.h,
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildRatingCircle(context),
+              const VerticalDivider(width: 1, thickness: 2, color: AppColors.primaryScheme),
+              _buildRatingInfo(context, isUserRating),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRatingCircle(BuildContext context) {
+    return SizedBox(
+      width: 90.w,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.primaryThemeGrey,
+              image: DecorationImage(
+                opacity: 0.15,
+                image: AssetImage(imagePath),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              rating != null ? rating.toString() : "-",
+              style: CustomTextStyles.m3HeadlineMedium().copyWith(fontSize: 40, fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatingInfo(BuildContext context, bool isUserRating) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.only(left: 12.w, right: 12.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              resourseName,
+              style: CustomTextStyles.m3TitleLarge(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: 10.h),
+            if(!isUserRating) 
+            Text(
+              voteCount != null
+                  ? "${DataFormatter.formatVoteCount(voteCount!)} оценок"
+                  : "Информация о количестве оценок отсутствует",
+              style: CustomTextStyles.m3TitleLarge(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilmScreenshotsWidget extends StatelessWidget {
+  final List<String>? imageUrls;
+  final List<String>? localImagePaths;
+
+  const _FilmScreenshotsWidget({
+    required this.imageUrls,
+    required this.localImagePaths
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasLocalImages = localImagePaths?.isNotEmpty == true;
+    final hasUrlImages = imageUrls?.isNotEmpty == true;
+
+    if (!hasLocalImages && !hasUrlImages) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.image_not_supported, size: 48.sp, color: AppColors.primaryScheme),
+            SizedBox(height: 8.h),
+            Text("Кадры отсутствуют", style: CustomTextStyles.m3BodyMedium()),
+          ],
+        ),
+      );
+    }
+
+    final itemCount = hasLocalImages ? localImagePaths!.length : imageUrls!.length;
+
+    return SizedBox(
+      height: 200.h,
+      child: ListView.separated(
+        physics: BouncingScrollPhysics(),
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
+        separatorBuilder: (context, index) => SizedBox(width: 12.w),
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          if (hasLocalImages) {
+            return _buildLocalImage(localImagePaths![index]);
+          } else {
+            return _buildNetworkImage(imageUrls![index]);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildLocalImage(String localPath) {
+    final fullPath = ImagePathResolver.resolve(localPath);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16.w),
+      child: RepaintBoundary(
+        child: Image.file(
+          File(fullPath),
+          fit: BoxFit.cover,
+          width: 320.w,
+          height: 200.h,
+          errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNetworkImage(String url) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16.w),
+      child: RepaintBoundary(
+        child: CachedNetworkImage(
+          imageUrl: url,
+          cacheManager: getIt<FilmImageCacheService>().instance,
+          memCacheWidth: 320.w.round(),
+          memCacheHeight: 200.h.round(),
+          fit: BoxFit.cover,
+          width: 320.w,
+          height: 200.h,
+          placeholder: (context, url) => Container(color: AppColors.primaryThemeGrey),
+          errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+        ),
+      ),
+    );
   }
 }
 
@@ -327,7 +703,8 @@ class _AddUserCommentDialogState extends State<_AddUserCommentDialog> {
     final filmInformationBloc = context.read<FilmInformationBloc>();
 
     return AlertDialog(
-      title: Text('Изменить пользовательский отзыв'),
+      backgroundColor: AppColors.primaryThemeBlack,
+      title: Text('Изменить пользовательский отзыв', style: CustomTextStyles.m3TitleLarge()),
       content: TextField(
           maxLines: 10,
           maxLength: 200,
@@ -336,22 +713,29 @@ class _AddUserCommentDialogState extends State<_AddUserCommentDialog> {
             hintText: 'Новый отзыв',
             border: OutlineInputBorder(),
           ),
+          style: CustomTextStyles.m3TitleMedium(),
           autofocus: true,
           onChanged: (_) => setState(() {})),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Отмена'),
+          child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: controller.text.isEmpty
-              ? null
-              : () {
-                  filmInformationBloc.add(
-                      UpdateUserFilmInformation(userComment: controller.text));
-                  Navigator.pop(context);
-                },
-          child: Text('Сохранить'),
+            ? null
+            : () {
+              filmInformationBloc.add(
+                UpdateUserFilmInformation(userComment: controller.text)
+              );
+              Navigator.pop(context);
+            },
+          child: Text(
+            "Сохранить",
+            style: controller.text.isEmpty
+            ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeBlack)
+            : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
+          )
         ),
       ],
     );
@@ -398,66 +782,72 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
       expand: false,
       initialChildSize: 0.28,
       builder: (context, scrollController) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 12.h),
-            Text("Оценить", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            SizedBox(height: 20.h),
-            SizedBox(
-              height: 80.h,
-              child: PageView.builder(
-                controller: _controller,
-                physics: const PageScrollPhysics(),
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  final value = index + 1;
-                  final diff = (currentPage - index).abs();
-                  final scale = (1 - (diff * 0.3)).clamp(0.6, 1.0);
-                  final opacity = (1 - (diff * 0.5)).clamp(0.3, 1.0);
-                  return Center(
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: opacity,
-                      child: Transform.scale(
-                        scale: scale,
-                        child: Text(
-                          "$value",
-                          style: TextStyle(
-                            fontSize: 50,
-                            fontWeight: FontWeight.bold,
-                            color: value == selectedRating
-                                ? Colors.deepPurple
-                                : Colors.grey,
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.w)),
+            color: AppColors.primaryThemeBlack
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 20.h),
+              Text("Оценить", style: CustomTextStyles.m3HeadlineMedium()),
+              SizedBox(height: 20.h),
+              SizedBox(
+                height: 80.h,
+                child: PageView.builder(
+                  controller: _controller,
+                  physics: BouncingScrollPhysics(),
+                  itemCount: 10,
+                  itemBuilder: (context, index) {
+                    final value = index + 1;
+                    final diff = (currentPage - index).abs();
+                    final scale = (1 - (diff * 0.3)).clamp(0.6, 1.0);
+                    final opacity = (1 - (diff * 0.5)).clamp(0.3, 1.0);
+                    return Center(
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: opacity,
+                        child: Transform.scale(
+                          scale: scale,
+                          child: Text(
+                            "$value",
+                            style: TextStyle(
+                              fontSize: 50,
+                              fontWeight: FontWeight.bold,
+                              color: value == selectedRating
+                                  ? AppColors.primaryScheme
+                                  : AppColors.secondaryThemeGrey,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-            SizedBox(height: 20.h),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  backgroundColor: Colors.deepPurple,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+              SizedBox(height: 20.h),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                      minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
+                      alignment: AlignmentGeometry.center,
+                      backgroundColor: WidgetStatePropertyAll(AppColors.primaryScheme)),
+                  onPressed: () {
+                    context.read<FilmInformationBloc>().add(
+                      UpdateUserFilmInformation(userRating: selectedRating)
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "Поставить оценку", 
+                    style: CustomTextStyles.m3BodyLarge(color: AppColors.textWhite)
                   ),
                 ),
-                onPressed: () {
-                  context.read<FilmInformationBloc>().add(
-                      UpdateUserFilmInformation(userRating: selectedRating));
-                  Navigator.pop(context);
-                },
-                child: const Text("Поставить оценку",
-                    style: TextStyle(color: Colors.white)),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -469,49 +859,65 @@ class _CollectionPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-        expand: false,
-        builder: (context, scrollController) {
-          return BlocBuilder<FilmInformationBloc, FilmInformationState>(
-            builder: (context, filmState) {
-              final collectionIds = (filmState as FilmLoaded).collectionIds;
 
-              return BlocBuilder<CollectionsBloc, CollectionsState>(
-                  builder: (context, collectionsState) {
-                if (collectionsState is CollectionsLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (collectionsState is! CollectionsLoaded) {
-                  return const Center(child: Text("Нет коллекций"));
-                }
-
-                final collections = collectionsState.collections;
-                return _CollectionsList(
-                    scrollController: scrollController,
-                    collectionsIds: collectionIds,
-                    collections: collections);
-              });
-            },
-          );
-        });
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 8.h, bottom: 6.h),
+                      width: 50.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryThemeGrey,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Text("Добавить в коллекцию", style: CustomTextStyles.m3TitleLarge()),
+                    SizedBox(height: 20.h),
+                    Flexible(
+                      child: BlocBuilder<FilmInformationBloc, FilmInformationState>(
+                        builder: (context, filmState) {
+                          final collectionIds = (filmState as FilmLoaded).collectionIds;
+                      
+                          return BlocBuilder<CollectionsBloc, CollectionsState>(
+                              builder: (context, collectionsState) {
+                            if (collectionsState is CollectionsLoading) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+                      
+                            if (collectionsState is! CollectionsLoaded) {
+                              return const Center(child: Text("Нет коллекций"));
+                            }
+                      
+                            final collections = collectionsState.collections;
+                            return _CollectionsList(
+                                collectionsIds: collectionIds,
+                                collections: collections);
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+              ),
+    );
+        }
   }
-}
 
 class _CollectionsList extends StatelessWidget {
-  final ScrollController scrollController;
   final List<String> collectionsIds;
   final List<CollectionEntity> collections;
 
   const _CollectionsList(
-      {required this.scrollController,
-      required this.collectionsIds,
+      {required this.collectionsIds,
       required this.collections});
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        controller: scrollController,
+        physics: BouncingScrollPhysics(),
+        shrinkWrap: true,
         itemCount: collections.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) {
@@ -531,7 +937,8 @@ class _CreateCollectionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        title: Text("Создать новую коллекцию"),
+        leading: Icon(Icons.add, color: AppColors.primaryScheme),
+        title: Text("Создать новую коллекцию", style: CustomTextStyles.m3TitleMedium().copyWith(fontWeight: FontWeight.w600)),
         onTap: () => showDialog(
             context: context,
             builder: (dialogContext) {
@@ -555,12 +962,12 @@ class _CollectionTile extends StatelessWidget {
     final loadFilmStatus = state.status;
 
     return ListTile(
-      title: Text(collection.name ?? "Без названия"),
+      title: Text(collection.name ?? "Без названия", style: CustomTextStyles.m3TitleMedium().copyWith(fontWeight: FontWeight.w600)),
       trailing: loadFilmStatus == FilmStatus.loading
-          ? CircularProgressIndicator()
+          ? SizedBox(width: 20.w, height: 20.h, child: CircularProgressIndicator())
           : Icon(
               isInCollection ? Icons.check_box : Icons.add,
-              color: isInCollection ? Colors.green : Colors.grey,
+              color: isInCollection ? AppColors.primaryScheme : AppColors.primaryScheme,
             ),
       onTap: loadFilmStatus == FilmStatus.loading
           ? null
@@ -600,7 +1007,8 @@ class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
     final collectionBloc = context.read<CollectionsBloc>();
 
     return AlertDialog(
-      title: Text('Новая коллекция'),
+      backgroundColor: AppColors.primaryThemeBlack,
+      title: Text('Новая коллекция', style: CustomTextStyles.m3TitleLarge()),
       content: TextField(
           controller: controller,
           maxLength: 24,
@@ -608,23 +1016,28 @@ class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
             hintText: 'Придумайте название',
             border: OutlineInputBorder(),
           ),
+          style: CustomTextStyles.m3TitleMedium(),
           autofocus: true,
           onChanged: (_) => setState(() {})),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Отмена'),
+          child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: controller.text.isEmpty
-              ? null
-              : () {
-                  collectionBloc
-                      .add(AddNewCollection(collectionName: controller.text));
-                  Navigator.pop(context);
-                },
-          child: Text('Сохранить'),
-        ),
+            ? null
+            : () {
+              collectionBloc.add(AddNewCollection(collectionName: controller.text));
+              Navigator.pop(context);
+            }, 
+          child: Text(
+            "Сохранить",
+            style: controller.text.isEmpty
+              ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeBlack)
+              : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
+          )
+        )
       ],
     );
   }

@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
-import 'package:movie_search_assistant_bloc/app/util/plural_forms.dart';
+import 'package:movie_search_assistant_bloc/app/util/data_formatter.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
@@ -193,7 +193,7 @@ class _CollectionCard extends StatelessWidget {
                           style: CustomTextStyles.m3TitleLarge2(),
                         ),
                         SizedBox(height: 10.h),
-                        Text(PluralForms.films(collection.filmCount ?? 0), style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)),
+                        Text(DataFormatter.formatFilmWordDeclension(collection.filmCount ?? 0), style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)),
                         SizedBox(height: 10.h),
                         Text("Дата создания: ${_formatDateTime(date)}", style: CustomTextStyles.m3BodyMedium()),
                         ]

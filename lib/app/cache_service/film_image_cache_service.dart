@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 class FilmImageCacheService {
   static const key = 'filmImageCache';
 
-  static final CacheManager instance = CacheManager(
+  final CacheManager instance = CacheManager(
     Config(
       key,
       stalePeriod: const Duration(days: 7),
@@ -15,17 +15,17 @@ class FilmImageCacheService {
     ),
   );
 
-  static Future<int> getCacheSize() async {
+  Future<int> getCacheSize() async {
     final cacheDir = await _getCacheDirectory();
     return _getDirectorySize(cacheDir);
   }
 
-  static Future<double> getCacheSizeInMB() async {
+  Future<double> getCacheSizeInMB() async {
     final bytes = await getCacheSize();
     return bytes / (1024 * 1024);
   }
 
-  static Future<void> clearCache() async {
+  Future<void> clearCache() async {
     final cacheDir = await _getCacheDirectory();
 
     if (await cacheDir.exists()) {
@@ -35,12 +35,12 @@ class FilmImageCacheService {
     await instance.emptyCache();
   }
 
-  static Future<Directory> _getCacheDirectory() async {
+  Future<Directory> _getCacheDirectory() async {
     final dir = await getTemporaryDirectory();
     return Directory('${dir.path}/$key');
   }
 
-  static Future<int> _getDirectorySize(Directory dir) async {
+  Future<int> _getDirectorySize(Directory dir) async {
     int totalSize = 0;
 
     if (await dir.exists()) {

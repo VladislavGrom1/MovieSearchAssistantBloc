@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -209,54 +211,58 @@ class _FilmCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.w),
         ),
         clipBehavior: Clip.antiAlias,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FilmPosterImage(
-              networkImageUrl: film.posterUrlPreview,
-              kinopoiskRating: film.ratingKinopoisk,
-              showSavedIcon: isSaved,
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(top: 5.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      film.nameRu ?? film.nameOriginal ?? "-",
-                      maxLines: 2,
-                      style: CustomTextStyles.m3TitleLarge2(),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 10.h),
-                    Text(
-                      film.nameOriginal ?? film.nameRu ?? "-",
-                      maxLines: 2,
-                      style: CustomTextStyles.m3BodyMedium(),
-                      overflow: TextOverflow.ellipsis,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FilmPosterImage(
+                networkImageUrl: film.posterUrlPreview,
+                kinopoiskRating: film.ratingKinopoisk,
+                showSavedIcon: isSaved,
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 5.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 5.h),
+                      Text(
+                        film.nameRu ?? film.nameOriginal ?? "-",
+                        maxLines: 2,
+                        style: CustomTextStyles.m3TitleLarge2(),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    SizedBox(height: 10.h),
-                    Text(
-                      DataFormatter.formatCountriesAndYear(film.countries, film.year),
-                      maxLines: 1,
-                      style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 10.h),
-                    Text(
-                      DataFormatter.formatGenres(film.genres),
-                      maxLines: 1,
-                      style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      SizedBox(height: 10.h),
+                      Text(
+                        film.nameOriginal ?? film.nameRu ?? "-",
+                        maxLines: 2,
+                        style: CustomTextStyles.m3BodyMedium(),
+                        overflow: TextOverflow.ellipsis,
+                        ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        DataFormatter.formatCountriesAndYear(film.countries, film.year),
+                        maxLines: 1,
+                        style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        DataFormatter.formatGenres(film.genres),
+                        maxLines: 1,
+                        style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: 7.w)
-          ],
+              SizedBox(width: 7.w)
+            ],
+          ),
         ),
       ),
     );

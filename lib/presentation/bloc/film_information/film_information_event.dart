@@ -61,3 +61,12 @@ class RefreshFilmInformation extends FilmInformationEvent {
   @override
   List<Object?> get props => [film];
 }
+
+class LaunchUrl extends FilmInformationEvent{
+  final String? url;
+
+  const LaunchUrl({required this.url});
+
+  @override
+  List<Object?> get props => [url];
+}

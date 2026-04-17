@@ -12,7 +12,7 @@ final class SearchFilmsInitial extends SearchFilmsState {}
 final class SearchFilmsLoading extends SearchFilmsState{}
 
 final class CollectionsFilmsLoadedSuccessful extends SearchFilmsState{
-  final Map<String, List<FilmEntity>?>? filmCollectionsMap;
+  final Map<String, List<FilmEntity>?> filmCollectionsMap;
   const CollectionsFilmsLoadedSuccessful({required this.filmCollectionsMap});
 
   @override

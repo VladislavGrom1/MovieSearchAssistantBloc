@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
+import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/file_service.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/zip_service.dart';
@@ -23,10 +24,13 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_collection_re
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/clear_cache_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_cache_size_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_collection_use_case.dart';
@@ -84,6 +88,7 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => NetworkService(getIt()));
     getIt.registerLazySingleton(() => FileService());
     getIt.registerLazySingleton(() => ZipService());
+    getIt.registerLazySingleton(() => FilmImageCacheService());
 
     // RemoteDataSources
     getIt.registerLazySingleton(() => UserRemoteDataSource(dio: getIt()));
@@ -155,6 +160,9 @@ Future<void> initializeDependencies() async {
       filmCollectionRepository: getIt(),
       imageStorageService: getIt()
     ));
+    getIt.registerLazySingleton(() => GetCacheSizeUseCase(filmImageCacheService: getIt()));
+    getIt.registerLazySingleton(() => ClearCacheUseCase(filmImageCacheService: getIt()));
+    getIt.registerLazySingleton(() => OpenUrlUseCase());
     
 
     // Blocs
@@ -170,7 +178,8 @@ Future<void> initializeDependencies() async {
       updateSavedFilmFromServerUseCase: getIt(),
       updateUserFilmInformationUseCase: getIt(),
       removeFilmFromCollectionUseCase: getIt(),
-      watchLinksByFilmUseCase: getIt()
+      watchLinksByFilmUseCase: getIt(),
+      openUrlUseCase: getIt()
     ));
     getIt.registerFactory(() => CollectionsBloc(
       getCollectionsUseCase: getIt(), 
@@ -191,7 +200,9 @@ Future<void> initializeDependencies() async {
       importLibraryUseCase: getIt(),
       importOldLibraryUseCase: getIt(),
       exportLibraryUseCase: getIt(),
-      clearLibraryUseCase: getIt()
+      clearLibraryUseCase: getIt(),
+      getCacheSizeUseCase: getIt(),
+      clearCacheUseCase: getIt()
     ));
 
     // Cubit

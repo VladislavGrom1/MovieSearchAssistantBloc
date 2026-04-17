@@ -52,7 +52,7 @@ class FilterListScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  separatorBuilder: (context, index) => Divider(color: AppColors.primaryScheme), 
+                  separatorBuilder: (context, index) => Divider(color: AppColors.primaryThemeGrey), 
                   itemCount: filterData.items.length
                 ),
             )

@@ -24,6 +24,7 @@ class CollectionFilmsBloc extends Bloc<CollectionFilmsEvent, CollectionFilmsStat
     on<GetSavedFilms>(_getSavedFilms);
     on<UpdateSavedFilms>(_updateSavedFilms);
     on<RemoveFilm>(_removeFilm);
+    on<RemoveFilms>(_removeFilms);
   }
 
   Future<void> _getSavedFilms(GetSavedFilms event, Emitter emit) async {
@@ -45,8 +46,14 @@ class CollectionFilmsBloc extends Bloc<CollectionFilmsEvent, CollectionFilmsStat
   Future<void> _updateSavedFilms(UpdateSavedFilms event, Emitter emit) async {
     final currentState = state;
     if(currentState is! CollectionFilmsLoaded) return;
+    emit(CollectionFilmsLoaded(collectionId: currentState.collectionId, savedFilms: event.updatedSavedFilms));
+  }
+
+  Future<void> _removeFilm(RemoveFilm event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! CollectionFilmsLoaded) return;
     try{
-      emit(CollectionFilmsLoaded(collectionId: currentState.collectionId, savedFilms: event.updatedSavedFilms));
+      await removeFilmFromCollectionUseCase.call(event.film, event.collectionId);
     } on LocalDataSourceException catch(e){
       emit(CollectionFilmsFailure(message: e.message));
       emit(currentState);
@@ -56,11 +63,15 @@ class CollectionFilmsBloc extends Bloc<CollectionFilmsEvent, CollectionFilmsStat
     }
   }
 
-  Future<void> _removeFilm(RemoveFilm event, Emitter emit) async {
+  Future<void> _removeFilms(RemoveFilms event, Emitter emit) async {
     final currentState = state;
     if(currentState is! CollectionFilmsLoaded) return;
     try{
-      await removeFilmFromCollectionUseCase.call(event.film, event.collectionId);
+      for(final film in currentState.savedFilms){
+        if(event.selectedFilmIds.contains(film.kinopoiskId)){
+          await removeFilmFromCollectionUseCase.call(film, event.collectionId);
+        }
+      }
     } on LocalDataSourceException catch(e){
       emit(CollectionFilmsFailure(message: e.message));
       emit(currentState);

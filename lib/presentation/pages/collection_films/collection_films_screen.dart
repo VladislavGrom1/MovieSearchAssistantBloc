@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -77,13 +79,12 @@ class _CollectionFilmsView extends StatelessWidget {
                     icon: Icon(Icons.delete),
                     onPressed: () {
                       if (collectionFilmsState is CollectionFilmsLoaded) {
-                        final selected = selectionFilmsState.selectedFilmIds;
-                        for (final film in collectionFilmsState.savedFilms) {
-                          if (selected.contains(film.kinopoiskId)) {
-                            context.read<CollectionFilmsBloc>().add(RemoveFilm(film: film, collectionId: collectionFilmsState.collectionId),
-                            );
-                          }
-                        }
+                        final selectedFilmIds = selectionFilmsState.selectedFilmIds;
+                        context.read<CollectionFilmsBloc>().add(
+                          RemoveFilms(
+                            selectedFilmIds: selectedFilmIds, 
+                            collectionId: collectionFilmsState.collectionId
+                          ));
                         context.read<SelectionFilmsCubit>().clear();
                       }
                     },
@@ -196,76 +197,79 @@ class _FilmCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.w),
         ),
         clipBehavior: Clip.antiAlias,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FilmPosterImage(
-              localImagePath: savedFilm.localPosterImagePath,
-              kinopoiskRating: savedFilm.ratingKinopoisk,
-              userRating: savedFilm.userRating,
-              showUserRating: true,
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-                child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(height: 5.h),
-                  Text(
-                    savedFilm.nameRu ?? savedFilm.nameOriginal ?? "-",
-                    maxLines: 2,
-                    style: CustomTextStyles.m3TitleLarge2(),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    savedFilm.nameOriginal ?? savedFilm.nameRu ?? "-",
-                    maxLines: 2,
-                    style: CustomTextStyles.m3BodyMedium(),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    DataFormatter.formatCountriesAndYear(savedFilm.countries, savedFilm.year),
-                    maxLines: 1,
-                    style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    DataFormatter.formatGenres(savedFilm.genres),
-                    maxLines: 1,
-                    style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FilmPosterImage(
+                localImagePath: savedFilm.localPosterImagePath,
+                kinopoiskRating: savedFilm.ratingKinopoisk,
+                userRating: savedFilm.userRating,
+                showUserRating: true,
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                  child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 10.h),
+                    Text(
+                      savedFilm.nameRu ?? savedFilm.nameOriginal ?? "-",
+                      maxLines: 2,
+                      style: CustomTextStyles.m3TitleLarge2(),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 10.h),
+                    Text(
+                      savedFilm.nameOriginal ?? savedFilm.nameRu ?? "-",
+                      maxLines: 2,
+                      style: CustomTextStyles.m3BodyMedium(),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 10.h),
+                    Text(
+                      DataFormatter.formatCountriesAndYear(savedFilm.countries, savedFilm.year),
+                      maxLines: 1,
+                      style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 10.h),
+                    Text(
+                      DataFormatter.formatGenres(savedFilm.genres),
+                      maxLines: 1,
+                      style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                )
+              ),
+              BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
+                builder: (context, state) {
+                  if (!state.isSelectionMode) {
+                    return SizedBox(
+                      width: 40.w,
+                      child: PopupMenuButton(
+                          color: AppColors.primaryThemeGrey,
+                          enableFeedback: false,
+                          icon: Icon(Icons.more_vert, color: AppColors.primaryScheme),
+                          onSelected: (value) {
+                            if (value == "removeFilm") onRemove();
+                          },
+                          itemBuilder: (_) => [PopupMenuItem(value: 'removeFilm', child: Text("Удалить фильм", style: CustomTextStyles.m3BodyMedium()))]),
+                    );
+                  }
+                  final isSelected = state.selectedFilmIds.contains(savedFilm.kinopoiskId!);
+                  return Checkbox(
+                      value: isSelected,
+                      onChanged: (_) {
+                        context.read<SelectionFilmsCubit>().toggle(savedFilm.kinopoiskId!);
+                      });
+                },
               )
-            ),
-            BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
-              builder: (context, state) {
-                if (!state.isSelectionMode) {
-                  return SizedBox(
-                    width: 40.w,
-                    child: PopupMenuButton(
-                        color: AppColors.primaryThemeGrey,
-                        enableFeedback: false,
-                        icon: Icon(Icons.more_vert, color: AppColors.primaryScheme),
-                        onSelected: (value) {
-                          if (value == "removeFilm") onRemove();
-                        },
-                        itemBuilder: (_) => [PopupMenuItem(value: 'removeFilm', child: Text("Удалить фильм", style: CustomTextStyles.m3BodyMedium()))]),
-                  );
-                }
-                final isSelected = state.selectedFilmIds.contains(savedFilm.kinopoiskId!);
-                return Checkbox(
-                    value: isSelected,
-                    onChanged: (_) {
-                      context.read<SelectionFilmsCubit>().toggle(savedFilm.kinopoiskId!);
-                    });
-              },
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );

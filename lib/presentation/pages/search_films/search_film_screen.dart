@@ -8,6 +8,7 @@ import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_names.dart';
+import 'package:movie_search_assistant_bloc/app/util/data_formatter.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
@@ -85,7 +86,7 @@ class _SearchFilmView extends StatelessWidget {
 }
 
 class _SearchFilmContent extends StatelessWidget {
-  final Map<String, List<FilmEntity>?>? filmCollectionsMap;
+  final Map<String, List<FilmEntity>?> filmCollectionsMap;
 
   const _SearchFilmContent({required this.filmCollectionsMap});
 
@@ -113,7 +114,7 @@ class _SearchFilmContent extends StatelessWidget {
 }
 
 class _CollectionsList extends StatelessWidget {
-  final Map<String, List<FilmEntity>?>? filmCollectionsMap;
+  final Map<String, List<FilmEntity>?> filmCollectionsMap;
 
   const _CollectionsList({required this.filmCollectionsMap});
 
@@ -128,7 +129,7 @@ class _CollectionsList extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    _switchCollectionName(filmCollectionsNamesList[index]),
+                    DataFormatter.formatCollectionName(filmCollectionsNamesList[index]),
                     style: CustomTextStyles.m3TitleLarge()
                   ),
                   IconButton(
@@ -136,7 +137,7 @@ class _CollectionsList extends StatelessWidget {
                       onPressed: () {
                         context.router.push(SearchedFilmsRoute(
                             nameCollection: filmCollectionsNamesList[index],
-                            appBarTitle: _switchCollectionName(filmCollectionsNamesList[index])));
+                            appBarTitle: DataFormatter.formatCollectionName(filmCollectionsNamesList[index])));
                       },
                       icon: Icon(Icons.arrow_forward, color: AppColors.primaryScheme))
                 ],
@@ -152,32 +153,24 @@ class _CollectionsList extends StatelessWidget {
         separatorBuilder: (context, index) => SizedBox(height: 12.h),
         itemCount: FilmCollectionNames.filmCollectionNames.length);
   }
-
-  String _switchCollectionName(String collectionName){
-    String collectionNameFormated;
-    switch(collectionName){
-      case("TOP_POPULAR_MOVIES"): collectionNameFormated = "Популярные фильмы"; break;
-      case("POPULAR_SERIES"): collectionNameFormated = "Популярные сериалы"; break;
-      case("TOP_250_MOVIES"): collectionNameFormated = "Топ 250: фильмы"; break;
-      case("TOP_250_TV_SHOWS"): collectionNameFormated = "Топ 250: сериалы"; break;
-      default: collectionNameFormated = collectionName;
-    }
-    return collectionNameFormated;
-  }
 }
 
 class _CollectionFilmsList extends StatelessWidget {
-  final Map<String, List<FilmEntity>?>? filmCollectionsMap;
+  final Map<String, List<FilmEntity>?> filmCollectionsMap;
   final String filmCollectionsName;
 
   const _CollectionFilmsList({required this.filmCollectionsMap, required this.filmCollectionsName});
 
   @override
   Widget build(BuildContext context) {
-    List<FilmEntity> filmEntityList = filmCollectionsMap![filmCollectionsName]!;
+    List<FilmEntity>? filmEntityList = filmCollectionsMap[filmCollectionsName];
 
     return BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
       builder: (context, savedFilmIds) {
+        if(filmEntityList == null){
+          return Text("Фильмы отсутствуют");
+        }
+
         return ListView.separated(
             addAutomaticKeepAlives: false,
             addSemanticIndexes: false,

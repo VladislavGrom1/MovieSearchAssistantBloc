@@ -6,6 +6,7 @@ import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_s
 import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
+import 'package:movie_search_assistant_bloc/injection_container.dart';
 
 class FilmPosterImage extends StatelessWidget {
   final String? networkImageUrl;
@@ -64,7 +65,7 @@ class FilmPosterImage extends StatelessWidget {
     } else {
       return CachedNetworkImage(
         imageUrl: networkImageUrl ?? '',
-        cacheManager: FilmImageCacheService.instance,
+        cacheManager: getIt<FilmImageCacheService>().instance,
         memCacheWidth: 200,
         memCacheHeight: 280,
         fit: BoxFit.cover,

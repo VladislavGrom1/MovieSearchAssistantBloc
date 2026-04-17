@@ -13,7 +13,7 @@ class GetSavedFilms extends CollectionFilmsEvent {
   const GetSavedFilms({required this.collectionId});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [collectionId];
 }
 
 class UpdateSavedFilms extends CollectionFilmsEvent {
@@ -33,4 +33,14 @@ class RemoveFilm extends CollectionFilmsEvent{
 
   @override
   List<Object> get props => [film, collectionId];
+}
+
+class RemoveFilms extends CollectionFilmsEvent{
+  final Set<int> selectedFilmIds;
+  final String collectionId;
+
+  const RemoveFilms({required this.selectedFilmIds, required this.collectionId});
+
+  @override
+  List<Object> get props => [selectedFilmIds, collectionId];
 }

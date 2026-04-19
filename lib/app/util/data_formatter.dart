@@ -77,6 +77,9 @@ class DataFormatter {
     switch(collectionName){
       case("TOP_POPULAR_MOVIES"): collectionNameFormated = "Популярные фильмы"; break;
       case("POPULAR_SERIES"): collectionNameFormated = "Популярные сериалы"; break;
+      case("LOVE_THEME"): collectionNameFormated = "Такая разная любовь"; break;
+      case("KIDS_ANIMATION_THEME"): collectionNameFormated = "Мультфильмы"; break;
+      case("COMICS_THEME"): collectionNameFormated = "Кинокомиксы"; break;
       case("TOP_250_MOVIES"): collectionNameFormated = "Топ 250: фильмы"; break;
       case("TOP_250_TV_SHOWS"): collectionNameFormated = "Топ 250: сериалы"; break;
       default: collectionNameFormated = collectionName;

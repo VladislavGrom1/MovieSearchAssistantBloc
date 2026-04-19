@@ -15,20 +15,11 @@ class HomeScreen extends StatelessWidget {
           CollectionsRoute(),
           UserProfileRoute()
         ],
-      transitionBuilder: (context, child, animation) {
-        return child;
-      },
       builder: (context, child) { 
-        
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
           body: child,
-          bottomNavigationBar: Theme(
-            data: Theme.of(context).copyWith(
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-            ),
-            child: BottomNavigationBar(
+          bottomNavigationBar: BottomNavigationBar(
               enableFeedback: false,
               type: BottomNavigationBarType.shifting,
               backgroundColor: AppColors.primaryThemeBlack,
@@ -54,7 +45,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
-          ),
         );
       },
     );

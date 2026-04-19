@@ -256,6 +256,7 @@ class _FilmCard extends StatelessWidget {
                         style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
                         overflow: TextOverflow.ellipsis,
                       ),
+                      SizedBox(height: 10.h)
                     ],
                   ),
                 ),

@@ -655,7 +655,7 @@ class _FilmScreenshotsWidget extends StatelessWidget {
           ),
           child: Image.file(
               File(fullPath),
-              fit: BoxFit.fill,
+              fit: BoxFit.cover,
               errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
             ),
         ),
@@ -674,10 +674,24 @@ class _FilmScreenshotsWidget extends StatelessWidget {
           child: CachedNetworkImage(
               imageUrl: url,
               cacheManager: getIt<FilmImageCacheService>().instance,
-              memCacheWidth: 320.w.round(),
-              memCacheHeight: 200.h.round(),
               fit: BoxFit.fill,
-              placeholder: (context, url) => Container(color: AppColors.primaryThemeGrey),
+              progressIndicatorBuilder: (context, url, downloadProgress) => Center(
+                child: Container(
+                  height: 100.h,
+                  width: 100.w,
+                  color: Colors.transparent,
+                  child: Center(
+                    child: SizedBox(
+                      height: 24.h,
+                      width: 24.w,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          value: downloadProgress.progress,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
             ),
         ),

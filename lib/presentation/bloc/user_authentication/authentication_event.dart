@@ -11,3 +11,5 @@ class TryAuthenticationEvent extends AuthenticationEvent{
   final String apiKey;
   const TryAuthenticationEvent({required this.apiKey});
 }
+
+class LaunchApiKeyUrl extends AuthenticationEvent{}

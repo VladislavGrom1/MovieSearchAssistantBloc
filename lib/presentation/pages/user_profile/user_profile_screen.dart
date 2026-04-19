@@ -182,7 +182,16 @@ class _UserProfileContent extends StatelessWidget {
                   height: 44.h,
                   padding: EdgeInsets.only(left: 20.w),
                   alignment: AlignmentGeometry.centerLeft,
-                  child: Text("Размер кэша: ${cacheSizeMB?.toStringAsFixed(1)} MB", style: CustomTextStyles.m3BodyLarge())
+                  child: Text.rich(
+                            TextSpan(
+                              style: CustomTextStyles.m3BodyLarge(),
+                              children: [
+                                TextSpan(text: "Размер кэша: "),
+                                TextSpan(text: "${cacheSizeMB?.toStringAsFixed(1)} МБ", style: CustomTextStyles.m3BodyLarge(color: AppColors.primaryScheme)),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                          ),
                 ),
               ),
             ] 

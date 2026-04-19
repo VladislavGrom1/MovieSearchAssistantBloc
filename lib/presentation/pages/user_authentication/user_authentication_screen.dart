@@ -1,9 +1,12 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
 
@@ -26,7 +29,7 @@ class _UserAuthenticationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primaryThemeBlack,
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.only(left: 20.w, right: 20.w),
@@ -73,26 +76,77 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text(
-            "UserAuthentication",
-            style: TextStyle(color: Colors.purple),
+          SizedBox(height: 40.h),
+          Center(
+            child: Text(
+              "Movie Search Assistant", 
+              style: CustomTextStyles.m3HeadlineLarge(color: AppColors.primaryScheme))
+            ),
+          SizedBox(height: 20.h),
+          Center(
+            child: Text.rich(
+              TextSpan(
+                style: CustomTextStyles.m3BodyLarge(),
+                children: [
+                  TextSpan(text: "Для использования возможностей приложения Вам потребуется зарегистрироваться на сайте "),
+                  TextSpan(
+                    text: "kinopoiskapiunofficial.tech",
+                    style: CustomTextStyles.m3BodyLarge(color: AppColors.primaryScheme),
+                    recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      _launchApiKeyUrl(context);
+                      },
+                    ),
+                  TextSpan(text: " и получить API Key"),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+            ),
           ),
           SizedBox(height: 20.h),
-          TextFormField(controller: _textEditingController),
-          SizedBox(height: 20.h),
-          TextButton(
-            onPressed: () {
-              authenticationBloc.add(TryAuthenticationEvent(apiKey: _textEditingController.text));
+          TextField(
+            controller: _textEditingController,
+            maxLength: 40,
+            maxLines: 1,
+            decoration: InputDecoration(
+              hintText: 'Введите API Key',
+              border: OutlineInputBorder(),
+            ),
+            style: CustomTextStyles.m3TitleMedium(),
+            autofocus: true,
+            onChanged: (_) => setState(() {})),
+          SizedBox(height: 10.h),
+          ElevatedButton(
+            style: ButtonStyle(
+                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
+                alignment: AlignmentGeometry.center,
+                backgroundColor: _textEditingController.text.isEmpty 
+                ? WidgetStatePropertyAll(AppColors.primaryThemeGrey)
+                : WidgetStatePropertyAll(AppColors.primaryScheme)),
+            onPressed: _textEditingController.text.isEmpty 
+            ? null 
+            : () {
+              _tryAuthenticationEvent(context, _textEditingController.text);
             },
             child: Text(
-              "Перейти на SearchFilmScreen",
-              style: TextStyle(color: Colors.purple),
-            ),
+              "Войти", 
+              style: CustomTextStyles.m3BodyLarge(
+                color: _textEditingController.text.isEmpty ? AppColors.textDarkGrey : AppColors.textWhite
+              )),
           ),
         ],
       ),
     );
   }
+
+  void _launchApiKeyUrl(BuildContext context){
+    context.read<AuthenticationBloc>().add(LaunchApiKeyUrl());
+  }
+
+  void _tryAuthenticationEvent(BuildContext context, String apiKey) {
+    context.read<AuthenticationBloc>().add(TryAuthenticationEvent(apiKey: apiKey));
+  }
+
 }

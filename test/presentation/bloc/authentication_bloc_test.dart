@@ -5,10 +5,12 @@ import 'package:mocktail/mocktail.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
 
 class MockAuthenticationUseCase extends Mock implements UpdateUserApiKeyInfoUseCase {}
+class MockOpenUrlUseCase extends Mock implements OpenUrlUseCase{}
 
 UserEntity _buildUserEntity({
   String? apiKey = "TestApiKey",
@@ -26,6 +28,7 @@ void main(){
   group("AuthenticationBloc", () {
     final userEntity = _buildUserEntity();
     final mockAuthenticationUseCase = MockAuthenticationUseCase();
+    final mockOpenUrlUseCase = MockOpenUrlUseCase();
 
     setUp(() {
       reset(mockAuthenticationUseCase);
@@ -36,7 +39,7 @@ void main(){
       setUp: () {
         when(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).thenAnswer((_) async => userEntity);
       },
-      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase),
+      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase, openUrlUseCase: mockOpenUrlUseCase),
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => <AuthenticationState>[
         AuthenticationLoading(),
@@ -52,7 +55,7 @@ void main(){
       setUp: () {
         when(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).thenAnswer((_) async => null);
       },
-      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase),
+      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase, openUrlUseCase: mockOpenUrlUseCase),
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => <AuthenticationState>[
         AuthenticationLoading(),
@@ -68,7 +71,7 @@ void main(){
       setUp: () {
         when(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).thenThrow(NetworkFailure());
       },
-      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase),
+      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase, openUrlUseCase: mockOpenUrlUseCase),
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => [
         AuthenticationLoading(),
@@ -86,7 +89,7 @@ void main(){
           message: "Error"
         ));
       },
-      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase),
+      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase, openUrlUseCase: mockOpenUrlUseCase),
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => [
         AuthenticationLoading(),
@@ -102,7 +105,7 @@ void main(){
       setUp: () {
         when(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).thenThrow(Exception());
       },
-      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase),
+      build: () => AuthenticationBloc(authenticationUseCase: mockAuthenticationUseCase, openUrlUseCase: mockOpenUrlUseCase),
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => [
         AuthenticationLoading(),

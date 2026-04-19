@@ -166,7 +166,7 @@ Future<void> initializeDependencies() async {
     
 
     // Blocs
-    getIt.registerFactory(() => AuthenticationBloc(authenticationUseCase: getIt()));
+    getIt.registerFactory(() => AuthenticationBloc(authenticationUseCase: getIt(), openUrlUseCase: getIt()));
     getIt.registerFactory(() => SearchFilmsBloc(displayFilmCollectionsUseCase: getIt()));
     getIt.registerFactory(() => SearchedFilmsBloc(searchFilterFilmsUseCase: getIt(), searchCollectionFilmsUseCase: getIt()));
     getIt.registerFactory(() => FilterFilmBloc());

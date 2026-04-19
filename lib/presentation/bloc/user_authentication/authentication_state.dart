@@ -26,3 +26,11 @@ final class AuthenticationFailure extends AuthenticationState{
   @override
   List<Object?> get props => [message];
 }
+
+final class AuthenticationActionFailure extends AuthenticationState{
+  final String message;
+  const AuthenticationActionFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}

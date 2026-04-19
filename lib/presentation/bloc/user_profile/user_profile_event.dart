@@ -31,3 +31,5 @@ class GetCacheSize extends UserProfileEvent{}
 class ClearCacheDirectory extends UserProfileEvent{}
 
 class ClearLibrary extends UserProfileEvent{}
+
+class LaunchApiKeyUrl extends UserProfileEvent{}

@@ -1,8 +1,11 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_profile_bloc.dart';
@@ -29,7 +32,7 @@ class _UserProfileView extends StatelessWidget {
     final userProfileBloc = context.read<UserProfileBloc>();
 
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primaryThemeBlack,
         body: BlocListener<UserProfileBloc, UserProfileState>(
           listener: (context, state) {
             if (state is UserProfileActionSuccess) {
@@ -61,17 +64,40 @@ class _UserProfileView extends StatelessWidget {
                           }
 
                           if (state is ExportInProgress){
-                            return Center(child: CircularProgressIndicator());
+                            return Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text("Экспорт библиотеки", style: CustomTextStyles.m3HeadlineMedium()),
+                                  SizedBox(height: 16.h),
+                                  Text("Пожалуйста, подождите завершения операции", 
+                                      style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme), 
+                                      textAlign: TextAlign.center),
+                                  SizedBox(height: 20.h),
+                                  CircularProgressIndicator(),
+                                ],
+                              ),
+                            );
                           }
 
                           if (state is ImportInProgress){
                             return Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  CircularProgressIndicator(value: state.progress),
-                                  SizedBox(height: 16),
-                                  Text("${state.current} / ${state.total}"),
+                                  Text("Импорт библиотеки", style: CustomTextStyles.m3HeadlineMedium()),
+                                  SizedBox(height: 16.h),
+                                  Text("Пожалуйста, подождите завершения операции", 
+                                    style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme), 
+                                    textAlign: TextAlign.center),
+                                  SizedBox(height: 20.h),
+                                  CircularProgressIndicator(value: state.progress, color: AppColors.primaryScheme,),
+                                  SizedBox(height: 16.h),
+                                  Text("${state.current} / ${state.total}", style: CustomTextStyles.m3BodyLarge(color: AppColors.primaryScheme)),
+                                  SizedBox(height: 10.h),
+                                  
                                 ],
                               ),
                             );
@@ -111,48 +137,59 @@ class _UserProfileContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text("API Key"),
+          SizedBox(height: 20.h),
+          Text("API Key", style: CustomTextStyles.m3TitleLarge()),
           SizedBox(height: 10.h),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Card(
-                color: Colors.grey,
+                color: AppColors.primaryThemeGrey,
                 child: SizedBox(
                     height: 44.h,
                     child: Center(
-                        child:
-                            Text(userEntity?.apiKey ?? "API Key отсутствует"))),
+                        child: Text(userEntity?.apiKey ?? "API Key отсутствует", style: CustomTextStyles.m3TitleMedium()))),
               ),
               SizedBox(height: 10.h),
-              Card(
-                color: Colors.grey,
-                child: SizedBox(
-                  height: 100.h,
-                  width: double.maxFinite,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 10.h),
-                      Text("Тип аккаунта: ${userEntity?.accountType}"),
-                      SizedBox(height: 10.h),
-                      Text(
-                          "Дневное количество запросов: ${userEntity?.limitCount}"),
-                      SizedBox(height: 10.h),
-                      Text(
-                          "Количество совершенных запросов: ${userEntity?.useCount}")
-                    ],
-                  ),
+              Text.rich(
+                TextSpan(
+                  style: CustomTextStyles.m3BodyMedium(color: AppColors.ratingGrey),
+                  children: [
+                    TextSpan(text: "Для получения дополнительной информации об API Key перейдите на "),
+                    TextSpan(
+                      text: "kinopoiskapiunofficial.tech",
+                      style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme),
+                      recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                          _launchApiKeyUrl(context);
+                          },
+                        ),
+                        TextSpan(text: "."),
+                      ],
+                    ),
                 ),
-              ),
             ],
           ),
+          SizedBox(height: 20.h),
+          Text("Память", style: CustomTextStyles.m3TitleLarge()),
           SizedBox(height: 10.h),
-          Text("Память"),
-          Column(children: [
-            Text("Размер кэша: ${cacheSizeMB?.toStringAsFixed(1)} MB")
-          ]),
-          Text("Настройки"),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                color: AppColors.primaryThemeGrey,
+                child: Container(
+                  height: 44.h,
+                  padding: EdgeInsets.only(left: 20.w),
+                  alignment: AlignmentGeometry.centerLeft,
+                  child: Text("Размер кэша: ${cacheSizeMB?.toStringAsFixed(1)} MB", style: CustomTextStyles.m3BodyLarge())
+                ),
+              ),
+            ] 
+          ),
+          SizedBox(height: 20.h),
+          Text("Настройки", style: CustomTextStyles.m3TitleLarge()),
+          SizedBox(height: 10.h),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -160,7 +197,7 @@ class _UserProfileContent extends StatelessWidget {
             separatorBuilder: (context, index) => Divider(
               height: 1,
               thickness: 1,
-              color: Colors.grey.shade300,
+              color: AppColors.primaryThemeGrey,
               indent: 16,
               endIndent: 16,
             ),
@@ -183,10 +220,10 @@ class _UserProfileContent extends StatelessWidget {
               ];
 
               return ListTile(
-                  leading: Icon(icons[index]),
-                  title: Text(items[index]),
+                  leading: Icon(icons[index], color: AppColors.primaryScheme),
+                  title: Text(items[index], style: CustomTextStyles.m3BodyLarge()),
                   trailing:
-                      const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                      const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.primaryScheme),
                   onTap: () {
                     switch (index) {
                       case 0:
@@ -273,6 +310,10 @@ class _UserProfileContent extends StatelessWidget {
   void _clearLibrary(BuildContext context) {
     context.read<UserProfileBloc>().add(ClearLibrary());
   }
+
+  void _launchApiKeyUrl(BuildContext context) {
+    context.read<UserProfileBloc>().add(LaunchApiKeyUrl());
+  }
 }
 
 class _UpdateApiKeyDialog extends StatefulWidget {
@@ -296,31 +337,41 @@ class _UpdateApiKeyDialogState extends State<_UpdateApiKeyDialog> {
     final userProfileBloc = context.read<UserProfileBloc>();
 
     return AlertDialog(
-      title: Text('Изменение API Key'),
-      content: TextField(
-          controller: controller,
-          maxLength: 40,
-          maxLines: 2,
-          decoration: InputDecoration(
-            hintText: 'Введите новый API Key',
-            border: OutlineInputBorder(),
-          ),
-          autofocus: true,
-          onChanged: (_) => setState(() {})),
+      backgroundColor: AppColors.primaryThemeBlack,
+      title: Text('Изменение API Key', style: CustomTextStyles.m3TitleLarge()),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: TextField(
+            controller: controller,
+            maxLength: 40,
+            maxLines: 2,
+            decoration: InputDecoration(
+              hintText: 'Введите новый API Key',
+              border: OutlineInputBorder(),
+            ),
+            style: CustomTextStyles.m3TitleMedium(),
+            autofocus: true,
+            onChanged: (_) => setState(() {})),
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Отмена'),
+          child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
         ),
-        ElevatedButton(
-          onPressed: controller.text.isEmpty
-              ? null
-              : () {
-                  userProfileBloc.add(UpdateApiKey(updatedApiKey: controller.text));
-                  Navigator.pop(context);
-                },
-          child: Text('Сохранить'),
-        ),
+        TextButton(
+            onPressed: controller.text.isEmpty
+            ? null
+            : () {
+              userProfileBloc.add(UpdateApiKey(updatedApiKey: controller.text));
+              Navigator.pop(context);
+            },
+            child: Text(
+              "Сохранить",
+              style: controller.text.isEmpty
+                ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeGrey)
+                : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
+              )
+            ),
       ],
     );
   }

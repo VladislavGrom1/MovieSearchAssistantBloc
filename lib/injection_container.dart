@@ -202,7 +202,8 @@ Future<void> initializeDependencies() async {
       exportLibraryUseCase: getIt(),
       clearLibraryUseCase: getIt(),
       getCacheSizeUseCase: getIt(),
-      clearCacheUseCase: getIt()
+      clearCacheUseCase: getIt(),
+      openUrlUseCase: getIt()
     ));
 
     // Cubit

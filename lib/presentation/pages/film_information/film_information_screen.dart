@@ -374,7 +374,7 @@ class _FilmInformationContent extends StatelessWidget {
                   alignment: AlignmentGeometry.centerLeft,
                   child: Text(
                     textAlign: TextAlign.left,
-                    film.userComment ?? "Отзыв отсутствует", 
+                    film.userComment ?? "Пользовательский отзыв отсутствует", 
                     style: CustomTextStyles.m3BodyLarge(),
                   ),
                 ),
@@ -631,7 +631,7 @@ class _FilmScreenshotsWidget extends StatelessWidget {
         physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        separatorBuilder: (context, index) => SizedBox(width: 12.w),
+        separatorBuilder: (context, index) => SizedBox(width: 15.w),
         itemCount: itemCount,
         itemBuilder: (context, index) {
           if (hasLocalImages) {
@@ -649,12 +649,15 @@ class _FilmScreenshotsWidget extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.w),
       child: RepaintBoundary(
-        child: Image.file(
-          File(fullPath),
-          fit: BoxFit.cover,
-          width: 320.w,
-          height: 200.h,
-          errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: 200.h,
+          ),
+          child: Image.file(
+              File(fullPath),
+              fit: BoxFit.fill,
+              errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+            ),
         ),
       ),
     );
@@ -664,16 +667,19 @@ class _FilmScreenshotsWidget extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.w),
       child: RepaintBoundary(
-        child: CachedNetworkImage(
-          imageUrl: url,
-          cacheManager: getIt<FilmImageCacheService>().instance,
-          memCacheWidth: 320.w.round(),
-          memCacheHeight: 200.h.round(),
-          fit: BoxFit.cover,
-          width: 320.w,
-          height: 200.h,
-          placeholder: (context, url) => Container(color: AppColors.primaryThemeGrey),
-          errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: 200.h,
+          ),
+          child: CachedNetworkImage(
+              imageUrl: url,
+              cacheManager: getIt<FilmImageCacheService>().instance,
+              memCacheWidth: 320.w.round(),
+              memCacheHeight: 200.h.round(),
+              fit: BoxFit.fill,
+              placeholder: (context, url) => Container(color: AppColors.primaryThemeGrey),
+              errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+            ),
         ),
       ),
     );
@@ -705,17 +711,20 @@ class _AddUserCommentDialogState extends State<_AddUserCommentDialog> {
     return AlertDialog(
       backgroundColor: AppColors.primaryThemeBlack,
       title: Text('Изменить пользовательский отзыв', style: CustomTextStyles.m3TitleLarge()),
-      content: TextField(
-          maxLines: 10,
-          maxLength: 200,
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: 'Новый отзыв',
-            border: OutlineInputBorder(),
-          ),
-          style: CustomTextStyles.m3TitleMedium(),
-          autofocus: true,
-          onChanged: (_) => setState(() {})),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: TextField(
+            maxLines: 10,
+            maxLength: 200,
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: 'Новый отзыв',
+              border: OutlineInputBorder(),
+            ),
+            style: CustomTextStyles.m3TitleMedium(),
+            autofocus: true,
+            onChanged: (_) => setState(() {})),
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
@@ -1009,16 +1018,19 @@ class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
     return AlertDialog(
       backgroundColor: AppColors.primaryThemeBlack,
       title: Text('Новая коллекция', style: CustomTextStyles.m3TitleLarge()),
-      content: TextField(
-          controller: controller,
-          maxLength: 24,
-          decoration: InputDecoration(
-            hintText: 'Придумайте название',
-            border: OutlineInputBorder(),
-          ),
-          style: CustomTextStyles.m3TitleMedium(),
-          autofocus: true,
-          onChanged: (_) => setState(() {})),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: TextField(
+            controller: controller,
+            maxLength: 24,
+            decoration: InputDecoration(
+              hintText: 'Придумайте название',
+              border: OutlineInputBorder(),
+            ),
+            style: CustomTextStyles.m3TitleMedium(),
+            autofocus: true,
+            onChanged: (_) => setState(() {})),
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),

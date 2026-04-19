@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
-import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_cache_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_case.dart';
@@ -11,6 +10,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/get_api_key_info_fro
 import 'package:movie_search_assistant_bloc/domain/usecases/get_cache_size_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 
 part 'user_profile_event.dart';
@@ -25,6 +25,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   final ClearLibraryUseCase clearLibraryUseCase;
   final GetCacheSizeUseCase getCacheSizeUseCase;
   final ClearCacheUseCase clearCacheUseCase;
+  final OpenUrlUseCase openUrlUseCase;
 
   UserProfileBloc({
     required this.getApiKeyInfoFromStorageUseCase,
@@ -34,7 +35,8 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     required this.exportLibraryUseCase,
     required this.clearLibraryUseCase,
     required this.getCacheSizeUseCase,
-    required this.clearCacheUseCase
+    required this.clearCacheUseCase,
+    required this.openUrlUseCase
   }) : super(UserProfileInitial()) {
     on<GetUserProfileInfo>(_getUserProfileInfo);
     on<UpdateUserProfileInfo>(_updateUserProfileInfo);
@@ -44,6 +46,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<ExportLibrary>(_exportLibrary);
     on<ImportLibrary>(_importLibrary);
     on<ImportOldLibrary>(_importOldLibrary);
+    on<LaunchApiKeyUrl>(_launchApiKeyUrl);
   }
 
   Future<void> _getUserProfileInfo(GetUserProfileInfo event, Emitter emit) async {
@@ -153,7 +156,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       if(path == "" || path == null){
         emit(UserProfileActionFailure(message: "Операция экспорта отменена"));
       } else{
-        emit(UserProfileActionSuccess(message: "Библиотека успешно экспортирована в $path"));
+        emit(UserProfileActionSuccess(message: "Библиотека успешно экспортирована"));
       }
       emit(currentState);
     } catch(e){
@@ -219,6 +222,21 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(currentState);
     }
   }
+
+  Future<void> _launchApiKeyUrl(LaunchApiKeyUrl event, Emitter emit) async {
+    final currentState = state;
+    try{
+      final isSuccess = await openUrlUseCase.call("https://kinopoiskapiunofficial.tech/?ysclid=mo5wqs4v48720285068");
+      if(!isSuccess){
+        emit(UserProfileActionFailure(message: "Не удалось перейти по ссылке"));
+        emit(currentState);
+      }
+    } catch(e){
+      emit(UserProfileActionFailure(message: "Не удалось перейти по ссылке"));
+      emit(currentState);
+    }
+  }
+
 }
 
 

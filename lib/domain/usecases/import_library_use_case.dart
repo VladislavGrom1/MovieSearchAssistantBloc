@@ -24,67 +24,94 @@ class ImportLibraryUseCase {
   });
 
   Future<bool?> call({Function(int current, int total)? onProgress}) async {
-  try {
-    final zipFile = await fileService.pickZipFile();
-    if (zipFile == null) return null;
+    try {
+      final zipFile = await fileService.pickZipFile();
+      if (zipFile == null) return null;
 
-    final bytes = await zipFile.readAsBytes();
-    final archive = ZipDecoder().decodeBytes(bytes);
+      final bytes = await zipFile.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
 
-    final totalSteps = archive.length + 1;
-    int currentStep = 0;
+      final tempDir = await getTemporaryDirectory();
+      final extractDir = Directory(
+        p.join(tempDir.path, "import_${DateTime.now().millisecondsSinceEpoch}"),
+      );
 
-    final tempDir = await getTemporaryDirectory();
-    final extractDir = Directory(
-      p.join(tempDir.path, "import_${DateTime.now().millisecondsSinceEpoch}"),
-    );
+      await extractDir.create(recursive: true);
 
-    await extractDir.create(recursive: true);
+      /// ---------- 1. РАСПАКОВКА ----------
+      for (final file in archive) {
+        final filePath = p.join(extractDir.path, file.name);
 
-    for (final file in archive) {
-      currentStep++;
-      onProgress?.call(currentStep, totalSteps);
-
-      final filename = file.name;
-      final filePath = p.join(extractDir.path, filename);
-
-      if (file.isFile) {
-        final outFile = File(filePath);
-        await outFile.create(recursive: true);
-        await outFile.writeAsBytes(file.content as List<int>);
-      } else {
-        await Directory(filePath).create(recursive: true);
+        if (file.isFile) {
+          final outFile = File(filePath);
+          await outFile.create(recursive: true);
+          await outFile.writeAsBytes(file.content as List<int>);
+        } else {
+          await Directory(filePath).create(recursive: true);
+        }
       }
 
-      await Future.delayed(const Duration(milliseconds: 2));
-    }
+      /// ---------- 2. ЧТЕНИЕ JSON ----------
+      final jsonFile = File(p.join(extractDir.path, "data.json"));
+      if (!await jsonFile.exists()) {
+        throw Exception("data.json not found");
+      }
 
-    final jsonFile = File(p.join(extractDir.path, "data.json"));
-    if (!await jsonFile.exists()) {
-      throw Exception("data.json not found");
-    }
+      final jsonString = await jsonFile.readAsString();
+      final jsonMap = jsonDecode(jsonString);
+      final exportData = ExportDataModel.fromJson(jsonMap);
 
-    final jsonString = await jsonFile.readAsString();
-    final jsonMap = jsonDecode(jsonString);
+      /// ---------- 3. ПОДГОТОВКА ДАННЫХ ----------
+      final appDir = await getApplicationDocumentsDirectory();
+      final filmsDir = Directory('${appDir.path}/films');
 
-    final exportData = ExportDataModel.fromJson(jsonMap);
+      if (!await filmsDir.exists()) {
+        await filmsDir.create(recursive: true);
+      }
 
-    final appDir = await getApplicationDocumentsDirectory();
-    final filmsDir = Directory('${appDir.path}/films');
+      final importedFilmsDir = Directory(p.join(extractDir.path, "images"));
 
-    if (!await filmsDir.exists()) {
-      await filmsDir.create(recursive: true);
-    }
+      final imageDirs = (await importedFilmsDir.exists())
+        ? (await importedFilmsDir
+            .list()
+            .where((e) => e is Directory)
+            .cast<Directory>()
+            .toList())
+        : <Directory>[];
 
-    final importedFilmsDir = Directory(p.join(extractDir.path, "images"));
+      /// ---------- 4. TOTAL ----------
+      int currentStep = 0;
 
-    if (await importedFilmsDir.exists()) {
-      final imageDirs = importedFilmsDir.listSync().whereType<Directory>().toList();
+      final totalSteps =
+          archive.length +
+          imageDirs.length +
+          exportData.films.length +
+          exportData.collections.length +
+          exportData.links.length;
 
-      for (final entity in imageDirs) {
+      void step() {
         currentStep++;
-        onProgress?.call(currentStep, totalSteps + imageDirs.length);
+        onProgress?.call(currentStep, totalSteps);
+      }
 
+      /// ---------- 5. РАСПАКОВКА С ПРОГРЕССОМ ----------
+      for (final file in archive) {
+        final filePath = p.join(extractDir.path, file.name);
+
+        if (file.isFile) {
+          final outFile = File(filePath);
+          await outFile.create(recursive: true);
+          await outFile.writeAsBytes(file.content as List<int>);
+        } else {
+          await Directory(filePath).create(recursive: true);
+        }
+
+        step();
+        await Future.delayed(const Duration(milliseconds: 1));
+      }
+
+      /// ---------- 6. КОПИРОВАНИЕ КАРТИНОК ----------
+      for (final entity in imageDirs) {
         final filmId = p.basename(entity.path);
         final targetDir = Directory('${filmsDir.path}/$filmId');
 
@@ -98,57 +125,63 @@ class ImportLibraryUseCase {
             final newPath = '${targetDir.path}/$fileName';
 
             final newFile = File(newPath);
-
             if (!await newFile.exists()) {
               await file.copy(newPath);
             }
           }
         }
 
-        await Future.delayed(const Duration(milliseconds: 2));
-      }
-    }
-
-    for (final film in exportData.films) {
-      currentStep++;
-      onProgress?.call(currentStep, totalSteps + exportData.films.length);
-
-      final exists = await filmRepository.filmIsSaved(
-        film.filmBaseModel.kinopoiskId!,
-      );
-
-      if (!exists) {
-        await filmRepository.addFilmInLocalDataSource(film);
+        step();
+        await Future.delayed(const Duration(milliseconds: 1));
       }
 
-      await Future.delayed(const Duration(milliseconds: 2));
-    }
+      /// ---------- 7. ФИЛЬМЫ ----------
+      for (final film in exportData.films) {
+        final exists = await filmRepository.filmIsSaved(
+          film.filmBaseModel.kinopoiskId!,
+        );
 
-    for (final collection in exportData.collections) {
-      final exists = await collectionRepository.collectionIsExist(collection.id!);
+        if (!exists) {
+          await filmRepository.addFilmInLocalDataSource(film);
+        }
 
-      if (!exists) {
-        await collectionRepository.addCollection(collection);
+        step();
+        await Future.delayed(const Duration(milliseconds: 1));
       }
-    }
 
-    final existingLinks = await filmCollectionRepository.getAllFilmCollectionLinks();
+      /// ---------- 8. КОЛЛЕКЦИИ ----------
+      for (final collection in exportData.collections) {
+        final exists =
+            await collectionRepository.collectionIsExist(collection.id!);
 
-    for (final link in exportData.links) {
-      final exists = existingLinks.any((e) =>
-          e.filmId == link.filmId &&
-          e.collectionId == link.collectionId);
+        if (!exists) {
+          await collectionRepository.addCollection(collection);
+        }
 
-      if (!exists) {
-        await filmCollectionRepository.addFilmCollectionLink(link);
+        step();
       }
-    }
 
-    return true;
-  } on LocalDataSourceException {
-    rethrow;
-  } catch (e) {
-    rethrow;
-  }
+      /// ---------- 9. СВЯЗИ ----------
+      final existingLinks =
+          await filmCollectionRepository.getAllFilmCollectionLinks();
+
+      for (final link in exportData.links) {
+        final exists = existingLinks.any((e) =>
+            e.filmId == link.filmId &&
+            e.collectionId == link.collectionId);
+
+        if (!exists) {
+          await filmCollectionRepository.addFilmCollectionLink(link);
+        }
+
+        step();
+      }
+
+      return true;
+    } on LocalDataSourceException {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
   }
 }

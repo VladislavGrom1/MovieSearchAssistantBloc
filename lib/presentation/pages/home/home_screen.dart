@@ -15,34 +15,45 @@ class HomeScreen extends StatelessWidget {
           CollectionsRoute(),
           UserProfileRoute()
         ],
-      builder: (context, child) {
+      transitionBuilder: (context, child, animation) {
+        return child;
+      },
+      builder: (context, child) { 
+        
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
           body: child,
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.shifting,
-            backgroundColor: AppColors.primaryThemeBlack,
-            selectedItemColor: AppColors.primaryScheme,
-            unselectedItemColor: AppColors.primaryThemeGrey,
-            currentIndex: tabsRouter.activeIndex,
-            onTap: tabsRouter.setActiveIndex,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: "Поиск",
-                backgroundColor: AppColors.primaryThemeBlack
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.library_books_outlined),
-                label: "Коллекции",
-                backgroundColor: AppColors.primaryThemeBlack
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.account_circle),
-                label: "Профиль",
-                backgroundColor: AppColors.primaryThemeBlack
-              ),
-            ],
+          bottomNavigationBar: Theme(
+            data: Theme.of(context).copyWith(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+            child: BottomNavigationBar(
+              enableFeedback: false,
+              type: BottomNavigationBarType.shifting,
+              backgroundColor: AppColors.primaryThemeBlack,
+              selectedItemColor: AppColors.primaryScheme,
+              unselectedItemColor: AppColors.primaryThemeGrey,
+              currentIndex: tabsRouter.activeIndex,
+              onTap: tabsRouter.setActiveIndex,
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.search),
+                  label: "Поиск",
+                  backgroundColor: AppColors.primaryThemeBlack
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.library_books_outlined),
+                  label: "Коллекции",
+                  backgroundColor: AppColors.primaryThemeBlack
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.account_circle),
+                  label: "Профиль",
+                  backgroundColor: AppColors.primaryThemeBlack
+                ),
+              ],
+            ),
           ),
         );
       },

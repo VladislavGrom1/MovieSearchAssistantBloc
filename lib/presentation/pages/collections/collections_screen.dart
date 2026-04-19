@@ -306,16 +306,19 @@ class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
     return AlertDialog(
           backgroundColor: AppColors.primaryThemeBlack,
           title: Text('Новая коллекция', style: CustomTextStyles.m3TitleLarge()),
-          content: TextField(
-            maxLength: 24,
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: 'Придумайте название',
-              border: OutlineInputBorder(),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: TextField(
+              maxLength: 24,
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'Придумайте название',
+                border: OutlineInputBorder(),
+              ),
+              style: CustomTextStyles.m3TitleMedium(),
+              autofocus: true,
+              onChanged: (_) => setState(() {})
             ),
-            style: CustomTextStyles.m3TitleMedium(),
-            autofocus: true,
-            onChanged: (_) => setState(() {})
           ),
           actions: [
             TextButton(
@@ -367,16 +370,19 @@ class _RenameCollectionDialogState extends State<_RenameCollectionDialog> {
     return AlertDialog(
           backgroundColor: AppColors.primaryThemeBlack,
           title: Text('Переименовать коллекцию', style: CustomTextStyles.m3TitleLarge()),
-          content: TextField(
-            maxLength: 24,
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: 'Новое название коллекции',
-              border: OutlineInputBorder(),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: TextField(
+              maxLength: 24,
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'Новое название коллекции',
+                border: OutlineInputBorder(),
+              ),
+              style: CustomTextStyles.m3TitleMedium(),
+              autofocus: true,
+              onChanged: (_) => setState(() {})
             ),
-            style: CustomTextStyles.m3TitleMedium(),
-            autofocus: true,
-            onChanged: (_) => setState(() {})
           ),
           actions: [
             TextButton(

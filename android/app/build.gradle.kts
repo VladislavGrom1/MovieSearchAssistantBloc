@@ -35,24 +35,38 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     signingConfigs {
-        create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-            storePassword = keystoreProperties["storePassword"] as String
+        if (hasKeyProperties) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storePassword = keystoreProperties["storePassword"] as String
+                
+                val storeFileName = keystoreProperties["storeFile"] as? String ?: ""
+                storeFile = if (storeFileName.contains(":")) {
+                    file(storeFileName)
+                } else {
+                    file("app/$storeFileName")
+                }
+            }
         }
+        // create("release") {
+        //     keyAlias = keystoreProperties["keyAlias"] as String
+        //     keyPassword = keystoreProperties["keyPassword"] as String
+        //     storeFile = keystoreProperties["storeFile"]?.let { file(it) }
+        //     storePassword = keystoreProperties["storePassword"] as String
+        // }
     }
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now,
             // so `flutter run --release` works.
-            //signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("debug")
             signingConfig = signingConfigs.getByName("release")
         }
     }

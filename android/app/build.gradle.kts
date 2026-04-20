@@ -49,10 +49,9 @@ android {
                 storePassword = keystoreProperties["storePassword"] as String
                 
                 val storeFileName = keystoreProperties["storeFile"] as? String ?: ""
-                storeFile = if (storeFileName.contains(":")) {
-                    file(storeFileName)
-                } else {
-                    file("app/$storeFileName")
+                storeFile = when {
+                    storeFileName.contains(":") -> file(storeFileName)
+                    else -> rootProject.file(storeFileName)
                 }
             }
         }
@@ -68,7 +67,7 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now,
             // so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            //signingConfig = signingConfigs.getByName("debug")
             signingConfig = signingConfigs.getByName("release")
         }
     }

@@ -43,7 +43,8 @@ void main(){
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => <AuthenticationState>[
         AuthenticationLoading(),
-        AuthenticationSuccess(userInfo: userEntity)
+        AuthenticationSuccess(userInfo: userEntity),
+        AuthenticationInitial(),
       ],
       verify: (_) {
         verify(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).called(1);
@@ -59,7 +60,8 @@ void main(){
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => <AuthenticationState>[
         AuthenticationLoading(),
-        AuthenticationFailure(message: "API ключ отсутствует")
+        AuthenticationFailure(message: "API ключ отсутствует"),
+        AuthenticationInitial(),
       ],
       verify: (_) {
         verify(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).called(1);
@@ -75,7 +77,8 @@ void main(){
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => [
         AuthenticationLoading(),
-        isA<AuthenticationFailure>()
+        isA<AuthenticationFailure>(),
+        AuthenticationInitial(),
       ],
       verify: (_) {
         verify(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).called(1);
@@ -93,7 +96,8 @@ void main(){
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => [
         AuthenticationLoading(),
-        isA<AuthenticationFailure>()
+        isA<AuthenticationFailure>(),
+        AuthenticationInitial(),
       ],
       verify: (_) {
         verify(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).called(1);
@@ -109,7 +113,8 @@ void main(){
       act: (bloc) => bloc.add(TryAuthenticationEvent(apiKey: "TestApiKey")),
       expect: () => [
         AuthenticationLoading(),
-        isA<AuthenticationFailure>()
+        isA<AuthenticationFailure>(),
+        AuthenticationInitial(),
       ],
       verify: (_) {
         verify(() => mockAuthenticationUseCase.call(apiKey: "TestApiKey")).called(1);

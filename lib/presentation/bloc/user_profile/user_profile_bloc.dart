@@ -69,9 +69,9 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     if(currentState is! UserProfileLoaded) return;
     emit(UserProfileLoading());
     try{
-      UserEntity? updatedUserEntity = await updateUserApiKeyInfoUseCase.call(apiKey: currentState.userEntity?.apiKey ?? "");
+      //UserEntity? updatedUserEntity = await updateUserApiKeyInfoUseCase.call(apiKey: currentState.userEntity?.apiKey ?? "");
       double? cacheSizeMb = await getCacheSizeUseCase.call();
-      emit(currentState.copyWith(userEntity: updatedUserEntity, cacheSizeMB: cacheSizeMb)); 
+      emit(currentState.copyWith(cacheSizeMB: cacheSizeMb)); 
     } on RemoteDataSourceException catch(e) {
       emit(UserProfileActionFailure(message: e.message));
       emit(currentState);

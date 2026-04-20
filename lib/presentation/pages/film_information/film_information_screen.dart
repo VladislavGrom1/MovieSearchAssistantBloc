@@ -129,6 +129,7 @@ class _FilmInformationContent extends StatelessWidget {
           elevation: 0,
           iconTheme: IconThemeData(color: AppColors.primaryScheme),
           flexibleSpace: FlexibleSpaceBar(
+            collapseMode: CollapseMode.parallax,
             background: _PosterImageWidget(film: film),
           ),
         ),

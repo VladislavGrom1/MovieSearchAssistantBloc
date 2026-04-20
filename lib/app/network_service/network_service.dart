@@ -17,8 +17,8 @@ class NetworkService {
 
   Future<bool> hasConnection() async {
     try {
-      final result = await InternetAddress.lookup('yandex.ru');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+      final resultYandex = await InternetAddress.lookup('yandex.ru');
+      return resultYandex.isNotEmpty && resultYandex[0].rawAddress.isNotEmpty;
     } catch (_) {
       return false;
     }

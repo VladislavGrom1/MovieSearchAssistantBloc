@@ -10,6 +10,7 @@ import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.da
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
 
 @RoutePage()
 class CollectionsScreen extends StatelessWidget {
@@ -86,7 +87,14 @@ class _CollectionsList extends StatelessWidget {
             builder: (dialogContext) {
               return BlocProvider.value(
                 value: context.read<CollectionsBloc>(),
-                child: _RenameCollectionDialog(collection: collection)
+                child: TextFieldAlertDialog(
+                  titleText: 'Переименовать коллекцию', 
+                  hintText: 'Новое название коллекции', 
+                  maxLenght: 24,
+                  maxLines: 1, 
+                  actionText: "Сохранить", 
+                  actionFunc: (controllerText) => context.read<CollectionsBloc>().add(RenameCollection(collection: collection, updatedName: controllerText))
+                )
               );
             }
           ),
@@ -195,7 +203,7 @@ class _CollectionCard extends StatelessWidget {
                         SizedBox(height: 10.h),
                         Text(DataFormatter.formatFilmWordDeclension(collection.filmCount ?? 0), style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)),
                         SizedBox(height: 10.h),
-                        Text("Дата создания: ${_formatDateTime(date)}", style: CustomTextStyles.m3BodyMedium()),
+                        Text("Дата создания: ${DataFormatter.formatDateTime(date)}", style: CustomTextStyles.m3BodyMedium()),
                         ]
                       ),
                   ),
@@ -218,19 +226,6 @@ class _CollectionCard extends StatelessWidget {
             ),
           );
   }
-
-  String _formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) return 'Дата не указана';
-    
-    // Форматируем дату и время
-    final day = dateTime.day.toString().padLeft(2, '0');
-    final month = dateTime.month.toString().padLeft(2, '0');
-    final year = dateTime.year;
-    final hour = dateTime.hour.toString().padLeft(2, '0');
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    
-    return '$day.$month.$year $hour:$minute';
-  }
 }
 
 class _CreateCollectionCard extends StatelessWidget {
@@ -247,7 +242,14 @@ class _CreateCollectionCard extends StatelessWidget {
           builder: (dialogContext) {
             return BlocProvider.value(
               value: context.read<CollectionsBloc>(),
-              child: const _CreateCollectionDialog()
+              child: TextFieldAlertDialog(
+                titleText: 'Новая коллекция', 
+                hintText: 'Придумайте название', 
+                maxLenght: 24,
+                maxLines: 1, 
+                actionText: "Сохранить", 
+                actionFunc: (controllerText) => context.read<CollectionsBloc>().add(AddNewCollection(collectionName: controllerText))
+              )
             );
           },
         ),
@@ -280,130 +282,5 @@ class _CreateCollectionCard extends StatelessWidget {
               ),
             ),
     );
-  }
-}
-
-class _CreateCollectionDialog extends StatefulWidget {
-  const _CreateCollectionDialog();
-
-  @override
-  State<_CreateCollectionDialog> createState() => _CreateCollectionDialogState();
-}
-
-class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
-  final controller = TextEditingController();
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final collectionBloc = context.read<CollectionsBloc>();
-
-    return AlertDialog(
-          backgroundColor: AppColors.primaryThemeBlack,
-          title: Text('Новая коллекция', style: CustomTextStyles.m3TitleLarge()),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: TextField(
-              maxLength: 24,
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: 'Придумайте название',
-                border: OutlineInputBorder(),
-              ),
-              style: CustomTextStyles.m3TitleMedium(),
-              autofocus: true,
-              onChanged: (_) => setState(() {})
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
-            ),
-            TextButton(
-              onPressed: controller.text.isEmpty
-              ? null
-              : () {
-                collectionBloc.add(AddNewCollection(collectionName: controller.text));
-                Navigator.pop(context);
-              },
-              child: Text(
-                "Сохранить",
-                style: controller.text.isEmpty
-                ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeGrey)
-                : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
-              )
-            )
-          ],
-        );
-  }
-}
-
-
-class _RenameCollectionDialog extends StatefulWidget {
-  const _RenameCollectionDialog({required this.collection});
-
-  final CollectionEntity collection;
-
-  @override
-  State<_RenameCollectionDialog> createState() => _RenameCollectionDialogState();
-}
-
-class _RenameCollectionDialogState extends State<_RenameCollectionDialog> {
-  final controller = TextEditingController();
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final collectionBloc = context.read<CollectionsBloc>();
-
-    return AlertDialog(
-          backgroundColor: AppColors.primaryThemeBlack,
-          title: Text('Переименовать коллекцию', style: CustomTextStyles.m3TitleLarge()),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: TextField(
-              maxLength: 24,
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: 'Новое название коллекции',
-                border: OutlineInputBorder(),
-              ),
-              style: CustomTextStyles.m3TitleMedium(),
-              autofocus: true,
-              onChanged: (_) => setState(() {})
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
-            ),
-            TextButton(
-              onPressed: controller.text.isEmpty 
-              ? null 
-              : () {
-                collectionBloc.add(RenameCollection(collection: widget.collection, updatedName: controller.text));
-                Navigator.pop(context);
-              }, 
-              child: Text(
-                "Сохранить", 
-                style: controller.text.isEmpty 
-                ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeGrey)
-                : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
-              )
-            ),
-          ],
-        );
   }
 }

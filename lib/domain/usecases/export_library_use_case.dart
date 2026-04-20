@@ -29,6 +29,9 @@ class ExportLibraryUseCase {
   });
 
   Future<String?> call() async {
+    final tempDir = await getTemporaryDirectory();
+    final exportDir = Directory("${tempDir.path}/export_temp");
+
     try{
       final filmEntities = await filmRepository.getAllFilmsFromLocalDataSource();
       final collectionEntities = await collectionRepository.getAllCollections();
@@ -43,9 +46,6 @@ class ExportLibraryUseCase {
         collections: collectionEntities.map((c) => CollectionModel.fromCollectionEntity(c)).toList(),
         links: links,
       );
-
-      final tempDir = await getTemporaryDirectory();
-      final exportDir = Directory("${tempDir.path}/export_temp");
 
       if (await exportDir.exists()) {
         await exportDir.delete(recursive: true);
@@ -65,6 +65,8 @@ class ExportLibraryUseCase {
 
       final zipBytes = await File(zipPath).readAsBytes();
 
+      await File(zipPath).delete();
+
       final date = DateTime.now();
 
       final savedPath = await fileManagerService.saveFile(
@@ -75,6 +77,10 @@ class ExportLibraryUseCase {
       return savedPath;
     } catch(e){
       rethrow;
+    } finally{
+      if (await exportDir.exists()) {
+        await exportDir.delete(recursive: true);
+      }
     }
   }
 }

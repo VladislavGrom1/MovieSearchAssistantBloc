@@ -9,7 +9,7 @@ class FilmImageCacheService {
     Config(
       key,
       stalePeriod: const Duration(days: 7),
-      maxNrOfCacheObjects: 100,
+      maxNrOfCacheObjects: 50,
       repo: JsonCacheInfoRepository(databaseName: key),
       fileService: HttpFileService(),
     ),

@@ -14,7 +14,6 @@ import 'package:movie_search_assistant_bloc/domain/usecases/remove_film_from_col
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_film_information_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_saved_film_from_server_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 part 'film_information_event.dart';
 part 'film_information_state.dart';

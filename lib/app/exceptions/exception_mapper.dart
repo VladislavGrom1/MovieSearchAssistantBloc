@@ -12,6 +12,8 @@ class ExceptionMapper {
 
         if (statusCode == 401) {
           return UnauthorizedFailure();
+        } else if (statusCode == 402){
+          return TooManyRequests();
         } else if (statusCode == 404) {
           return NotFoundFailure();
         } else if (statusCode != null && statusCode >= 500) {

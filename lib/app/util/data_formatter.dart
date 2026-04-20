@@ -1,4 +1,5 @@
 class DataFormatter {
+  
   static String formatCountriesAndYear(List<String>? countries, int? year) {
     final List<String> parts = [];
     
@@ -71,7 +72,6 @@ class DataFormatter {
     return '$filmCount фильмов';
   }
 
-
   static String formatCollectionName(String collectionName){
     String collectionNameFormated;
     switch(collectionName){
@@ -86,9 +86,17 @@ class DataFormatter {
     }
     return collectionNameFormated;
   }
-  // static String formatFilmRatingAndVoteCount(String resourceName, num? rating, int? voteCount){
-  //   final ratingText = rating == null ? "-" : rating.toString();
-  //       final voteCountText = "${voteCount == null ? 0 : voteCount.toString()} оценок";
-  //       return Text("$resourceName, $ratingText, $voteCountText");
-  // }
+  
+  static String formatDateTime(DateTime? dateTime){
+    if (dateTime == null) return 'Дата не указана';
+    
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final year = dateTime.year;
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    
+    return '$day.$month.$year $hour:$minute';
+  }
+  
 }

@@ -20,6 +20,10 @@ class UnauthorizedFailure extends RemoteDataSourceException {
   UnauthorizedFailure() : super("Неверный API ключ");
 }
 
+class TooManyRequests extends RemoteDataSourceException {
+  TooManyRequests() : super("Превышен лимит количества запросов в сутки");
+}
+
 class UnknownFailure extends RemoteDataSourceException{
   UnknownFailure() : super("Неизвестная ошибка");
 }

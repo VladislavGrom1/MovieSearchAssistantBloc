@@ -11,6 +11,7 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
 
 @RoutePage()
 class UserProfileScreen extends StatelessWidget {
@@ -274,7 +275,14 @@ class _UserProfileContent extends StatelessWidget {
       builder: (dialogContext) {
         return BlocProvider.value(
           value: context.read<UserProfileBloc>(),
-          child: _UpdateApiKeyDialog(),
+          child: TextFieldAlertDialog(
+            titleText: 'Изменение API Key', 
+            hintText: 'Введите новый API Key',
+            maxLenght: 40,
+            maxLines: 1,
+            actionText: "Сохранить", 
+            actionFunc: (controllerText) => context.read<UserProfileBloc>().add(UpdateApiKey(updatedApiKey: controllerText))
+          ),
         );
       },
     );
@@ -322,67 +330,6 @@ class _UserProfileContent extends StatelessWidget {
 
   void _launchApiKeyUrl(BuildContext context) {
     context.read<UserProfileBloc>().add(LaunchApiKeyUrl());
-  }
-}
-
-class _UpdateApiKeyDialog extends StatefulWidget {
-  const _UpdateApiKeyDialog();
-
-  @override
-  State<_UpdateApiKeyDialog> createState() => _UpdateApiKeyDialogState();
-}
-
-class _UpdateApiKeyDialogState extends State<_UpdateApiKeyDialog> {
-  final controller = TextEditingController();
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final userProfileBloc = context.read<UserProfileBloc>();
-
-    return AlertDialog(
-      backgroundColor: AppColors.primaryThemeBlack,
-      title: Text('Изменение API Key', style: CustomTextStyles.m3TitleLarge()),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: TextField(
-            controller: controller,
-            maxLength: 40,
-            maxLines: 2,
-            decoration: InputDecoration(
-              hintText: 'Введите новый API Key',
-              border: OutlineInputBorder(),
-            ),
-            style: CustomTextStyles.m3TitleMedium(),
-            autofocus: true,
-            onChanged: (_) => setState(() {})),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
-        ),
-        TextButton(
-            onPressed: controller.text.isEmpty
-            ? null
-            : () {
-              userProfileBloc.add(UpdateApiKey(updatedApiKey: controller.text));
-              Navigator.pop(context);
-            },
-            child: Text(
-              "Сохранить",
-              style: controller.text.isEmpty
-                ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeGrey)
-                : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
-              )
-            ),
-      ],
-    );
   }
 }
 

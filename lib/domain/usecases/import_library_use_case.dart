@@ -24,6 +24,11 @@ class ImportLibraryUseCase {
   });
 
   Future<bool?> call({Function(int current, int total)? onProgress}) async {
+    final tempDir = await getTemporaryDirectory();
+    final extractDir = Directory(
+      p.join(tempDir.path, "import_${DateTime.now().millisecondsSinceEpoch}"),
+    );
+
     try {
       final zipFile = await fileService.pickZipFile();
       if (zipFile == null) return null;
@@ -31,14 +36,8 @@ class ImportLibraryUseCase {
       final bytes = await zipFile.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
 
-      final tempDir = await getTemporaryDirectory();
-      final extractDir = Directory(
-        p.join(tempDir.path, "import_${DateTime.now().millisecondsSinceEpoch}"),
-      );
-
       await extractDir.create(recursive: true);
 
-      /// ---------- 1. РАСПАКОВКА ----------
       for (final file in archive) {
         final filePath = p.join(extractDir.path, file.name);
 
@@ -51,7 +50,6 @@ class ImportLibraryUseCase {
         }
       }
 
-      /// ---------- 2. ЧТЕНИЕ JSON ----------
       final jsonFile = File(p.join(extractDir.path, "data.json"));
       if (!await jsonFile.exists()) {
         throw Exception("data.json not found");
@@ -61,7 +59,6 @@ class ImportLibraryUseCase {
       final jsonMap = jsonDecode(jsonString);
       final exportData = ExportDataModel.fromJson(jsonMap);
 
-      /// ---------- 3. ПОДГОТОВКА ДАННЫХ ----------
       final appDir = await getApplicationDocumentsDirectory();
       final filmsDir = Directory('${appDir.path}/films');
 
@@ -79,7 +76,6 @@ class ImportLibraryUseCase {
             .toList())
         : <Directory>[];
 
-      /// ---------- 4. TOTAL ----------
       int currentStep = 0;
 
       final totalSteps =
@@ -94,7 +90,6 @@ class ImportLibraryUseCase {
         onProgress?.call(currentStep, totalSteps);
       }
 
-      /// ---------- 5. РАСПАКОВКА С ПРОГРЕССОМ ----------
       for (final file in archive) {
         final filePath = p.join(extractDir.path, file.name);
 
@@ -110,7 +105,6 @@ class ImportLibraryUseCase {
         await Future.delayed(const Duration(milliseconds: 1));
       }
 
-      /// ---------- 6. КОПИРОВАНИЕ КАРТИНОК ----------
       for (final entity in imageDirs) {
         final filmId = p.basename(entity.path);
         final targetDir = Directory('${filmsDir.path}/$filmId');
@@ -135,7 +129,6 @@ class ImportLibraryUseCase {
         await Future.delayed(const Duration(milliseconds: 1));
       }
 
-      /// ---------- 7. ФИЛЬМЫ ----------
       for (final film in exportData.films) {
         final exists = await filmRepository.filmIsSaved(
           film.filmBaseModel.kinopoiskId!,
@@ -149,7 +142,6 @@ class ImportLibraryUseCase {
         await Future.delayed(const Duration(milliseconds: 1));
       }
 
-      /// ---------- 8. КОЛЛЕКЦИИ ----------
       for (final collection in exportData.collections) {
         final exists =
             await collectionRepository.collectionIsExist(collection.id!);
@@ -161,7 +153,6 @@ class ImportLibraryUseCase {
         step();
       }
 
-      /// ---------- 9. СВЯЗИ ----------
       final existingLinks =
           await filmCollectionRepository.getAllFilmCollectionLinks();
 
@@ -182,6 +173,10 @@ class ImportLibraryUseCase {
       rethrow;
     } catch (e) {
       rethrow;
+    } finally {
+      if (await extractDir.exists()) {
+        await extractDir.delete(recursive: true);
+      }
     }
   }
 }

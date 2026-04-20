@@ -119,6 +119,8 @@ class ImportOldLibraryUseCase {
             localScreenshotPaths: localScreenshots,
           ),
           description: item["description"],
+          ratingImdbVoteCount: item["ratingImdbVoteCount"],
+          ratingKinopoiskVoteCount: item["ratingKinopoiskVoteCount"],
           slogan: item["slogan"],
           webUrl: item["webUrl"],
           serial: item["serial"],

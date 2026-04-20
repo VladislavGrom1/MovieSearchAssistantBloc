@@ -67,7 +67,7 @@ class _SearchFilmView extends StatelessWidget {
                         }
 
                         if (state is CollectionsFilmsLoadedFailure) {
-                          return ErrorMessageWidget(message: state.message);
+                          return Center(child: ErrorMessageWidget(message: state.message));
                         }
 
                         if (state is CollectionsFilmsLoadedSuccessful) {
@@ -182,7 +182,7 @@ class _CollectionFilmsList extends StatelessWidget {
               return _FilmCard(film: film, isSaved: isSaved);
             },
             separatorBuilder: (context, index) => SizedBox(width: 12.w),
-            itemCount: min(filmCollectionsMap![filmCollectionsName]!.length, 10));
+            itemCount: min(filmCollectionsMap[filmCollectionsName]!.length, 10));
       },
     );
   }

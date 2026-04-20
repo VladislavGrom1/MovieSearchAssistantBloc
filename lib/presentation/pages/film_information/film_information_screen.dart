@@ -18,9 +18,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collec
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
-
-// TODO: Настроить отображение фото (сейчас растягиваются)
-// TODO: Декомпозировать виджеты
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
 
 @RoutePage()
 class FilmInformationScreen extends StatelessWidget {
@@ -159,7 +157,7 @@ class _FilmInformationContent extends StatelessWidget {
                     SizedBox(width: 5.w),
                     Text(
                       film.ratingKinopoiskVoteCount == null 
-                      ? "-"
+                      ? "Нет данных"
                       : DataFormatter.formatVoteCount(film.ratingKinopoiskVoteCount!),
                       style: CustomTextStyles.m3BodyMedium(color: AppColors.textDarkGrey),
                     ),
@@ -434,20 +432,29 @@ class _FilmInformationContent extends StatelessWidget {
 
   void _openRatingSheet(BuildContext context, int? currentUserRating) {
     showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (bottomSheetContext) => BlocProvider.value(
-            value: context.read<FilmInformationBloc>(),
-            child: _RatingPickerSheet(currentUserRating: currentUserRating)));
+      context: context,
+      isScrollControlled: true,
+      builder: (bottomSheetContext) => BlocProvider.value(
+          value: context.read<FilmInformationBloc>(),
+          child: _RatingPickerSheet(currentUserRating: currentUserRating))
+      );
   }
 
   void _openCommentDialog(BuildContext context) {
     showDialog(
-        context: context,
-        builder: (dialogContext) => BlocProvider.value(
-              value: context.read<FilmInformationBloc>(),
-              child: _AddUserCommentDialog(film: film),
-            ));
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+          value: context.read<FilmInformationBloc>(),
+          child: TextFieldAlertDialog(
+              titleText: 'Изменить пользовательский отзыв', 
+              hintText: 'Новый отзыв',
+              maxLenght: 200,
+              maxLines: 10,
+              actionText: "Сохранить", 
+              actionFunc: (controllerText) => context.read<FilmInformationBloc>().add(UpdateUserFilmInformation(userComment: controllerText))
+            ),
+          )
+      );
   }
 }
 
@@ -473,7 +480,6 @@ class _PosterImageWidget extends StatelessWidget {
         imageUrl: film.posterUrl ?? "",
         cacheManager: getIt<FilmImageCacheService>().instance,
         fit: BoxFit.cover,
-        memCacheHeight: 500,
         width: 320.w,
         height: 200.h,
         placeholder: (context, url) => Container(
@@ -584,7 +590,7 @@ class _FilmRatingWidget extends StatelessWidget {
             Text(
               voteCount != null
                   ? "${DataFormatter.formatVoteCount(voteCount!)} оценок"
-                  : "Информация о количестве оценок отсутствует",
+                  : "Нет данных",
               style: CustomTextStyles.m3TitleLarge(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -696,71 +702,6 @@ class _FilmScreenshotsWidget extends StatelessWidget {
             ),
         ),
       ),
-    );
-  }
-}
-
-class _AddUserCommentDialog extends StatefulWidget {
-  const _AddUserCommentDialog({required this.film});
-
-  final FilmEntity film;
-
-  @override
-  State<_AddUserCommentDialog> createState() => _AddUserCommentDialogState();
-}
-
-class _AddUserCommentDialogState extends State<_AddUserCommentDialog> {
-  final controller = TextEditingController();
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final filmInformationBloc = context.read<FilmInformationBloc>();
-
-    return AlertDialog(
-      backgroundColor: AppColors.primaryThemeBlack,
-      title: Text('Изменить пользовательский отзыв', style: CustomTextStyles.m3TitleLarge()),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: TextField(
-            maxLines: 10,
-            maxLength: 200,
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: 'Новый отзыв',
-              border: OutlineInputBorder(),
-            ),
-            style: CustomTextStyles.m3TitleMedium(),
-            autofocus: true,
-            onChanged: (_) => setState(() {})),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
-        ),
-        TextButton(
-          onPressed: controller.text.isEmpty
-            ? null
-            : () {
-              filmInformationBloc.add(
-                UpdateUserFilmInformation(userComment: controller.text)
-              );
-              Navigator.pop(context);
-            },
-          child: Text(
-            "Сохранить",
-            style: controller.text.isEmpty
-            ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeBlack)
-            : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
-          )
-        ),
-      ],
     );
   }
 }
@@ -967,7 +908,12 @@ class _CreateCollectionTile extends StatelessWidget {
             builder: (dialogContext) {
               return BlocProvider.value(
                 value: context.read<CollectionsBloc>(),
-                child: const _CreateCollectionDialog(),
+                child: TextFieldAlertDialog(
+                  titleText: 'Новая коллекция', 
+                  hintText: 'Придумайте название', 
+                  actionText: "Сохранить", 
+                  actionFunc: (controllerText) => context.read<CollectionsBloc>().add(AddNewCollection(collectionName: controllerText))
+                ),
               );
             }));
   }
@@ -1008,63 +954,3 @@ class _CollectionTile extends StatelessWidget {
   }
 }
 
-class _CreateCollectionDialog extends StatefulWidget {
-  const _CreateCollectionDialog();
-
-  @override
-  State<_CreateCollectionDialog> createState() =>
-      _CreateCollectionDialogState();
-}
-
-class _CreateCollectionDialogState extends State<_CreateCollectionDialog> {
-  final controller = TextEditingController();
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final collectionBloc = context.read<CollectionsBloc>();
-
-    return AlertDialog(
-      backgroundColor: AppColors.primaryThemeBlack,
-      title: Text('Новая коллекция', style: CustomTextStyles.m3TitleLarge()),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: TextField(
-            controller: controller,
-            maxLength: 24,
-            decoration: InputDecoration(
-              hintText: 'Придумайте название',
-              border: OutlineInputBorder(),
-            ),
-            style: CustomTextStyles.m3TitleMedium(),
-            autofocus: true,
-            onChanged: (_) => setState(() {})),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
-        ),
-        TextButton(
-          onPressed: controller.text.isEmpty
-            ? null
-            : () {
-              collectionBloc.add(AddNewCollection(collectionName: controller.text));
-              Navigator.pop(context);
-            }, 
-          child: Text(
-            "Сохранить",
-            style: controller.text.isEmpty
-              ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeBlack)
-              : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
-          )
-        )
-      ],
-    );
-  }
-}

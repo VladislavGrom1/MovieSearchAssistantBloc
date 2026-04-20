@@ -71,8 +71,6 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
 
   @override
   Widget build(BuildContext context) {
-    final authenticationBloc = context.read<AuthenticationBloc>();
-
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

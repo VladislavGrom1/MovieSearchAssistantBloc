@@ -16,17 +16,10 @@ class NetworkService {
   }
 
   Future<bool> hasConnection() async {
-    final result = await _connectivity.checkConnectivity();
-
-    final hasNetwork = result.contains(ConnectivityResult.wifi) ||
-        result.contains(ConnectivityResult.mobile);
-
-    if (!hasNetwork) return false;
-
     try {
-      final lookup = await InternetAddress.lookup('google.com');
-      return lookup.isNotEmpty && lookup.first.rawAddress.isNotEmpty;
-    } on SocketException {
+      final result = await InternetAddress.lookup('yandex.ru');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (_) {
       return false;
     }
   }

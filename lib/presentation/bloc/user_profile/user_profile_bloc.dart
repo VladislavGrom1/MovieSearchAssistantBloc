@@ -183,7 +183,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(UserProfileActionSuccess(message: "Данные успешно импортированы"));
       emit(currentState);
     } on RemoteDataSourceException{
-      emit(UserProfileActionFailure(message: "Операция импорта прервана"));
+      emit(UserProfileActionFailure(message: "Операция импорта прервана, требуется стабильное интернет-соединение"));
       emit(currentState);
     } on LocalDataSourceException{
       emit(UserProfileActionFailure(message: "Не удалось импортировать данные"));
@@ -212,7 +212,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(UserProfileActionSuccess(message: "Данные успешно импортированы"));
       emit(currentState);
     } on RemoteDataSourceException {
-      emit(UserProfileActionFailure(message: "Операция импорта прервана"));
+      emit(UserProfileActionFailure(message: "Операция импорта прервана, требуется стабильное интернет-соединение"));
       emit(currentState);
     } on LocalDataSourceException{
       emit(UserProfileActionFailure(message: "Не удалось импортировать данные"));

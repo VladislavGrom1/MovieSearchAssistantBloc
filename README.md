@@ -6,8 +6,9 @@
   [![Flutter](https://img.shields.io/badge/Flutter-3.35.4-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
   [![Dart](https://img.shields.io/badge/Dart-3.9.2-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
   [![Platform](https://img.shields.io/badge/Platform-Android%20|%20iOS-lightgrey?style=for-the-badge)](https://github.com)
-  <br>
   
+  <br>
+
   [![RuStore](https://img.shields.io/badge/RuStore-Скачать-blue?logo=android)](https://www.rustore.ru/catalog/app/com.example.movie_search_assistant_bloc)
   [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)]()
 </div>

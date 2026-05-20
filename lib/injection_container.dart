@@ -27,10 +27,12 @@ import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collecti
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_cache_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_app_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_cache_size_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/share_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_collection_use_case.dart';
@@ -163,6 +165,14 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => GetCacheSizeUseCase(filmImageCacheService: getIt()));
     getIt.registerLazySingleton(() => ClearCacheUseCase(filmImageCacheService: getIt()));
     getIt.registerLazySingleton(() => OpenUrlUseCase());
+    getIt.registerLazySingleton(() => GetAppInfoUseCase());
+    getIt.registerLazySingleton(() => ShareLibraryUseCase(
+      filmRepository: getIt(), 
+      collectionRepository: getIt(), 
+      filmCollectionRepository: getIt(), 
+      imageStorageService: getIt(), 
+      fileManagerService: getIt(), 
+      zipService: getIt()));
     
 
     // Blocs
@@ -203,7 +213,9 @@ Future<void> initializeDependencies() async {
       clearLibraryUseCase: getIt(),
       getCacheSizeUseCase: getIt(),
       clearCacheUseCase: getIt(),
-      openUrlUseCase: getIt()
+      openUrlUseCase: getIt(),
+      getAppInfoUseCase: getIt(),
+      shareLibraryUseCase: getIt()
     ));
 
     // Cubit

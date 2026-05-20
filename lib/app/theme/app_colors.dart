@@ -15,5 +15,8 @@ class AppColors {
   static const Color textWhite = Color(0xFFefeeee);
   static const Color textDarkGrey = Color.fromARGB(255, 128, 124, 124);
 
+  static const Color snackRed = Color(0xFF9e2121);
+  static const Color snackGreen = Color(0xFF047e29);
+
   static const Color savedFilmIcon = Colors.deepOrange;
 }

@@ -198,12 +198,14 @@ class _CollectionCard extends StatelessWidget {
                           collection.name ?? "Название отсутствует", 
                           overflow: TextOverflow.ellipsis, 
                           maxLines: 2,
-                          style: CustomTextStyles.m3TitleLarge2(),
+                          style: CustomTextStyles.m3Title().copyWith(
+                            fontSize: 17
+                          ),
                         ),
                         SizedBox(height: 10.h),
-                        Text(DataFormatter.formatFilmWordDeclension(collection.filmCount ?? 0), style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)),
+                        Text(DataFormatter.formatFilmWordDeclension(collection.filmCount ?? 0), style: CustomTextStyles.m3Body(color: AppColors.primaryScheme)),
                         SizedBox(height: 10.h),
-                        Text("Дата создания: ${DataFormatter.formatDateTime(date)}", style: CustomTextStyles.m3BodyMedium()),
+                        Text("Дата создания: ${DataFormatter.formatDateTime(date)}", style: CustomTextStyles.m3Body()),
                         ]
                       ),
                   ),
@@ -217,9 +219,9 @@ class _CollectionCard extends StatelessWidget {
                       if(value == "clearCollection") onClear();
                       },
                       itemBuilder: (_) => [
-                        PopupMenuItem(value: 'renameCollection', child: Text("Переименовать коллекцию", style: CustomTextStyles.m3BodyMedium())),
-                        PopupMenuItem(value: 'removeCollection', child: Text("Удалить коллекцию", style: CustomTextStyles.m3BodyMedium())),
-                        PopupMenuItem(value: 'clearCollection',child: Text("Очистить коллекцию", style: CustomTextStyles.m3BodyMedium()))]
+                        PopupMenuItem(value: 'renameCollection', child: Text("Переименовать коллекцию", style: CustomTextStyles.m3Body())),
+                        PopupMenuItem(value: 'removeCollection', child: Text("Удалить коллекцию", style: CustomTextStyles.m3Body())),
+                        PopupMenuItem(value: 'clearCollection',child: Text("Очистить коллекцию", style: CustomTextStyles.m3Body()))] 
                         )
                       ],
               ),
@@ -274,7 +276,7 @@ class _CreateCollectionCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(height: 5.h),
-                        Text("Новая коллекция", style: CustomTextStyles.m3TitleLarge2()),
+                        Text("Новая коллекция", style: CustomTextStyles.m3Title().copyWith(fontSize: 17)),
                         ]
                       ),
                   ),

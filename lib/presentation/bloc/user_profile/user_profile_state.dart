@@ -14,21 +14,24 @@ final class UserProfileLoading extends UserProfileState {}
 final class UserProfileLoaded extends UserProfileState{
   final UserEntity? userEntity;
   final double? cacheSizeMB;
+  final Map<String, String>? appInfo;
 
-  const UserProfileLoaded({this.userEntity, this.cacheSizeMB});
+  const UserProfileLoaded({this.userEntity, this.cacheSizeMB, this.appInfo});
 
   UserProfileLoaded copyWith({
     UserEntity? userEntity,
-    double? cacheSizeMB
+    double? cacheSizeMB,
+    Map<String, String>? appInfo
   }) {
     return UserProfileLoaded(
       userEntity: userEntity ?? this.userEntity,
-      cacheSizeMB: cacheSizeMB ?? this.cacheSizeMB
+      cacheSizeMB: cacheSizeMB ?? this.cacheSizeMB,
+      appInfo: appInfo ?? this.appInfo
     );
   }
 
   @override
-  List<Object?> get props => [userEntity, cacheSizeMB];
+  List<Object?> get props => [userEntity, cacheSizeMB, appInfo];
 }
 
 final class CacheSizeLoaded extends UserProfileState{

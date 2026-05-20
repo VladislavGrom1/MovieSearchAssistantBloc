@@ -21,7 +21,7 @@ class ErrorMessageWidget extends StatelessWidget {
               Image.asset("assets/icons/errorIcon.png", fit: BoxFit.cover),
               Text(
                 message, 
-                style: CustomTextStyles.m3TitleLarge(), 
+                style: CustomTextStyles.m3Title(), 
                 textAlign: TextAlign.center
               ),
               SizedBox(height: 20.h)

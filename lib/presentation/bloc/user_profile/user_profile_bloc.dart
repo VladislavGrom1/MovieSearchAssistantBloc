@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
@@ -7,10 +9,12 @@ import 'package:movie_search_assistant_bloc/domain/usecases/clear_cache_use_case
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_api_key_info_from_storage_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_app_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_cache_size_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/share_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 
 part 'user_profile_event.dart';
@@ -26,6 +30,10 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   final GetCacheSizeUseCase getCacheSizeUseCase;
   final ClearCacheUseCase clearCacheUseCase;
   final OpenUrlUseCase openUrlUseCase;
+  final GetAppInfoUseCase getAppInfoUseCase;
+  final ShareLibraryUseCase shareLibraryUseCase;
+
+  Timer? _cacheTimer;
 
   UserProfileBloc({
     required this.getApiKeyInfoFromStorageUseCase,
@@ -36,10 +44,11 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     required this.clearLibraryUseCase,
     required this.getCacheSizeUseCase,
     required this.clearCacheUseCase,
-    required this.openUrlUseCase
+    required this.openUrlUseCase,
+    required this.getAppInfoUseCase,
+    required this.shareLibraryUseCase
   }) : super(UserProfileInitial()) {
     on<GetUserProfileInfo>(_getUserProfileInfo);
-    on<UpdateUserProfileInfo>(_updateUserProfileInfo);
     on<UpdateApiKey>(_updateApiKey);
     on<ClearCacheDirectory>(_clearCacheDirectory);
     on<ClearLibrary>(_clearLibrary);
@@ -47,6 +56,28 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<ImportLibrary>(_importLibrary);
     on<ImportOldLibrary>(_importOldLibrary);
     on<LaunchApiKeyUrl>(_launchApiKeyUrl);
+    on<UpdateCacheSize>(_updateCacheSize);
+    on<ShareLibrary>(_shareLibrary);
+  }
+
+  void _startCacheMonitoring() {
+    _cacheTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      add(UpdateCacheSize());
+    });
+  }
+
+  Future<void> _updateCacheSize(UpdateCacheSize event, Emitter emit) async {
+    final currentState = state;
+    if (currentState is! UserProfileLoaded) return;
+    try{
+      final size = await getCacheSizeUseCase.call();
+      if (size != currentState.cacheSizeMB) {
+        emit(currentState.copyWith(cacheSizeMB: size));
+      }
+    } catch(e){
+      emit(UserProfileActionFailure(message: e.toString()));
+      emit(currentState);
+    }
   }
 
   Future<void> _getUserProfileInfo(GetUserProfileInfo event, Emitter emit) async {
@@ -54,7 +85,9 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     try{
       UserEntity? userEntity = await getApiKeyInfoFromStorageUseCase.call();
       double? cacheSizeMb = await getCacheSizeUseCase.call();
-      emit(UserProfileLoaded(userEntity: userEntity, cacheSizeMB: cacheSizeMb));
+      Map<String, String>? appInfo = await getAppInfoUseCase.call();
+      emit(UserProfileLoaded(userEntity: userEntity, cacheSizeMB: cacheSizeMb, appInfo: appInfo));
+      _startCacheMonitoring();
     } on LocalDataSourceException {
       emit(UserProfileActionFailure(message: "Не удалось загрузить информацию о пользователе"));
       emit(UserProfileLoaded(userEntity: null, cacheSizeMB: null));
@@ -64,25 +97,25 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     }
   }
 
-  Future<void> _updateUserProfileInfo(UpdateUserProfileInfo event, Emitter emit) async {
-    final currentState = state;
-    if(currentState is! UserProfileLoaded) return;
-    emit(UserProfileLoading());
-    try{
-      //UserEntity? updatedUserEntity = await updateUserApiKeyInfoUseCase.call(apiKey: currentState.userEntity?.apiKey ?? "");
-      double? cacheSizeMb = await getCacheSizeUseCase.call();
-      emit(currentState.copyWith(cacheSizeMB: cacheSizeMb)); 
-    } on RemoteDataSourceException catch(e) {
-      emit(UserProfileActionFailure(message: e.message));
-      emit(currentState);
-    } on LocalDataSourceException {
-      emit(UserProfileActionFailure(message: "Не удалось обновить информацию о пользователе"));
-      emit(currentState);
-    } catch(e){
-      emit(UserProfileActionFailure(message: e.toString()));
-      emit(currentState);
-    }
-  }
+  // Future<void> _updateUserProfileInfo(UpdateUserProfileInfo event, Emitter emit) async {
+  //   final currentState = state;
+  //   if(currentState is! UserProfileLoaded) return;
+  //   emit(UserProfileLoading());
+  //   try{
+  //     //UserEntity? updatedUserEntity = await updateUserApiKeyInfoUseCase.call(apiKey: currentState.userEntity?.apiKey ?? "");
+  //     double? cacheSizeMb = await getCacheSizeUseCase.call();
+  //     emit(currentState.copyWith(cacheSizeMB: cacheSizeMb)); 
+  //   } on RemoteDataSourceException catch(e) {
+  //     emit(UserProfileActionFailure(message: e.message));
+  //     emit(currentState);
+  //   } on LocalDataSourceException {
+  //     emit(UserProfileActionFailure(message: "Не удалось обновить информацию о пользователе"));
+  //     emit(currentState);
+  //   } catch(e){
+  //     emit(UserProfileActionFailure(message: e.toString()));
+  //     emit(currentState);
+  //   }
+  // }
 
   Future<void> _updateApiKey(UpdateApiKey event, Emitter emit) async {
     final currentState = state;
@@ -145,15 +178,15 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     if(currentState is! UserProfileLoaded) return;
     emit(ExportInProgress());
     try{
-      final path = await exportLibraryUseCase.call();
+      final result = await exportLibraryUseCase.call();
       
-      if(path == "Нет сохранённых фильмов"){
+      if(result == "Нет сохранённых фильмов"){
         emit(UserProfileActionFailure(message: "Добавьте хотя бы 1 фильм в коллекцию"));
         emit(currentState);
         return;
       }
 
-      if(path == "" || path == null){
+      if(result == "" || result == null){
         emit(UserProfileActionFailure(message: "Операция экспорта отменена"));
       } else{
         emit(UserProfileActionSuccess(message: "Библиотека успешно экспортирована"));
@@ -161,6 +194,33 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(currentState);
     } catch(e){
       emit(UserProfileActionFailure(message: "Ошибка экспорта: ${e.toString()}"));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _shareLibrary(ShareLibrary event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! UserProfileLoaded) return;
+    emit(ExportInProgress());
+    try{
+      final result = await shareLibraryUseCase.call();
+
+      if(result == "Нет сохранённых фильмов"){
+        emit(UserProfileActionFailure(message: "Добавьте хотя бы 1 фильм в коллекцию"));
+        emit(currentState);
+        return;
+      }
+
+      if(result == ""){
+        emit(UserProfileActionFailure(message: "Операция отменена"));
+      } else{
+        emit(UserProfileActionSuccess(message: "Библиотека успешно отправлена"));
+      }
+
+      emit(currentState);
+    }
+    catch(e){
+      emit(UserProfileActionFailure(message: "Ошибка отправки: ${e.toString()}"));
       emit(currentState);
     }
   }
@@ -235,6 +295,12 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(UserProfileActionFailure(message: "Не удалось перейти по ссылке"));
       emit(currentState);
     }
+  }
+
+  @override
+  Future<void> close() {
+    _cacheTimer?.cancel();
+    return super.close();
   }
 
 }

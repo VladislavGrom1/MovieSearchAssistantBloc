@@ -4,7 +4,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
@@ -14,6 +13,7 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/poster_film_image.dart';
 
@@ -102,7 +102,7 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
       appBar: AppBar(
         title: Text(
           widget.appBarTitle,
-          style: CustomTextStyles.m3TitleLarge(),
+          style: CustomTextStyles.m3Title(),
           overflow: TextOverflow.ellipsis,
         ),
       ),
@@ -199,10 +199,7 @@ class _FilmCard extends StatelessWidget {
                 filmName: film.nameRu ?? film.nameOriginal.toString()),
           );
         } else {
-          Fluttertoast.showToast(
-            backgroundColor: Colors.red,
-            msg: "Не удалось получить информацию о фильме"
-          );
+          CustomSnackBar(message: "Не удалось получить информацию о фильме", color:AppColors.snackRed).show(context); 
         }
       },
       child: Card(
@@ -223,43 +220,39 @@ class _FilmCard extends StatelessWidget {
               ),
               SizedBox(width: 10.w),
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 5.h),
-                  child: Column(
+                child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 5.h),
+                      SizedBox(height: 10.h),
                       Text(
                         film.nameRu ?? film.nameOriginal ?? "-",
                         maxLines: 2,
-                        style: CustomTextStyles.m3TitleLarge2(),
+                        style: CustomTextStyles.m3Title().copyWith(fontSize: 16),
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 10.h),
                       Text(
                         film.nameOriginal ?? film.nameRu ?? "-",
                         maxLines: 2,
-                        style: CustomTextStyles.m3BodyMedium(),
+                        style: CustomTextStyles.m3Body().copyWith(fontWeight: FontWeight.w400),
                         overflow: TextOverflow.ellipsis,
                         ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 2.h),
                       Text(
                         DataFormatter.formatCountriesAndYear(film.countries, film.year),
                         maxLines: 1,
-                        style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
+                        style: CustomTextStyles.m3Body(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 2.h),
                       Text(
                         DataFormatter.formatGenres(film.genres),
                         maxLines: 1,
-                        style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
+                        style: CustomTextStyles.m3Body().copyWith(fontWeight: FontWeight.w600),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 10.h)
                     ],
                   ),
-                ),
               ),
               SizedBox(width: 7.w)
             ],

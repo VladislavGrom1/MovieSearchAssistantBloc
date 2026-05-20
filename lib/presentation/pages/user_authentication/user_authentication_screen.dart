@@ -3,12 +3,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 
 @RoutePage()
 class UserAuthenticationScreen extends StatelessWidget {
@@ -42,20 +42,13 @@ class _UserAuthenticationView extends StatelessWidget {
 
   void _userAuthenticationBlocListener(BuildContext context, AuthenticationState state) {
     if (state is AuthenticationSuccess) {
-      _showToast(context, "Успешный вход", Colors.green);
+      CustomSnackBar(message: "Успешный вход", color: AppColors.snackGreen).show(context);
       context.router.replace(HomeRoute());
     }
 
     if (state is AuthenticationFailure) {
-      _showToast(context, "Не удалось выполнить вход: ${state.message}", Colors.red);
+      CustomSnackBar(message: "Не удалось выполнить вход: ${state.message}", color: AppColors.snackRed).show(context);
     }
-  }
-
-  void _showToast(BuildContext context, String message, Color color) {
-    Fluttertoast.showToast(
-      backgroundColor: color,
-      msg: message
-    );
   }
 }
 
@@ -80,18 +73,22 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
           Center(
             child: Text(
               "Movie Search Assistant", 
-              style: CustomTextStyles.m3HeadlineLarge(color: AppColors.primaryScheme))
+              style: CustomTextStyles.m3Headline(color: AppColors.primaryScheme))
             ),
           SizedBox(height: 20.h),
           Center(
             child: Text.rich(
               TextSpan(
-                style: CustomTextStyles.m3BodyLarge(),
+                style: CustomTextStyles.m3Content(),
                 children: [
                   TextSpan(text: "Для использования возможностей приложения Вам потребуется зарегистрироваться на сайте "),
                   TextSpan(
                     text: "kinopoiskapiunofficial.tech",
-                    style: CustomTextStyles.m3BodyLarge(color: AppColors.primaryScheme),
+                    style: CustomTextStyles.m3Content(color: AppColors.primaryScheme).copyWith(
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppColors.primaryScheme,
+                      decorationThickness: 2
+                    ),
                     recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       _launchApiKeyUrl(context);
@@ -112,7 +109,7 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
               hintText: 'Введите API Key',
               border: OutlineInputBorder(),
             ),
-            style: CustomTextStyles.m3TitleMedium(),
+            style: CustomTextStyles.m3ActionText(),
             autofocus: true,
             onChanged: (_) => setState(() {})),
           SizedBox(height: 10.h),
@@ -130,7 +127,7 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
             },
             child: Text(
               "Войти", 
-              style: CustomTextStyles.m3BodyLarge(
+              style: CustomTextStyles.m3Content(
                 color: _textEditingController.text.isEmpty ? AppColors.textDarkGrey : AppColors.textWhite
               )),
           ),

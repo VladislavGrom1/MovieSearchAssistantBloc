@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
+import 'package:share_plus/share_plus.dart';
 
 
 class FileService {
@@ -46,16 +47,16 @@ class FileService {
 
     return File(result.files.single.path!);
   }
+
+  Future<String> shareZip(File zipFile) async {
+    final path = await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(zipFile.path)],
+      ),
+    );
+    return path.raw;
+  }
 }
 
-  // static Future<String> shareZip(File zipFile) async {
-  //   final shareResult = await SharePlus.instance.share(
-  //     ShareParams(
-  //       files: [XFile(zipFile.path)],
-  //       text: "Экспорт библиотеки фильмов",
-  //       subject: "Film Library Backup",
-  //     ),
-  //   );
-  //   return shareResult.raw;
-  // }
+  
   

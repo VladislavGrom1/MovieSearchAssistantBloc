@@ -32,7 +32,7 @@ class _FilterFilmView extends StatelessWidget {
         appBar: AppBar(
           title: Text(
             "Поиск фильмов", 
-            style: CustomTextStyles.m3TitleLarge()
+            style: CustomTextStyles.m3Title()
           ),
         ),
         body: SafeArea(
@@ -96,7 +96,7 @@ class _FilterFilmContent extends StatelessWidget {
             onPressed: () {
               goToSearchedFilmsScreen(context, country, genre, yearRange);
             },
-            child: Text("Показать", style: CustomTextStyles.m3BodyLarge(color: AppColors.textWhite)),
+            child: Text("Показать", style: CustomTextStyles.m3ActionText(color: AppColors.textWhite)),
           ),
         ),
         SizedBox(height: 5.h),
@@ -110,7 +110,7 @@ class _FilterFilmContent extends StatelessWidget {
             onPressed: () {
               filterFilmBloc.add(ResetFilters());
             },
-            child: Text("Сбросить поиск", style: CustomTextStyles.m3BodyLarge(color: AppColors.textWhite)),
+            child: Text("Сбросить поиск", style: CustomTextStyles.m3ActionText(color: AppColors.textWhite)),
           ),
         ),
       ],
@@ -156,10 +156,10 @@ class _FilterButtonsList extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(_filterTypeToString(filterType),
-                          style: CustomTextStyles.m3BodyLarge()),
+                          style: CustomTextStyles.m3Content()),
                       Text(
                           _showSelectedFilter(filterType, country, genre, yearRange),
-                          style: CustomTextStyles.m3BodyLarge(color: AppColors.primaryScheme)),
+                          style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
                     ],
                   ),
                 ),

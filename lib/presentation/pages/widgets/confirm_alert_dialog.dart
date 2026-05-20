@@ -20,19 +20,19 @@ class ConfirmAlertDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: AppColors.primaryThemeBlack,
-      title: Text(titleText, style: CustomTextStyles.m3TitleLarge()),
-      content: Text(contentText, style: CustomTextStyles.m3BodyLarge()),
+      title: Text(titleText, style: CustomTextStyles.m3Title()),
+      content: Text(contentText, style: CustomTextStyles.m3Content()),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
+          child: Text('Отмена', style: CustomTextStyles.m3Body()),
         ),
         TextButton(
           onPressed: () {
             actionFunc();
             Navigator.pop(context);
           },
-          child: Text(actionText, style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme))
+          child: Text(actionText, style: CustomTextStyles.m3Body(color: AppColors.primaryScheme))
         )
       ],
     );

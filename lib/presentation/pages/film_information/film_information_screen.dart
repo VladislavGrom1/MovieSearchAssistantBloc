@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
@@ -18,6 +17,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collec
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
 
 @RoutePage()
@@ -95,15 +95,10 @@ class _FilmInformationView extends StatelessWidget {
     );
   }
 
-  void _filmInformationBlocListener(
-      BuildContext context, FilmInformationState state) {
+  void _filmInformationBlocListener(BuildContext context, FilmInformationState state) {
     if (state is FilmActionFailure) {
-      _showToast(context, state.message, Colors.red);
+      CustomSnackBar(message: state.message, color: AppColors.snackRed).show(context);
     }
-  }
-
-  void _showToast(BuildContext context, String message, Color color) {
-    Fluttertoast.showToast(backgroundColor: color, msg: message);
   }
 }
 
@@ -144,7 +139,7 @@ class _FilmInformationContent extends StatelessWidget {
                   maxLines: 5,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center, 
-                  style: CustomTextStyles.m3HeadlineMedium().copyWith(fontWeight: FontWeight.w800)
+                  style: CustomTextStyles.m3Headline()
                 ),
                 SizedBox(height: 20.h),
                 Row(
@@ -153,19 +148,22 @@ class _FilmInformationContent extends StatelessWidget {
                   children: [
                     Text(
                       "${film.ratingKinopoisk ?? "-"}", 
-                      style: CustomTextStyles.m3BodyMedium(color: AppColors.ratingGreen)
+                      style: CustomTextStyles.m3Body(color: AppColors.ratingGreen)
                     ),
                     SizedBox(width: 5.w),
                     Text(
                       film.ratingKinopoiskVoteCount == null 
                       ? "Нет данных"
                       : DataFormatter.formatVoteCount(film.ratingKinopoiskVoteCount!),
-                      style: CustomTextStyles.m3BodyMedium(color: AppColors.textDarkGrey),
+                      style: CustomTextStyles.m3Body(color: AppColors.textDarkGrey),
                     ),
                     SizedBox(width: 5.w),
-                    Text(
-                      "${film.nameOriginal ?? film.nameRu ?? film.nameEn}",
-                      style: CustomTextStyles.m3BodyMedium(),
+                    Flexible(
+                      child: Text(
+                        "${film.nameOriginal ?? film.nameRu ?? film.nameEn}",
+                        overflow: TextOverflow.ellipsis,
+                        style: CustomTextStyles.m3Body(),
+                      ),
                     )
                   ]
                 ),
@@ -174,17 +172,17 @@ class _FilmInformationContent extends StatelessWidget {
                   film.serial!
                     ? "${film.startYear} - ${film.endYear ?? "настоящее время"}"
                     : "${film.year}",
-                  style: CustomTextStyles.m3BodyMedium(color: AppColors.textDarkGrey),
+                  style: CustomTextStyles.m3Body(color: AppColors.textDarkGrey),
                 ),
                 SizedBox(height: 10.h),
                 Text(
                   DataFormatter.formatCountries(film.countries), 
-                  style: CustomTextStyles.m3BodyMedium(color: AppColors.textDarkGrey)
+                  style: CustomTextStyles.m3Body(color: AppColors.textDarkGrey)
                 ),
                 SizedBox(height: 10.h),
                 Text(
                   DataFormatter.formatGenres(film.genres),
-                  style: CustomTextStyles.m3BodyMedium(),
+                  style: CustomTextStyles.m3Body(),
                 ),
                 SizedBox(height: 20.h),
                 Row(
@@ -193,8 +191,8 @@ class _FilmInformationContent extends StatelessWidget {
                   children: [
                     InkWell(
                       enableFeedback: false,
-                      highlightColor: Colors.transparent,
-                      splashColor: Colors.transparent,
+                      highlightColor: AppColors.primaryThemeGrey,
+                      splashColor: AppColors.primaryThemeGrey,
                       onTap: () => _openCollectionSheet(context),
                       borderRadius: BorderRadius.circular(8.w),
                       child: Padding(
@@ -210,7 +208,7 @@ class _FilmInformationContent extends StatelessWidget {
                             SizedBox(height: 4.h),
                             Text(
                               "Коллекции",
-                              style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme),
+                              style: CustomTextStyles.m3Body(color: AppColors.primaryScheme),
                             ),
                           ],
                         ),
@@ -222,8 +220,8 @@ class _FilmInformationContent extends StatelessWidget {
                         final color = !isSaved ? AppColors.primaryThemeGrey : AppColors.primaryScheme;
                         return InkWell(
                           enableFeedback: false,
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
+                          highlightColor: AppColors.primaryThemeGrey,
+                          splashColor: AppColors.primaryThemeGrey,
                           onTap: !isSaved ? null : () {
                             _openCommentDialog(context);
                           },
@@ -241,7 +239,7 @@ class _FilmInformationContent extends StatelessWidget {
                                 SizedBox(height: 2.h),
                                 Text(
                                   "Отзыв",
-                                  style: CustomTextStyles.m3BodyMedium(color: color),
+                                  style: CustomTextStyles.m3Body(color: color),
                                 ),
                               ],
                             ),
@@ -255,8 +253,8 @@ class _FilmInformationContent extends StatelessWidget {
                         final color = !isSaved ? AppColors.primaryThemeGrey : AppColors.primaryScheme;
                         return InkWell(
                           enableFeedback: false,
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
+                          highlightColor: AppColors.primaryThemeGrey,
+                          splashColor: AppColors.primaryThemeGrey,
                           onTap: !isSaved ? null : () {
                             _openRatingSheet(context, film.userRating);
                           },
@@ -274,7 +272,7 @@ class _FilmInformationContent extends StatelessWidget {
                                 SizedBox(height: 2.h),
                                 Text(
                                   "Оценить",
-                                  style: CustomTextStyles.m3BodyMedium(color: color),
+                                  style: CustomTextStyles.m3Body(color: color),
                                 ),
                               ],
                             ),
@@ -284,8 +282,8 @@ class _FilmInformationContent extends StatelessWidget {
                     ),
                     InkWell(
                       enableFeedback: false,
-                      highlightColor: Colors.transparent,
-                      splashColor: Colors.transparent,
+                      highlightColor: AppColors.primaryThemeGrey,
+                      splashColor: AppColors.primaryThemeGrey,
                       onTap: () {
                         context.read<FilmInformationBloc>().add(LaunchUrl(url: film.webUrl));
                       },
@@ -303,7 +301,7 @@ class _FilmInformationContent extends StatelessWidget {
                             SizedBox(height: 4.h),
                             Text(
                               "Подробнее",
-                              style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme),
+                              style: CustomTextStyles.m3Body(color: AppColors.primaryScheme),
                             ),
                           ],
                         ),
@@ -315,15 +313,19 @@ class _FilmInformationContent extends StatelessWidget {
                 Divider(color: AppColors.primaryScheme, thickness: 2),
                 SizedBox(height: 20.h),
                 Text(
-                  film.slogan ?? "Слоган отсутствует",
+                  film.slogan != null ? "«${film.slogan}»" : "Слоган отсутствует",
                   textAlign: TextAlign.left, 
-                  style: CustomTextStyles.m3BodyLarge(),
+                  style: CustomTextStyles.m3Content().copyWith(
+                    fontStyle: FontStyle.italic,
+                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w600
+                  ),
                 ),
                 SizedBox(height: 20.h),
                 Text(
                   textAlign: TextAlign.left,
                   film.description ?? "Описание отсутствует", 
-                  style: CustomTextStyles.m3BodyLarge(),
+                  style: CustomTextStyles.m3Content().copyWith(),
                 ),
                 SizedBox(height: 20.h),
                 Divider(color: AppColors.primaryScheme, thickness: 2),
@@ -332,7 +334,7 @@ class _FilmInformationContent extends StatelessWidget {
                   alignment: AlignmentGeometry.centerLeft,
                   child: Text(
                     "Рейтинг", 
-                    style: CustomTextStyles.m3HeadlineMedium(), 
+                    style: CustomTextStyles.m3Headline(), 
                     textAlign: TextAlign.left,
                   ),
                 ),
@@ -364,7 +366,7 @@ class _FilmInformationContent extends StatelessWidget {
                   alignment: AlignmentGeometry.centerLeft,
                   child: Text(
                     "Отзыв", 
-                    style: CustomTextStyles.m3HeadlineMedium(), 
+                    style: CustomTextStyles.m3Headline(), 
                     textAlign: TextAlign.left,
                   ),
                 ),
@@ -374,7 +376,7 @@ class _FilmInformationContent extends StatelessWidget {
                   child: Text(
                     textAlign: TextAlign.left,
                     film.userComment ?? "Пользовательский отзыв отсутствует", 
-                    style: CustomTextStyles.m3BodyLarge(),
+                    style: CustomTextStyles.m3Content(),
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -384,7 +386,7 @@ class _FilmInformationContent extends StatelessWidget {
                   alignment: AlignmentGeometry.centerLeft,
                   child: Text(
                     "Кадры из фильма", 
-                    style: CustomTextStyles.m3HeadlineMedium(), 
+                    style: CustomTextStyles.m3Headline(), 
                     textAlign: TextAlign.left,
                   ),
                 ),
@@ -563,7 +565,7 @@ class _FilmRatingWidget extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Text(
               rating != null ? rating.toString() : "-",
-              style: CustomTextStyles.m3HeadlineMedium().copyWith(fontSize: 40, fontWeight: FontWeight.w800),
+              style: CustomTextStyles.m3Title().copyWith(fontSize: 40, fontWeight: FontWeight.w800),
             ),
           ),
         ],
@@ -582,7 +584,7 @@ class _FilmRatingWidget extends StatelessWidget {
           children: [
             Text(
               resourseName,
-              style: CustomTextStyles.m3TitleLarge(),
+              style: CustomTextStyles.m3Title(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -592,7 +594,7 @@ class _FilmRatingWidget extends StatelessWidget {
               voteCount != null
                   ? "${DataFormatter.formatVoteCount(voteCount!)} оценок"
                   : "Нет данных",
-              style: CustomTextStyles.m3TitleLarge(),
+              style: CustomTextStyles.m3Title(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             )
@@ -624,7 +626,7 @@ class _FilmScreenshotsWidget extends StatelessWidget {
           children: [
             Icon(Icons.image_not_supported, size: 48.sp, color: AppColors.primaryScheme),
             SizedBox(height: 8.h),
-            Text("Кадры отсутствуют", style: CustomTextStyles.m3BodyMedium()),
+            Text("Кадры отсутствуют", style: CustomTextStyles.m3Body()),
           ],
         ),
       );
@@ -756,7 +758,7 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(height: 20.h),
-              Text("Оценить", style: CustomTextStyles.m3HeadlineMedium()),
+              Text("Оценить", style: CustomTextStyles.m3ActionText()),
               SizedBox(height: 20.h),
               SizedBox(
                 height: 80.h,
@@ -807,7 +809,7 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
                   },
                   child: Text(
                     "Поставить оценку", 
-                    style: CustomTextStyles.m3BodyLarge(color: AppColors.textWhite)
+                    style: CustomTextStyles.m3ActionText(color: AppColors.textWhite)
                   ),
                 ),
               ),
@@ -839,7 +841,7 @@ class _CollectionPickerSheet extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 10.h),
-                    Text("Добавить в коллекцию", style: CustomTextStyles.m3TitleLarge()),
+                    Text("Добавить в коллекцию", style: CustomTextStyles.m3Title()),
                     SizedBox(height: 20.h),
                     Flexible(
                       child: BlocBuilder<FilmInformationBloc, FilmInformationState>(
@@ -903,7 +905,8 @@ class _CreateCollectionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
         leading: Icon(Icons.add, color: AppColors.primaryScheme),
-        title: Text("Создать новую коллекцию", style: CustomTextStyles.m3TitleMedium().copyWith(fontWeight: FontWeight.w600)),
+        title: Text("Создать новую коллекцию", style: CustomTextStyles.m3ActionText().copyWith(fontWeight: FontWeight.w600)),
+        splashColor: AppColors.primaryThemeGrey,
         onTap: () => showDialog(
             context: context,
             builder: (dialogContext) {
@@ -932,7 +935,8 @@ class _CollectionTile extends StatelessWidget {
     final loadFilmStatus = state.status;
 
     return ListTile(
-      title: Text(collection.name ?? "Без названия", style: CustomTextStyles.m3TitleMedium().copyWith(fontWeight: FontWeight.w600)),
+      title: Text(collection.name ?? "Без названия", style: CustomTextStyles.m3ActionText().copyWith(fontWeight: FontWeight.w600)),
+      splashColor: AppColors.primaryThemeGrey,
       trailing: loadFilmStatus == FilmStatus.loading
           ? SizedBox(width: 20.w, height: 20.h, child: CircularProgressIndicator())
           : Icon(

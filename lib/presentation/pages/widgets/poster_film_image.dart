@@ -122,7 +122,7 @@ class _RatingIcon extends StatelessWidget {
         child: Center(
           child: Text(
             ratingText,
-            style: CustomTextStyles.m3LabelSmall(color: AppColors.textWhite),
+            style: CustomTextStyles.m3FilmTitle(color: AppColors.textWhite),
           ),
         ),
       ),
@@ -181,7 +181,7 @@ class _UserRatingIcon extends StatelessWidget {
         child: Center(
           child: Text(
             "${rating ?? "-"}",
-            style: CustomTextStyles.m3LabelSmall(color: AppColors.textWhite),
+            style: CustomTextStyles.m3FilmRating(color: AppColors.textWhite),
           ),
         ),
       ),

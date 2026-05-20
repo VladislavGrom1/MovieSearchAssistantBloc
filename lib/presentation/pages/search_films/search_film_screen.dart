@@ -3,7 +3,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
@@ -15,6 +14,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/search_films/widgets/custom_search_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/poster_film_image.dart';
 
@@ -130,7 +130,7 @@ class _CollectionsList extends StatelessWidget {
                 children: [
                   Text(
                     DataFormatter.formatCollectionName(filmCollectionsNamesList[index]),
-                    style: CustomTextStyles.m3TitleLarge()
+                    style: CustomTextStyles.m3Title()
                   ),
                   IconButton(
                       highlightColor: AppColors.primaryThemeGrey,
@@ -143,7 +143,7 @@ class _CollectionsList extends StatelessWidget {
                 ],
               ),
               SizedBox(
-                  height: 185.h,
+                  height: 200.h,
                   child: _CollectionFilmsList(
                       filmCollectionsMap: filmCollectionsMap,
                       filmCollectionsName: filmCollectionsNamesList[index]))
@@ -206,10 +206,7 @@ class _FilmCard extends StatelessWidget {
                 filmId: film.kinopoiskId!,
                 filmName: film.nameRu ?? film.nameOriginal.toString()));
           } else {
-            Fluttertoast.showToast(
-              backgroundColor: Colors.red,
-              msg: "Не удалось получить информацию о фильме"
-            );
+            CustomSnackBar(message: "Не удалось получить информацию о фильме", color: AppColors.snackRed).show(context);
           }
         },
         child: Column(
@@ -224,10 +221,10 @@ class _FilmCard extends StatelessWidget {
             SizedBox(
               width: 96.w,
               child: Text(
-                film.nameRu!,
+                film.nameRu ?? film.nameOriginal!,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 3,
-                style: CustomTextStyles.m3LabelLarge()
+                style: CustomTextStyles.m3FilmTitle()
               ),
             )
           ],

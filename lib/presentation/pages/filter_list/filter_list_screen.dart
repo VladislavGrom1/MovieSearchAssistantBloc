@@ -20,7 +20,7 @@ class FilterListScreen extends StatelessWidget {
     return Scaffold(
         backgroundColor: AppColors.primaryThemeBlack,
         appBar: AppBar(
-          title: Text(_filterTypeToString(), style: CustomTextStyles.m3TitleLarge()),
+          title: Text(_filterTypeToString(), style: CustomTextStyles.m3Title()),
         ),
         body: SafeArea(
           child: Column(
@@ -46,7 +46,7 @@ class FilterListScreen extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(filterData.items.keys.elementAt(index), style: CustomTextStyles.m3BodyLarge()),
+                              Text(filterData.items.keys.elementAt(index), style: CustomTextStyles.m3Content()),
                             ],
                           ),
                       ),

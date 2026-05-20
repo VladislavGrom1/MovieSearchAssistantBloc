@@ -48,9 +48,9 @@ class _CollectionFilmsView extends StatelessWidget {
         title: BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
           builder: (context, state) {
             if (!state.isSelectionMode) {
-              return Text(collectionName, style: CustomTextStyles.m3TitleLarge());
+              return Text(collectionName, style: CustomTextStyles.m3Title());
             } 
-            return Text("Выбрано: ${state.selectedFilmIds.length}", style: CustomTextStyles.m3TitleLarge());
+            return Text("Выбрано: ${state.selectedFilmIds.length}", style: CustomTextStyles.m3Title());
           },
         ),
         actions: [
@@ -208,38 +208,37 @@ class _FilmCard extends StatelessWidget {
                 userRating: savedFilm.userRating,
                 showUserRating: true,
               ),
-              SizedBox(width: 16.w),
+              SizedBox(width: 10.w),
               Expanded(
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(height: 10.h),
                     Text(
                       savedFilm.nameRu ?? savedFilm.nameOriginal ?? "-",
                       maxLines: 2,
-                      style: CustomTextStyles.m3TitleLarge2(),
+                      style: CustomTextStyles.m3Title().copyWith(fontSize: 16),
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 10.h),
                     Text(
                       savedFilm.nameOriginal ?? savedFilm.nameRu ?? "-",
                       maxLines: 2,
-                      style: CustomTextStyles.m3BodyMedium(),
+                      style: CustomTextStyles.m3Body().copyWith(fontWeight: FontWeight.w400),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 2.h),
                     Text(
                       DataFormatter.formatCountriesAndYear(savedFilm.countries, savedFilm.year),
                       maxLines: 1,
-                      style: CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
+                      style: CustomTextStyles.m3Body(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 2.h),
                     Text(
                       DataFormatter.formatGenres(savedFilm.genres),
                       maxLines: 1,
-                      style: CustomTextStyles.m3BodyMedium().copyWith(fontWeight: FontWeight.w600),
+                      style: CustomTextStyles.m3Body().copyWith(fontWeight: FontWeight.w600),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -257,7 +256,7 @@ class _FilmCard extends StatelessWidget {
                           onSelected: (value) {
                             if (value == "removeFilm") onRemove();
                           },
-                          itemBuilder: (_) => [PopupMenuItem(value: 'removeFilm', child: Text("Удалить фильм", style: CustomTextStyles.m3BodyMedium()))]),
+                          itemBuilder: (_) => [PopupMenuItem(value: 'removeFilm', child: Text("Удалить фильм", style: CustomTextStyles.m3Body()))]),
                     );
                   }
                   final isSelected = state.selectedFilmIds.contains(savedFilm.kinopoiskId!);

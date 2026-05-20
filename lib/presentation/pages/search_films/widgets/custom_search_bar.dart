@@ -87,11 +87,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                   return;
                 } else {
                   widget.onSearchSubmitted(_searchController.text, context);
-                  _clearText();
+                  //_clearText();
                 }
               },
               cursorColor: AppColors.primaryScheme,
-              style: CustomTextStyles.m3TitleMedium(),
+              style: CustomTextStyles.m3ActionText(),
               decoration: InputDecoration(border: InputBorder.none),
             )),
             Padding(

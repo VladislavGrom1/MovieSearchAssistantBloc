@@ -3,111 +3,72 @@ import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 
 class CustomTextStyles {
   
-  static TextStyle m3TitleLarge({Color? color}){ 
-      return TextStyle(
-      fontSize: 22,
-      height: 22/23,
-      letterSpacing: 0,
-      fontWeight: FontWeight.w700,
+  static TextStyle m3FilmTitle({Color? color}){
+    return TextStyle(
+      fontSize: 12,
+      height: 1,
+      letterSpacing: 0.1,
+      fontWeight: FontWeight.w800,
       color: color ?? AppColors.textGrey,
     );
   }
 
-  static TextStyle m3TitleMedium({Color? color}){
+  static TextStyle m3FilmRating({Color? color}){
+    return TextStyle(
+      fontSize: 12,
+      height: 1,
+      letterSpacing: 0.1,
+      fontWeight: FontWeight.w800,
+      color: color ?? AppColors.textGrey,
+    );
+  }
+
+  static TextStyle m3ActionText({Color? color}){
     return TextStyle(
       fontSize: 16,
-      height: 1.2,
-      letterSpacing: 0.15,
-      fontWeight: FontWeight.w400,
+      height: 1,
+      letterSpacing: 0.1,
+      fontWeight: FontWeight.w600,
       color: color ?? AppColors.textGrey
     );
   }
 
-  static TextStyle m3TitleLarge2({Color? color}){
+  static TextStyle m3Content({Color? color}){
     return TextStyle(
-      fontSize: 18,
-      height: 18/19,
-      letterSpacing: 0,
-      fontWeight: FontWeight.w700,
-      color: color ?? AppColors.textGrey,
-    );
-  }
-
-  static TextStyle m3LabelSmall({Color? color}){ 
-      return TextStyle(
-      fontSize: 11,
-      height: 11/16,
-      letterSpacing: 0,
-      fontWeight: FontWeight.bold,
-      color: color ?? AppColors.textGrey,
-    );
-  }
-
-  static TextStyle m3LabelLarge({Color? color}){ 
-      return TextStyle(
-      fontSize: 12,
-      height: 14/16,
+      fontSize: 16,
+      height: 1.3,
       letterSpacing: 0.1,
-      fontWeight: FontWeight.w700,
-      color: color ?? AppColors.textGrey,
-    );
-  }
-
-  static TextStyle m3LabelMedium({Color? color}){
-    return TextStyle(
-      fontSize: 12,
-      height: 12/16,
-      letterSpacing: 0.5,
       fontWeight: FontWeight.w500,
       color: color ?? AppColors.textGrey
     );
   }
 
-  static TextStyle m3BodyLarge({Color? color}){
+  static TextStyle m3Title({Color? color}){
     return TextStyle(
-      fontSize: 16,
-      height: 30/24,
-      letterSpacing: 0.5,
-      fontWeight: FontWeight.w400,
-      color: color ?? AppColors.textGrey
-    );
-  }
-
-  static TextStyle m3BodyMedium({Color? color}){
-    return TextStyle(
-      fontSize: 14,
+      fontSize: 22,
       height: 1,
-      letterSpacing: 0.25,
-      fontWeight: FontWeight.w400,
-      color: color ?? AppColors.textGrey
-    );
-  }
-
-  static TextStyle m3BodySmall({Color? color}){
-    return TextStyle(
-      fontSize: 12,
-      height: 1.2,
-      letterSpacing: 0.4,
-      color: color ?? AppColors.textGrey
-    );
-  }
-
-  static TextStyle m3HeadlineLarge({Color? color}){
-    return TextStyle(
-      fontSize: 32,
-      height: 32/40,
       letterSpacing: 0,
-      fontWeight: FontWeight.w700,
-      color: color ?? AppColors.textGrey
+      fontWeight: FontWeight.w800,
+      color: color ?? AppColors.textGrey,
     );
   }
 
-  static TextStyle m3HeadlineMedium({Color? color}){
+  static TextStyle m3Headline({Color? color}){
     return TextStyle(
       fontSize: 28,
       height: 28/36,
       letterSpacing: 0,
       fontWeight: FontWeight.w700,
+      color: color ?? AppColors.textGrey
+    ); 
+  }
+
+  static TextStyle m3Body({Color? color}){
+    return TextStyle(
+      fontSize: 14,
+      height: 1.2,
+      letterSpacing: 0.25,
+      fontWeight: FontWeight.w600,
       color: color ?? AppColors.textGrey
     );
   }

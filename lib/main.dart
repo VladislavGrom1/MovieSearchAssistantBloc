@@ -30,9 +30,12 @@ class _MyAppState extends State<MyApp> {
         create: (_) => getIt<NetworkCubit>(),
         child: MaterialApp.router(
           builder: (context, child) {
-            return NetworkListener(child: child!);
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+              child: NetworkListener(child: child!)
+            );
           },
-          title: 'Flutter Demo',
+          title: 'Movie Search Assistant',
           theme: ThemeData(
             appBarTheme: AppBarTheme(
               elevation: 0,
@@ -42,7 +45,8 @@ class _MyAppState extends State<MyApp> {
               color: AppColors.primaryScheme
               ),
             ),
-            splashColor: AppColors.primaryScheme,
+            splashColor: AppColors.primaryThemeGrey,
+            hoverColor: AppColors.primaryThemeGrey,
             scaffoldBackgroundColor: Colors.black,
             colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryScheme),
           ),

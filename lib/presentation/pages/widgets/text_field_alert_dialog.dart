@@ -37,7 +37,7 @@ class _TextFieldAlertDialogState extends State<TextFieldAlertDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
           backgroundColor: AppColors.primaryThemeBlack,
-          title: Text(widget.titleText, style: CustomTextStyles.m3TitleLarge()),
+          title: Text(widget.titleText, style: CustomTextStyles.m3Title()),
           content: SizedBox(
             width: double.maxFinite,
             child: TextField(
@@ -48,7 +48,7 @@ class _TextFieldAlertDialogState extends State<TextFieldAlertDialog> {
                 hintText: widget.hintText,
                 border: OutlineInputBorder(),
               ),
-              style: CustomTextStyles.m3TitleMedium(),
+              style: CustomTextStyles.m3ActionText(),
               autofocus: true,
               onChanged: (_) => setState(() {})
             ),
@@ -56,7 +56,7 @@ class _TextFieldAlertDialogState extends State<TextFieldAlertDialog> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Отмена', style: CustomTextStyles.m3BodyMedium()),
+              child: Text('Отмена', style: CustomTextStyles.m3Body()),
             ),
             TextButton(
               onPressed: controller.text.isEmpty
@@ -68,8 +68,8 @@ class _TextFieldAlertDialogState extends State<TextFieldAlertDialog> {
               child: Text(
                 widget.actionText,
                 style: controller.text.isEmpty
-                ? CustomTextStyles.m3BodyMedium(color: AppColors.primaryThemeGrey)
-                : CustomTextStyles.m3BodyMedium(color: AppColors.primaryScheme)
+                ? CustomTextStyles.m3Body(color: AppColors.primaryThemeGrey)
+                : CustomTextStyles.m3Body(color: AppColors.primaryScheme)
               )
             )
           ],

@@ -37,8 +37,10 @@ class ZipService {
 
     final zipData = ZipEncoder().encode(archive);
 
+    final date = DateTime.now();
+
     final tempDir = Directory.systemTemp.createTempSync();
-    final zipPath = p.join(tempDir.path, "film_library.zip");
+    final zipPath = p.join(tempDir.path, "FilmLibrary_${date.day}_${date.month}_${date.year}_${date.hour}${date.minute}${date.second}.zip");
 
     File(zipPath).writeAsBytesSync(zipData);
 

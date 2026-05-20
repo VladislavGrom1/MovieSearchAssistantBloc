@@ -9,8 +9,6 @@ sealed class UserProfileEvent extends Equatable {
 
 class GetUserProfileInfo extends UserProfileEvent{}
 
-class UpdateUserProfileInfo extends UserProfileEvent{}
-
 class UpdateApiKey extends UserProfileEvent{
   final String updatedApiKey;
 
@@ -21,6 +19,8 @@ class UpdateApiKey extends UserProfileEvent{
 }
 
 class ExportLibrary extends UserProfileEvent{}
+
+class ShareLibrary extends UserProfileEvent{}
 
 class ImportLibrary extends UserProfileEvent{}
 
@@ -33,3 +33,7 @@ class ClearCacheDirectory extends UserProfileEvent{}
 class ClearLibrary extends UserProfileEvent{}
 
 class LaunchApiKeyUrl extends UserProfileEvent{}
+
+class GetAppInfo extends UserProfileEvent{}
+
+class UpdateCacheSize extends UserProfileEvent{}

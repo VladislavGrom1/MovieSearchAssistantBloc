@@ -72,7 +72,10 @@ class FilmPosterImage extends StatelessWidget {
         width: 100.w,
         height: 140.h,
         placeholder: (context, url) => Container(color: AppColors.primaryThemeGrey),
-        errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.primaryThemeGrey, 
+          child: Icon(Icons.image_not_supported, color: AppColors.primaryScheme)
+        ),
       );
     }
   }

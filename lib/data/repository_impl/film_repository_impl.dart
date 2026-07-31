@@ -38,14 +38,12 @@ class FilmRepositoryImpl implements FilmRepository{
   @override
   Future<List<FilmEntity>?> getCollectionFilms(String collectionName, int page) async {
     try{
-      List<FilmEntity> collectionFilmsEntity = [];
       List<FilmBaseModel>? filmBaseModels = await filmRemoteDataSource.getCollectionFilms(collectionName, page);
       if(filmBaseModels != null){
-        for(var filmBaseModel in filmBaseModels){
-          final filmBaseModelWithUserData = await initUserDataForFilmBaseModel(filmBaseModel);
-          collectionFilmsEntity.add(FilmEntity.fromFilmBaseModel(filmBaseModelWithUserData));
-        }
-        return collectionFilmsEntity;
+        final collectionFilmsWithUserData = await Future.wait(
+          filmBaseModels.map(initUserDataForFilmBaseModel)
+        );
+        return collectionFilmsWithUserData.map((model) => FilmEntity.fromFilmBaseModel(model)).toList();
       }
       return null;
     } on RemoteDataSourceException{
@@ -58,16 +56,14 @@ class FilmRepositoryImpl implements FilmRepository{
   @override
   Future<List<FilmEntity>?> getFilterFilms(String? keyword, List<int>? countries, List<int>? genres, int? yearFrom, int? yearTo, int page) async{
     try{
-      List<FilmEntity> filterFilmsEntity = [];
       BuiltList<int>? builtCountries = countries != null ? BuiltList<int>.from(countries) : null;
       BuiltList<int>? builtGenres = genres != null ? BuiltList<int>.from(genres) : null;
       List<FilmBaseModel>? filmBaseModels = await filmRemoteDataSource.getFilterFilms(keyword, builtCountries, builtGenres, yearFrom, yearTo, page);
       if(filmBaseModels != null){
-        for(var filmBaseModel in filmBaseModels){
-          final filmBaseModelWithUserData = await initUserDataForFilmBaseModel(filmBaseModel);
-          filterFilmsEntity.add(FilmEntity.fromFilmBaseModel(filmBaseModelWithUserData));
-        }
-        return filterFilmsEntity;
+        final filterFilmsWithUserData = await Future.wait(
+          filmBaseModels.map(initUserDataForFilmBaseModel)
+        );
+        return filterFilmsWithUserData.map((model) => FilmEntity.fromFilmBaseModel(model)).toList();
       }
       return null;
     } on RemoteDataSourceException{

@@ -38,13 +38,19 @@ class ImportLibraryUseCase {
 
       await extractDir.create(recursive: true);
 
-      for (final file in archive) {
+      int currentStep = 0;
+
+      final filesToExtract = archive.files.where((file) => file.isFile).length;
+      
+      for (final file in archive.files) {
         final filePath = p.join(extractDir.path, file.name);
 
         if (file.isFile) {
           final outFile = File(filePath);
           await outFile.create(recursive: true);
           await outFile.writeAsBytes(file.content as List<int>);
+          currentStep++;
+          onProgress?.call(currentStep, filesToExtract);
         } else {
           await Directory(filePath).create(recursive: true);
         }
@@ -52,7 +58,7 @@ class ImportLibraryUseCase {
 
       final jsonFile = File(p.join(extractDir.path, "data.json"));
       if (!await jsonFile.exists()) {
-        throw Exception("data.json not found");
+        throw Exception("data.json not found in the ZIP archive");
       }
 
       final jsonString = await jsonFile.readAsString();
@@ -60,7 +66,7 @@ class ImportLibraryUseCase {
       final exportData = ExportDataModel.fromJson(jsonMap);
 
       final appDir = await getApplicationDocumentsDirectory();
-      final filmsDir = Directory('${appDir.path}/films');
+      final filmsDir = Directory(p.join(appDir.path, "films"));
 
       if (!await filmsDir.exists()) {
         await filmsDir.create(recursive: true);
@@ -69,54 +75,23 @@ class ImportLibraryUseCase {
       final importedFilmsDir = Directory(p.join(extractDir.path, "images"));
 
       final imageDirs = (await importedFilmsDir.exists())
-        ? (await importedFilmsDir
-            .list()
-            .where((e) => e is Directory)
-            .cast<Directory>()
-            .toList())
-        : <Directory>[];
-
-      int currentStep = 0;
-
-      final totalSteps =
-          archive.length +
-          imageDirs.length +
-          exportData.films.length +
-          exportData.collections.length +
-          exportData.links.length;
-
-      void step() {
-        currentStep++;
-        onProgress?.call(currentStep, totalSteps);
-      }
-
-      for (final file in archive) {
-        final filePath = p.join(extractDir.path, file.name);
-
-        if (file.isFile) {
-          final outFile = File(filePath);
-          await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content as List<int>);
-        } else {
-          await Directory(filePath).create(recursive: true);
-        }
-
-        step();
-        await Future.delayed(const Duration(milliseconds: 1));
-      }
+          ? (await importedFilmsDir
+              .list()
+              .where((e) => e is Directory)
+              .cast<Directory>()
+              .toList())
+          : <Directory>[];
 
       for (final entity in imageDirs) {
         final filmId = p.basename(entity.path);
-        final targetDir = Directory('${filmsDir.path}/$filmId');
-
+        final targetDir = Directory(p.join(filmsDir.path, filmId));
         if (!await targetDir.exists()) {
           await targetDir.create(recursive: true);
         }
-
         for (final file in entity.listSync()) {
           if (file is File) {
             final fileName = p.basename(file.path);
-            final newPath = '${targetDir.path}/$fileName';
+            final newPath = p.join(targetDir.path, fileName);
 
             final newFile = File(newPath);
             if (!await newFile.exists()) {
@@ -124,48 +99,59 @@ class ImportLibraryUseCase {
             }
           }
         }
-
-        step();
-        await Future.delayed(const Duration(milliseconds: 1));
+        currentStep++;
+        onProgress?.call(
+          currentStep, 
+          filesToExtract + imageDirs.length + exportData.films.length + 
+          exportData.collections.length + exportData.links.length
+        );
       }
 
       for (final film in exportData.films) {
         final exists = await filmRepository.filmIsSaved(
           film.filmBaseModel.kinopoiskId!,
         );
-
         if (!exists) {
           await filmRepository.addFilmInLocalDataSource(film);
         }
-
-        step();
-        await Future.delayed(const Duration(milliseconds: 1));
+        currentStep++;
+        onProgress?.call(
+          currentStep,
+          filesToExtract + imageDirs.length + exportData.films.length + 
+          exportData.collections.length + exportData.links.length
+        );
       }
 
       for (final collection in exportData.collections) {
-        final exists =
-            await collectionRepository.collectionIsExist(collection.id!);
-
+        final exists = await collectionRepository.collectionIsExist(collection.id!);
         if (!exists) {
           await collectionRepository.addCollection(collection);
         }
-
-        step();
+        currentStep++;
+        onProgress?.call(
+          currentStep,
+          filesToExtract + imageDirs.length + exportData.films.length + 
+          exportData.collections.length + exportData.links.length
+        );
       }
 
-      final existingLinks =
-          await filmCollectionRepository.getAllFilmCollectionLinks();
+      final existingLinks = await filmCollectionRepository.getAllFilmCollectionLinks();
 
       for (final link in exportData.links) {
-        final exists = existingLinks.any((e) =>
-            e.filmId == link.filmId &&
-            e.collectionId == link.collectionId);
+        final exists = existingLinks.any(
+          (e) => e.filmId == link.filmId && e.collectionId == link.collectionId
+        );
 
         if (!exists) {
           await filmCollectionRepository.addFilmCollectionLink(link);
         }
 
-        step();
+        currentStep++;
+        onProgress?.call(
+          currentStep,
+          filesToExtract + imageDirs.length + exportData.films.length + 
+          exportData.collections.length + exportData.links.length
+        );
       }
 
       return true;

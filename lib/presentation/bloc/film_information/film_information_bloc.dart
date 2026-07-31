@@ -106,7 +106,10 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   Future<void> _addFilmToCollection(AddFilmToCollection event, Emitter emit) async {
     final currentState = state;
     if(currentState is! FilmLoaded) return;
-    emit(currentState.copyWith(status: FilmStatus.loading));
+    emit(currentState.copyWith(
+      status: FilmStatus.loading, 
+      loadingCollectionId: event.collectionId
+    ));
     try {
       await addFilmToCollectionUseCase(currentState.film, currentState.filmImages, event.collectionId);
     } on LocalDataSourceException catch(e){
@@ -121,6 +124,10 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   Future<void> _removeFilmFromCollection(RemoveFilmFromCollection event, Emitter emit) async {
     final currentState = state;
     if(currentState is! FilmLoaded) return;
+    emit(currentState.copyWith(
+      status: FilmStatus.loading,
+      loadingCollectionId: event.collectionId,
+    ));
     try {
       await removeFilmFromCollectionUseCase.call(currentState.film, event.collectionId);
     } on LocalDataSourceException catch(e){
@@ -135,7 +142,13 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   Future<void> _updateFilmLinks(UpdateFilmLinks event, Emitter emit) async {
     final currentState = state;
     if(currentState is! FilmLoaded) return;
-    emit(currentState.copyWith(film: currentState.film, filmImages: currentState.filmImages, collectionIds: event.updatedCollectionIds, status: FilmStatus.success));
+    emit(currentState.copyWith(
+      film: currentState.film, 
+      filmImages: currentState.filmImages, 
+      collectionIds: event.updatedCollectionIds, 
+      status: FilmStatus.success,
+      clearLoadingCollectionId: true
+    ));
   }
 
   Future<void> _updateUserFilmInformation(UpdateUserFilmInformation event, Emitter emit) async {

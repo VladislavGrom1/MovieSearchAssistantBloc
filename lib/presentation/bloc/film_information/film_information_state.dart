@@ -23,30 +23,37 @@ class FilmLoaded extends FilmInformationState{
   final FilmImagesEntity? filmImages;
   final List<String> collectionIds;
   final FilmStatus status;
+  final String? loadingCollectionId;
 
   const FilmLoaded({
     required this.film,
     required this.filmImages,
     required this.collectionIds,
-    required this.status
+    required this.status,
+    this.loadingCollectionId
   });
 
   FilmLoaded copyWith({
     FilmEntity? film,
     FilmImagesEntity? filmImages,
     List<String>? collectionIds,
-    FilmStatus? status
+    FilmStatus? status,
+    String? loadingCollectionId,
+    bool clearLoadingCollectionId = false,
   }) {
     return FilmLoaded(
       film: film ?? this.film,
       filmImages: filmImages ?? this.filmImages,
       collectionIds: collectionIds ?? this.collectionIds,
-      status: status ?? this.status
+      status: status ?? this.status,
+      loadingCollectionId: clearLoadingCollectionId
+          ? null
+          : (loadingCollectionId ?? this.loadingCollectionId),
     );
   }
 
   @override
-  List<Object?> get props => [film, filmImages, collectionIds, status];
+  List<Object?> get props => [film, filmImages, collectionIds, status, loadingCollectionId];
 }
 
 class FilmFailure extends FilmInformationState {

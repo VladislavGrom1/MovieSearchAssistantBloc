@@ -19,17 +19,16 @@ class GetCollectionsFilmsUseCase {
   });
 
   Future<Map<String, List<FilmEntity>?>?> call(List<String> collectionNames) async{
-    Map<String, List<FilmEntity>?> collectionsFilmsMap = {};
     try{
       UserEntity? userEntity = await userRepository.getUserApiKeyInfoFromStorage();
-      if(userEntity != null){
-        apiClient.updateApiKeyHeaders(userEntity.apiKey!);
-        for(var collectionName in collectionNames){
-          collectionsFilmsMap[collectionName] = await filmRepository.getCollectionFilms(collectionName, 1);
-        }
-        return collectionsFilmsMap;
-      }
-      return null;
+      if(userEntity == null) return null;
+      
+      apiClient.updateApiKeyHeaders(userEntity.apiKey!);
+      final results = await Future.wait(
+        collectionNames.map((name) => filmRepository.getCollectionFilms(name, 1))
+      );
+
+      return Map.fromIterables(collectionNames, results);
     } on RemoteDataSourceException{
       rethrow;
     } on LocalDataSourceException{

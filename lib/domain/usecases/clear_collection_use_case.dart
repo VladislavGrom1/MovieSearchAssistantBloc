@@ -22,13 +22,15 @@ class ClearCollectionUseCase {
 
       await filmCollectionRepository.removeAllLinksByCollectionId(collectionId);
 
-      for(final filmId in filmIdsIncludedInCollection){
-        final filmHasOtherLinks = allFilmCollectionLinks.any((link) => link.filmId == filmId && link.collectionId != collectionId);
-        if(!filmHasOtherLinks){
-          imageStorageService.deleteFilmImages(filmId);
-          filmRepository.removeFilmFromLocalDataSource(filmId);
-        }
-      }
+      final filmIdsToDelete = filmIdsIncludedInCollection.where((filmId) {
+        return !allFilmCollectionLinks.any((link) =>
+            link.filmId == filmId && link.collectionId != collectionId);
+      }).toList();
+
+      await Future.wait(filmIdsToDelete.map((filmId) async {
+        await imageStorageService.deleteFilmImages(filmId);
+        await filmRepository.removeFilmFromLocalDataSource(filmId);
+      }));
     } on LocalDataSourceException{
       rethrow;
     } catch(e){

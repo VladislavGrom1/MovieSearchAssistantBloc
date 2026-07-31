@@ -932,18 +932,22 @@ class _CollectionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.read<FilmInformationBloc>().state as FilmLoaded;
-    final loadFilmStatus = state.status;
+    final isLoadingThisCollection = state.loadingCollectionId == collection.id;
+    final isSavingAnyCollection = state.loadingCollectionId != null;
 
     return ListTile(
       title: Text(collection.name ?? "Без названия", style: CustomTextStyles.m3ActionText().copyWith(fontWeight: FontWeight.w600)),
       splashColor: AppColors.primaryThemeGrey,
-      trailing: loadFilmStatus == FilmStatus.loading
+      enabled: !isSavingAnyCollection || isLoadingThisCollection,
+      trailing: isLoadingThisCollection
           ? SizedBox(width: 20.w, height: 20.h, child: CircularProgressIndicator())
           : Icon(
               isInCollection ? Icons.check_box : Icons.add,
-              color: isInCollection ? AppColors.primaryScheme : AppColors.primaryScheme,
+              color: (isSavingAnyCollection && !isLoadingThisCollection)
+                  ? AppColors.primaryThemeGrey
+                  : AppColors.primaryScheme,
             ),
-      onTap: loadFilmStatus == FilmStatus.loading
+      onTap: isSavingAnyCollection
           ? null
           : () {
               if (isInCollection) {

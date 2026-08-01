@@ -10,6 +10,7 @@ import 'package:movie_search_assistant_bloc/domain/entities/collection_entity.da
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_search_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
 
 @RoutePage()
@@ -52,7 +53,7 @@ class _CollectionsView extends StatelessWidget {
                       }
 
                       if (state is CollectionsLoaded) {
-                        return _CollectionsList(collections: state.collections);
+                        return _SearchCollectionContent(collections: state.collections);
                       }
                       return const SizedBox();
                 },
@@ -61,6 +62,68 @@ class _CollectionsView extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SearchCollectionContent extends StatefulWidget {
+  final List<CollectionEntity> collections;
+
+  const _SearchCollectionContent({required this.collections});
+
+  @override
+  State<_SearchCollectionContent> createState() => _SearchCollectionContentState();
+}
+
+class _SearchCollectionContentState extends State<_SearchCollectionContent> {
+  String _searchKeyword = '';
+
+  void onSearchSubmitted(String keyword, BuildContext context) {
+    setState(() {
+      _searchKeyword = keyword.toLowerCase();
+    });
+  }
+
+  List<CollectionEntity> _getFilteredCollections(List<CollectionEntity> collections) {
+    if (_searchKeyword.isEmpty) {
+      return collections;
+    }
+    return collections.where((collection) {
+      final collectionName = collection.name?.toLowerCase() ?? '';
+      return collectionName.contains(_searchKeyword);
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CollectionsBloc, CollectionsState>(
+      builder: (context, state) {
+        List<CollectionEntity> displayedCollections = [];
+        
+        if (state is CollectionsLoaded) {
+          displayedCollections = _getFilteredCollections(state.collections);
+        }
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CustomSearchBar(
+              onSearchSubmitted: onSearchSubmitted,
+              useFilterButton: false,
+              useRealTimeChange: true,
+              onClear: () {
+                setState(() {
+                  _searchKeyword = '';
+                });
+              },
+            ),
+            SizedBox(height: 10.h),
+            Expanded(
+              child: _CollectionsList(collections: displayedCollections)
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -12,7 +12,7 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/search_films/widgets/custom_search_bar.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_search_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
@@ -105,7 +105,11 @@ class _SearchFilmContent extends StatelessWidget {
       children: [
         CustomSearchBar(
             onSearchSubmitted: onSearchSubmitted,
-            onFilterSubmitted: onFilterSubmitted),
+            onFilterSubmitted: onFilterSubmitted,
+            useFilterButton: true,
+            useRealTimeChange: true,
+            textInputAction: TextInputAction.search,
+            ),
         SizedBox(height: 10.h),
         Expanded(child: _CollectionsList(filmCollectionsMap: filmCollectionsMap)),
       ],

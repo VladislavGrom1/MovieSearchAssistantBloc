@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
+import 'package:media_store_plus/media_store_plus.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
@@ -89,6 +90,7 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => Connectivity());
     getIt.registerLazySingleton(() => NetworkService(getIt()));
     getIt.registerLazySingleton(() => FileService());
+    getIt.registerLazySingleton(() => MediaStore());
     getIt.registerLazySingleton(() => ZipService());
     getIt.registerLazySingleton(() => FilmImageCacheService());
 
@@ -146,10 +148,11 @@ Future<void> initializeDependencies() async {
       collectionRepository: getIt(), 
       filmCollectionRepository: getIt(), 
       imageStorageService: getIt(),
-      fileManagerService: getIt(),
+      mediaStore: getIt(),
       zipService: getIt()
     ));
     getIt.registerLazySingleton(() => ImportLibraryUseCase(
+      zipService: getIt(),
       fileService: getIt(), 
       filmRepository: getIt(), 
       collectionRepository: getIt(), 

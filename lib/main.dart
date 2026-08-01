@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:media_store_plus/media_store_plus.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_cubit.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/network_listener.dart';
@@ -10,6 +12,12 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDependencies();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  await MediaStore.ensureInitialized();
+  MediaStore.appFolder = "MovieSearchAssistant";
   runApp(const MyApp());
 }
 

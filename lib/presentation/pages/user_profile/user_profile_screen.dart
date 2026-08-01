@@ -12,7 +12,6 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
-import 'package:share_plus/share_plus.dart';
 
 @RoutePage()
 class UserProfileScreen extends StatelessWidget {
@@ -295,9 +294,7 @@ class _UserProfileContent extends StatelessWidget {
       ],
     );
   }
-
-  // TODO: добавить Share библиотеки при экспорте, изменить версию 1.1.0+2, 
-
+ 
   void _showChangeApiKeyDialog(BuildContext context) {
     showDialog(
       context: context,

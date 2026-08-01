@@ -451,8 +451,8 @@ class _FilmInformationContent extends StatelessWidget {
           child: TextFieldAlertDialog(
               titleText: 'Изменить пользовательский отзыв', 
               hintText: 'Новый отзыв',
-              maxLenght: 200,
-              maxLines: 10,
+              maxLenght: 500,
+              maxLines: 20,
               actionText: "Сохранить", 
               actionFunc: (controllerText) => context.read<FilmInformationBloc>().add(UpdateUserFilmInformation(userComment: controllerText))
             ),

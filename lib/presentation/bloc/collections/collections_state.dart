@@ -13,6 +13,7 @@ final class CollectionsLoading extends CollectionsState {}
 
 final class CollectionsLoaded extends CollectionsState {
   final List<CollectionEntity> collections;
+  
 
   const CollectionsLoaded({required this.collections});
 

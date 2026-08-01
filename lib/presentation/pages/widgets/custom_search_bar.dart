@@ -7,11 +7,19 @@ class CustomSearchBar extends StatefulWidget {
   const CustomSearchBar({
     super.key,
     required this.onSearchSubmitted,
-    required this.onFilterSubmitted
+    this.onFilterSubmitted,
+    required this.useFilterButton,
+    required this.useRealTimeChange,
+    this.onClear,
+    this.textInputAction
   });
 
   final Function(String keyword, BuildContext context) onSearchSubmitted;
-  final Function(BuildContext context) onFilterSubmitted;
+  final Function(BuildContext context)? onFilterSubmitted;
+  final bool useFilterButton;
+  final bool useRealTimeChange;
+  final VoidCallback? onClear;
+  final TextInputAction? textInputAction;
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -45,6 +53,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   void _clearText() {
     _searchController.clear();
     _focusNode.unfocus();
+    widget.onClear?.call();
   }
 
   @override
@@ -75,7 +84,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 child: TextField(
               controller: _searchController,
               focusNode: _focusNode,
-              textInputAction: TextInputAction.search,
+              textInputAction: widget.textInputAction,
               onEditingComplete: () {
                 _focusNode.unfocus();
               },
@@ -90,6 +99,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                   //_clearText();
                 }
               },
+              onChanged: (keyword) {
+                if(widget.useRealTimeChange) {
+                  widget.onSearchSubmitted(_searchController.text, context);
+                }
+              },
               cursorColor: AppColors.primaryScheme,
               style: CustomTextStyles.m3ActionText(),
               decoration: InputDecoration(border: InputBorder.none),
@@ -98,22 +112,34 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 padding: EdgeInsets.only(left: 5.w, right: 0.w),
                 child: AnimatedSwitcher(
                     duration: Duration(milliseconds: 100),
-                    child: _hasFocus
-                    ? IconButton(
-                        key: ValueKey('clear'),
-                        onPressed: () {
-                          _clearText();
-                        },
-                        icon: Icon(Icons.clear, color: AppColors.primaryScheme)
-                      )
-                    : IconButton(
-                        key: ValueKey('filter'),
-                        onPressed: () {
-                          _clearText();
-                          widget.onFilterSubmitted(context);
-                        },
-                        icon: Icon(Icons.filter_alt_outlined, color: AppColors.primaryScheme)
-                      )
+                    child: widget.useFilterButton
+                    ? _hasFocus
+                      ? IconButton(
+                          key: ValueKey('clear'),
+                          onPressed: () {
+                            _clearText();
+                          },
+                          icon: Icon(Icons.clear, color: AppColors.primaryScheme)
+                        )
+                      : IconButton(
+                          key: ValueKey('filter'),
+                          onPressed: () {
+                            _clearText();
+                            if(widget.useFilterButton){
+                              widget.onFilterSubmitted!(context);
+                            }
+                          },
+                          icon: Icon(Icons.filter_alt_outlined, color: AppColors.primaryScheme)
+                        )
+                    : _hasFocus 
+                      ? IconButton(
+                          key: ValueKey('clear'),
+                          onPressed: () {
+                            _clearText();
+                          },
+                          icon: Icon(Icons.clear, color: AppColors.primaryScheme)
+                        )
+                      : SizedBox()
             ))
           ],
         ),
@@ -121,3 +147,4 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
     );
   }
 }
+

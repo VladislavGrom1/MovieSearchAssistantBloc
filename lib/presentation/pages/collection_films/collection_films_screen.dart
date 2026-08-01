@@ -12,6 +12,7 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_films_cubit/selection_films_cubit.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_search_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/poster_film_image.dart';
 
@@ -35,29 +36,87 @@ class CollectionFilmsScreen extends StatelessWidget {
   }
 }
 
-class _CollectionFilmsView extends StatelessWidget {
+class _CollectionFilmsView extends StatefulWidget {
   const _CollectionFilmsView({required this.collectionName});
 
   final String collectionName;
+
+  @override
+  State<_CollectionFilmsView> createState() => _CollectionFilmsViewState();
+}
+
+class _CollectionFilmsViewState extends State<_CollectionFilmsView> {
+  bool _isSearch = false;
+  String _searchKeyword = '';
+
+  void _onSearchSubmitted(String keyword, BuildContext context) {
+    setState(() {
+      _searchKeyword = keyword.toLowerCase();
+    });
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearch = !_isSearch;
+      if (!_isSearch) {
+        _searchKeyword = '';
+      }
+    });
+  }
+
+  List<FilmEntity> _getFilteredFilms(List<FilmEntity> films) {
+    if (_searchKeyword.isEmpty) {
+      return films;
+    }
+    return films.where((film) {
+      final nameRu = film.nameRu?.toLowerCase() ?? '';
+      final nameOriginal = film.nameOriginal?.toLowerCase() ?? '';
+      return nameRu.contains(_searchKeyword) || nameOriginal.contains(_searchKeyword);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryThemeBlack,
       appBar: AppBar(
+        automaticallyImplyLeading: !_isSearch,
         title: BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
           builder: (context, state) {
-            if (!state.isSelectionMode) {
-              return Text(collectionName, style: CustomTextStyles.m3Title());
-            } 
-            return Text("Выбрано: ${state.selectedFilmIds.length}", style: CustomTextStyles.m3Title());
+            if (state.isSelectionMode) {
+              return Text("Выбрано: ${state.selectedFilmIds.length}", style: CustomTextStyles.m3Title());
+            }
+            if (_isSearch){
+              return CustomSearchBar(
+                key: ValueKey('search_bar'),
+                onSearchSubmitted: _onSearchSubmitted,
+                useFilterButton: false,
+                useRealTimeChange: true,
+                onClear: () {
+                  setState(() {
+                    _searchKeyword = '';
+                  });
+                },
+              );
+            }
+            return Text(widget.collectionName, style: CustomTextStyles.m3Title());
           },
         ),
         actions: [
           BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
             builder: (context, selectionFilmsState) {
+              if (_isSearch) {
+                return IconButton(
+                  icon: Icon(Icons.search_off, color: AppColors.primaryScheme),
+                  onPressed: _toggleSearch,
+                );
+              }
+              
               if (!selectionFilmsState.isSelectionMode) {
-                return SizedBox();
+                return IconButton(
+                  icon: Icon(Icons.search, color: AppColors.primaryScheme),
+                  onPressed: _toggleSearch,
+                );
               } 
               final collectionFilmsState = context.read<CollectionFilmsBloc>().state;
               return Row(
@@ -96,31 +155,45 @@ class _CollectionFilmsView extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-          child: Padding(
-        padding: EdgeInsets.only(left: 20.w, right: 20.h),
-        child: BlocBuilder<CollectionFilmsBloc, CollectionFilmsState>(
-          builder: (context, state) {
-            if (state is CollectionFilmsLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        child: Padding(
+      padding: EdgeInsets.only(left: 20.w, right: 20.h),
+      child: BlocBuilder<CollectionFilmsBloc, CollectionFilmsState>(
+        builder: (context, state) {
+          if (state is CollectionFilmsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            if (state is CollectionFilmsFailure) {
-              return Center(child: Text(state.message));
-            }
+          if (state is CollectionFilmsFailure) {
+            return Center(child: Text(state.message));
+          }
 
-            if (state is CollectionFilmsLoaded) {
-              if(state.savedFilms.isEmpty){
-                return ErrorMessageWidget(message: "Коллекция пуста");
-              }
-              return _CollectionFilmsList(
-                savedFilms: state.savedFilms,
-                collectionId: state.collectionId,
+          if (state is CollectionFilmsLoaded) {
+            if (state.savedFilms.isEmpty) {
+              return ErrorMessageWidget(message: "Коллекция пуста");
+            }
+            
+            final filteredFilms = _getFilteredFilms(state.savedFilms);
+            
+            if (filteredFilms.isEmpty) {
+              return Center(
+                child: Text(
+                "Фильмы не найдены", 
+                style: CustomTextStyles.m3Title(), 
+                textAlign: TextAlign.center
+              ),
               );
             }
-            return SizedBox();
-          },
-        ),
-      )),
+            
+            return _CollectionFilmsList(
+              savedFilms: filteredFilms,
+              collectionId: state.collectionId,
+              isSearchMode: _isSearch,
+            );
+          }
+          return SizedBox();
+        },
+      ),
+    )),
     );
   }
 }
@@ -128,17 +201,17 @@ class _CollectionFilmsView extends StatelessWidget {
 class _CollectionFilmsList extends StatelessWidget {
   final List<FilmEntity> savedFilms;
   final String collectionId;
+  final bool isSearchMode;
 
-  const _CollectionFilmsList({required this.savedFilms, required this.collectionId});
+  const _CollectionFilmsList({
+    required this.savedFilms, 
+    required this.collectionId,
+    required this.isSearchMode,
+  });
 
   @override
   Widget build(BuildContext context) {
     final collectionFilmsBloc = context.read<CollectionFilmsBloc>();
-
-    if (savedFilms.isEmpty) {
-      return Center(child: Text("Коллекция пуста", style: TextStyle(color: Colors.black)));
-    }
-
     return ListView.separated(
         addAutomaticKeepAlives: false,
         addSemanticIndexes: false,
@@ -149,6 +222,7 @@ class _CollectionFilmsList extends StatelessWidget {
               savedFilm: savedFilm,
               collectionId: collectionId,
               collectionFilmsBloc: collectionFilmsBloc,
+              isSearchMode: isSearchMode,
           );
         },
         separatorBuilder: (context, index) => SizedBox(height: 12.h),
@@ -160,11 +234,14 @@ class _FilmCard extends StatelessWidget {
   final FilmEntity savedFilm;
   final String collectionId;
   final CollectionFilmsBloc collectionFilmsBloc;
+  final bool isSearchMode;
 
-  const _FilmCard(
-      {required this.savedFilm,
-      required this.collectionId,
-      required this.collectionFilmsBloc});
+  const _FilmCard({
+    required this.savedFilm,
+    required this.collectionId,
+    required this.collectionFilmsBloc,
+    required this.isSearchMode,
+  });
 
   void onRemove() {
     collectionFilmsBloc.add(RemoveFilm(film: savedFilm, collectionId: collectionId));
@@ -177,6 +254,13 @@ class _FilmCard extends StatelessWidget {
       highlightColor: Colors.transparent,
       splashColor: Colors.transparent,
       onTap: () {
+        if (isSearchMode) {
+          context.router.push(FilmInformationRoute(
+              filmId: savedFilm.kinopoiskId!,
+              filmName: savedFilm.nameRu ?? savedFilm.nameOriginal.toString()));
+          return;
+        }
+        
         final selectionFilmsCubit = context.read<SelectionFilmsCubit>();
         final selectionFilmsState = selectionFilmsCubit.state;
 
@@ -189,7 +273,9 @@ class _FilmCard extends StatelessWidget {
         }
       },
       onLongPress: () {
-        context.read<SelectionFilmsCubit>().enterSelection(savedFilm.kinopoiskId!);
+        if (!isSearchMode) {
+          context.read<SelectionFilmsCubit>().enterSelection(savedFilm.kinopoiskId!);
+        }
       },
       child: Card(
         color: AppColors.primaryThemeGrey,
@@ -246,6 +332,20 @@ class _FilmCard extends StatelessWidget {
               ),
               BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
                 builder: (context, state) {
+                  if (isSearchMode) {
+                    return SizedBox(
+                      width: 40.w,
+                      child: PopupMenuButton(
+                          color: AppColors.primaryThemeGrey,
+                          enableFeedback: false,
+                          icon: Icon(Icons.more_vert, color: AppColors.primaryScheme),
+                          onSelected: (value) {
+                            if (value == "removeFilm") onRemove();
+                          },
+                          itemBuilder: (_) => [PopupMenuItem(value: 'removeFilm', child: Text("Удалить фильм", style: CustomTextStyles.m3Body()))]),
+                    );
+                  }
+                  
                   if (!state.isSelectionMode) {
                     return SizedBox(
                       width: 40.w,

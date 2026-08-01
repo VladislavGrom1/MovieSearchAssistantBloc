@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/zip_service.dart';
@@ -9,6 +10,7 @@ import 'package:movie_search_assistant_bloc/data/models/film_detail_model.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/collection_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_collection_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
  
 class ExportLibraryUseCase {
@@ -28,60 +30,132 @@ class ExportLibraryUseCase {
     required this.mediaStore,
   });
  
-  Future<String?> call() async {
+  Future<String> call() async {
     final tempDir = await getTemporaryDirectory();
     final exportDir = Directory("${tempDir.path}/export_temp");
- 
-    try{
-      final filmEntities = await filmRepository.getAllFilmsFromLocalDataSource();
-      final collectionEntities = await collectionRepository.getAllCollections();
-      final links = await filmCollectionRepository.getAllFilmCollectionLinks();
- 
+
+    try {
+      final filmEntities =
+          await filmRepository.getAllFilmsFromLocalDataSource();
+
+      final collectionEntities =
+          await collectionRepository.getAllCollections();
+
+      final links =
+          await filmCollectionRepository.getAllFilmCollectionLinks();
+
       if (filmEntities.isEmpty) {
         return "Нет сохранённых фильмов";
       }
- 
+
       final exportData = ExportDataModel(
-        films: filmEntities.map((f) => FilmDetailModel.fromFilmEntity(f)).toList(),
-        collections: collectionEntities.map((c) => CollectionModel.fromCollectionEntity(c)).toList(),
+        films: filmEntities
+            .map((f) => FilmDetailModel.fromFilmEntity(f))
+            .toList(),
+        collections: collectionEntities
+            .map((c) => CollectionModel.fromCollectionEntity(c))
+            .toList(),
         links: links,
       );
- 
+
       if (await exportDir.exists()) {
         await exportDir.delete(recursive: true);
       }
-      await exportDir.create();
- 
+
+      await exportDir.create(recursive: true);
+
       final jsonFile = File("${exportDir.path}/data.json");
-      final jsonString = jsonEncode(exportData.toJson());
-      await jsonFile.writeAsString(jsonString);
- 
+
+      await jsonFile.writeAsString(
+        jsonEncode(exportData.toJson()),
+      );
+
       final imagesDir = Directory("${exportDir.path}/images");
-      await imagesDir.create();
- 
-      await imageStorageService.copyAllImagesTo(imagesDir.path);
- 
-      // zipDirectory уже пишет архив на диск потоково (ZipFileEncoder) —
-      // дальше просто переносим уже готовый файл, без чтения его в память.
-      final zipPath = await zipService.zipDirectory(exportDir.path);
+
+      await imagesDir.create(recursive: true);
+
+      await imageStorageService.copyAllImagesTo(
+        imagesDir.path,
+      );
+
+      final zipPath = await zipService.zipDirectory(
+        exportDir.path,
+      );
+
+      log("ZIP created: $zipPath");
+
+      final zipFile = File(zipPath);
+
+      if (!await zipFile.exists()) {
+        throw Exception(
+          "ZIP файл не существует: $zipPath",
+        );
+      }
+
+      final fileName = p.basename(zipPath);
+
+      log("ZIP name: $fileName");
+      log(
+        "ZIP size: ${await zipFile.length()} bytes",
+      );
+
       final saveInfo = await mediaStore.saveFile(
-          tempFilePath: zipPath,
+        tempFilePath: zipPath,
+        dirType: DirType.download,
+        dirName: DirName.download,
+      );
+
+      log("saveInfo: $saveInfo");
+
+      if (saveInfo != null) {
+        log(
+          "Saved URI: ${saveInfo.uri}",
+        );
+
+        log(
+          "Saved name: ${saveInfo.name}",
+        );
+
+        log(
+          "Save status: ${saveInfo.saveStatus}",
+        );
+
+        return saveInfo.uri.toString();
+      }
+
+      final exists = await mediaStore.isFileExist(
+        fileName: fileName,
+        dirType: DirType.download,
+        dirName: DirName.download,
+      );
+
+      log(
+        "File exists after saveFile: $exists",
+      );
+
+      if (exists) {
+        final uri = await mediaStore.getFileUri(
+          fileName: fileName,
           dirType: DirType.download,
           dirName: DirName.download,
         );
- 
-        if (saveInfo == null) {
-          throw Exception("Не удалось сохранить архив в Загрузки");
+
+        if (uri != null) {
+          log(
+            "Recovered URI: $uri",
+          );
+
+          return uri.toString();
         }
- 
-        return saveInfo.uri.toString();
-    } catch(e){
-      rethrow;
-    } finally{
+      }
+
+      throw Exception(
+        "MediaStore не смог подтвердить сохранение файла",
+      );
+    } finally {
       if (await exportDir.exists()) {
         await exportDir.delete(recursive: true);
       }
     }
   }
-
 }

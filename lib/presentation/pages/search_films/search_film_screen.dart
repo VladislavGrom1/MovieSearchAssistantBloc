@@ -107,7 +107,7 @@ class _SearchFilmContent extends StatelessWidget {
             onSearchSubmitted: onSearchSubmitted,
             onFilterSubmitted: onFilterSubmitted,
             useFilterButton: true,
-            useRealTimeChange: true,
+            useRealTimeChange: false,
             textInputAction: TextInputAction.search,
             ),
         SizedBox(height: 10.h),

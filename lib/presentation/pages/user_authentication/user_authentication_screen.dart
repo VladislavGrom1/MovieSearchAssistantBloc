@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
@@ -32,7 +31,7 @@ class _UserAuthenticationView extends StatelessWidget {
         backgroundColor: AppColors.primaryThemeBlack,
         body: SafeArea(
           child: Padding(
-            padding: EdgeInsets.only(left: 20.w, right: 20.w),
+            padding: EdgeInsets.only(left: 20, right: 20),
             child: BlocListener<AuthenticationBloc, AuthenticationState>(
                 listener: _userAuthenticationBlocListener,
                 child: _UserAuthenticationContent()),
@@ -69,13 +68,13 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          SizedBox(height: 40.h),
+          SizedBox(height: 40),
           Center(
             child: Text(
               "Movie Search Assistant", 
               style: CustomTextStyles.m3Headline(color: AppColors.primaryScheme))
             ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 20),
           Center(
             child: Text.rich(
               TextSpan(
@@ -100,7 +99,7 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
                 textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 20),
           TextField(
             controller: _textEditingController,
             maxLength: 40,
@@ -112,10 +111,10 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
             style: CustomTextStyles.m3ActionText(),
             autofocus: true,
             onChanged: (_) => setState(() {})),
-          SizedBox(height: 10.h),
+          SizedBox(height: 10),
           ElevatedButton(
             style: ButtonStyle(
-                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
+                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40)),
                 alignment: AlignmentGeometry.center,
                 backgroundColor: _textEditingController.text.isEmpty 
                 ? WidgetStatePropertyAll(AppColors.primaryThemeGrey)

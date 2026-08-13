@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
@@ -85,12 +84,12 @@ class _FilterFilmContent extends StatelessWidget {
           genre: genre,
           yearRange: yearRange,
         ),
-        SizedBox(height: 20.h),
+        SizedBox(height: 20),
         Padding(
-          padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
+          padding: EdgeInsetsGeometry.only(left: 20, right: 20),
           child: ElevatedButton(
             style: ButtonStyle(
-                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
+                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40)),
                 alignment: AlignmentGeometry.center,
                 backgroundColor: WidgetStatePropertyAll(AppColors.primaryScheme)),
             onPressed: () {
@@ -99,12 +98,12 @@ class _FilterFilmContent extends StatelessWidget {
             child: Text("Показать", style: CustomTextStyles.m3ActionText(color: AppColors.textWhite)),
           ),
         ),
-        SizedBox(height: 5.h),
+        SizedBox(height: 5),
         Padding(
-          padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
+          padding: EdgeInsetsGeometry.only(left: 20, right: 20),
           child: ElevatedButton(
             style: ButtonStyle(
-                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40.h)),
+                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40)),
                 alignment: AlignmentGeometry.center,
                 backgroundColor: WidgetStatePropertyAll(AppColors.primaryThemeGrey)),
             onPressed: () {
@@ -130,7 +129,7 @@ class _FilterButtonsList extends StatelessWidget {
     final filterFilmBloc = context.read<FilterFilmBloc>();
 
     return SizedBox(
-      height: 180.h,
+      height: 180,
       child: ListView.separated(
           physics: NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
@@ -147,9 +146,9 @@ class _FilterButtonsList extends StatelessWidget {
                     UpdateFilterValue(filterType: filterType, value: result));
               },
               child: Padding(
-                padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
+                padding: EdgeInsetsGeometry.only(left: 20, right: 20),
                 child: Container(
-                  height: 48.h,
+                  height: 48,
                   width: double.infinity,
                   color: AppColors.primaryThemeBlack,
                   child: Row(

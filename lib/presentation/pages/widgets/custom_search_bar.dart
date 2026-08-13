@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 
@@ -59,11 +58,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 50.h,
+      height: 50,
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.primaryThemeGrey,
-          borderRadius: BorderRadius.circular(8.w),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
@@ -76,7 +75,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                     }, 
                     icon: Icon(Icons.arrow_back, color: AppColors.primaryScheme))
                   : Padding(
-                    padding: EdgeInsets.only(left: 10.w),
+                    padding: EdgeInsets.only(left: 10),
                     child: Icon(Icons.search, color: AppColors.secondaryThemeGrey),
                   )
             ),
@@ -109,7 +108,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
               decoration: InputDecoration(border: InputBorder.none),
             )),
             Padding(
-                padding: EdgeInsets.only(left: 5.w, right: 0.w),
+                padding: EdgeInsets.only(left: 5, right: 0),
                 child: AnimatedSwitcher(
                     duration: Duration(milliseconds: 100),
                     child: widget.useFilterButton

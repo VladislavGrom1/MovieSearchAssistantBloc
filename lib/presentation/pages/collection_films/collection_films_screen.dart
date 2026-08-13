@@ -1,9 +1,7 @@
 import 'dart:ui';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
@@ -14,7 +12,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/c
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_films_cubit/selection_films_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_search_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/widgets/poster_film_image.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_image.dart';
 
 @RoutePage()
 class CollectionFilmsScreen extends StatelessWidget {
@@ -156,7 +154,7 @@ class _CollectionFilmsViewState extends State<_CollectionFilmsView> {
       ),
       body: SafeArea(
         child: Padding(
-      padding: EdgeInsets.only(left: 20.w, right: 20.h),
+      padding: EdgeInsets.only(left: 20, right: 20),
       child: BlocBuilder<CollectionFilmsBloc, CollectionFilmsState>(
         builder: (context, state) {
           if (state is CollectionFilmsLoading) {
@@ -225,7 +223,7 @@ class _CollectionFilmsList extends StatelessWidget {
               isSearchMode: isSearchMode,
           );
         },
-        separatorBuilder: (context, index) => SizedBox(height: 12.h),
+        separatorBuilder: (context, index) => SizedBox(height: 12),
         itemCount: savedFilms.length);
   }
 }
@@ -280,7 +278,7 @@ class _FilmCard extends StatelessWidget {
       child: Card(
         color: AppColors.primaryThemeGrey,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.w),
+          borderRadius: BorderRadius.circular(16),
         ),
         clipBehavior: Clip.antiAlias,
         child: BackdropFilter(
@@ -294,33 +292,33 @@ class _FilmCard extends StatelessWidget {
                 userRating: savedFilm.userRating,
                 showUserRating: true,
               ),
-              SizedBox(width: 10.w),
+              SizedBox(width: 10),
               Expanded(
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 10),
                     Text(
                       savedFilm.nameRu ?? savedFilm.nameOriginal ?? "-",
                       maxLines: 2,
                       style: CustomTextStyles.m3Title().copyWith(fontSize: 16),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 10),
                     Text(
                       savedFilm.nameOriginal ?? savedFilm.nameRu ?? "-",
                       maxLines: 2,
                       style: CustomTextStyles.m3Body().copyWith(fontWeight: FontWeight.w400),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 2),
                     Text(
                       DataFormatter.formatCountriesAndYear(savedFilm.countries, savedFilm.year),
                       maxLines: 1,
                       style: CustomTextStyles.m3Body(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 2),
                     Text(
                       DataFormatter.formatGenres(savedFilm.genres),
                       maxLines: 1,
@@ -334,7 +332,7 @@ class _FilmCard extends StatelessWidget {
                 builder: (context, state) {
                   if (isSearchMode) {
                     return SizedBox(
-                      width: 40.w,
+                      width: 40,
                       child: PopupMenuButton(
                           color: AppColors.primaryThemeGrey,
                           enableFeedback: false,
@@ -348,7 +346,7 @@ class _FilmCard extends StatelessWidget {
                   
                   if (!state.isSelectionMode) {
                     return SizedBox(
-                      width: 40.w,
+                      width: 40,
                       child: PopupMenuButton(
                           color: AppColors.primaryThemeGrey,
                           enableFeedback: false,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_cubit.dart';
@@ -32,9 +31,7 @@ class _MyAppState extends State<MyApp> {
   final _router = AppRouter();
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(412, 927),
-      child: BlocProvider(
+    return BlocProvider(
         create: (_) => getIt<NetworkCubit>(),
         child: MaterialApp.router(
           builder: (context, child) {
@@ -60,7 +57,6 @@ class _MyAppState extends State<MyApp> {
           ),
           routerConfig: _router.config(),
         ),
-      ),
     );
   }
 }

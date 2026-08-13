@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class FilmPosterImage extends StatelessWidget {
   final String? networkImageUrl;
@@ -29,7 +29,7 @@ class FilmPosterImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16.w),
+      borderRadius: BorderRadius.circular(16),
       child: RepaintBoundary(
         child: Stack(
           children: [
@@ -58,9 +58,9 @@ class FilmPosterImage extends StatelessWidget {
       return Image.file(
           file,
           fit: BoxFit.cover,
-          width: 100.w,
-          height: 140.h,
-          errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme)
+          width: 100,
+          height: 140,
+          errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
         );
     } else {
       return CachedNetworkImage(
@@ -69,9 +69,21 @@ class FilmPosterImage extends StatelessWidget {
         memCacheWidth: 200,
         memCacheHeight: 280,
         fit: BoxFit.cover,
-        width: 100.w,
-        height: 140.h,
-        placeholder: (context, url) => Container(color: AppColors.primaryThemeGrey),
+        width: 100,
+        height: 140,
+        placeholder: (context, url) => Skeletonizer(
+          enabled: true,
+          effect: const ShimmerEffect(
+            baseColor: AppColors.primaryThemeBlack,
+            highlightColor: AppColors.primaryThemeGrey,
+            duration: Duration(seconds: 4),
+          ),
+          child: Container(
+            color: AppColors.primaryThemeGrey,
+            width: 100,
+            height: 140,
+          )
+        ),
         errorWidget: (context, url, error) => Container(
           color: AppColors.primaryThemeGrey, 
           child: Icon(Icons.image_not_supported, color: AppColors.primaryScheme)
@@ -111,17 +123,17 @@ class _RatingIcon extends StatelessWidget {
     }
 
     return Positioned(
-      bottom: position == RatingPosition.bottomRight || position == RatingPosition.bottomLeft ? 6.h : null,
-      top: position == RatingPosition.topRight || position == RatingPosition.topLeft ? 6.h : null,
-      right: position == RatingPosition.bottomRight || position == RatingPosition.topRight ? 4.w : null,
-      left: position == RatingPosition.bottomLeft || position == RatingPosition.topLeft ? 4.w : null,
+      bottom: position == RatingPosition.bottomRight || position == RatingPosition.bottomLeft ? 6 : null,
+      top: position == RatingPosition.topRight || position == RatingPosition.topLeft ? 6 : null,
+      right: position == RatingPosition.bottomRight || position == RatingPosition.topRight ? 4 : null,
+      left: position == RatingPosition.bottomLeft || position == RatingPosition.topLeft ? 4 : null,
       child: Container(
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(5.0.h),
+          borderRadius: BorderRadius.circular(5.0),
         ),
-        width: 22.w,
-        height: 20.h,
+        width: 22,
+        height: 20,
         child: Center(
           child: Text(
             ratingText,
@@ -145,19 +157,19 @@ class _SavedIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: 6.h,
-      left: 4.w,
+      top: 6,
+      left: 4,
       child: Container(
-        width: 20.w,
-        height: 20.h,
+        width: 20,
+        height: 20,
         decoration: BoxDecoration(
           color: AppColors.savedFilmIcon,
-          borderRadius: BorderRadius.circular(5.0.h),
+          borderRadius: BorderRadius.circular(5.0),
         ),
         child: Icon(
           Icons.bookmark,
           color: Colors.white,
-          size: 19.w,
+          size: 19,
         ),
       ),
     );
@@ -172,15 +184,15 @@ class _UserRatingIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 6.h,
-      right: 30.w,
+      bottom: 6,
+      right: 30,
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.savedFilmIcon,
-          borderRadius: BorderRadius.circular(5.0.h),
+          borderRadius: BorderRadius.circular(5.0),
         ),
-        width: 22.w,
-        height: 20.h,
+        width: 22,
+        height: 20,
         child: Center(
           child: Text(
             "${rating ?? "-"}",

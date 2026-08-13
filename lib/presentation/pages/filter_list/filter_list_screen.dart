@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/filter_data.dart';
@@ -38,9 +37,9 @@ class FilterListScreen extends StatelessWidget {
                       context.router.pop(filterData.items.values.elementAt(index));
                     },
                     child: Padding(
-                      padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
+                      padding: EdgeInsetsGeometry.only(left: 20, right: 20),
                       child: Container(
-                          height: 48.h,
+                          height: 48,
                           width: double.maxFinite,
                           color: AppColors.primaryThemeBlack,
                           child: Row(

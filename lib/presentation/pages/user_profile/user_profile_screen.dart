@@ -3,7 +3,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
@@ -54,11 +53,11 @@ class _UserProfileView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text("Экспорт библиотеки", style: CustomTextStyles.m3Headline()),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 16),
                       Text("Пожалуйста, подождите завершения операции", 
                         style: CustomTextStyles.m3Body(color: AppColors.primaryScheme), 
                         textAlign: TextAlign.center),
-                      SizedBox(height: 20.h),
+                      SizedBox(height: 20),
                       CircularProgressIndicator(),
                       ],
                     ),
@@ -70,15 +69,15 @@ class _UserProfileView extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text("Импорт библиотеки", style: CustomTextStyles.m3Headline()),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 16),
                       Text("Пожалуйста, подождите завершения операции", 
                         style: CustomTextStyles.m3Body(color: AppColors.primaryScheme), 
                         textAlign: TextAlign.center),
-                      SizedBox(height: 20.h),
+                      SizedBox(height: 20),
                       CircularProgressIndicator(value: state.progress, color: AppColors.primaryScheme,),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 16),
                       Text("${state.current} / ${state.total}", style: CustomTextStyles.m3Body(color: AppColors.primaryScheme)),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 10),
                     ],
                   ),
                 );
@@ -135,9 +134,9 @@ class _UserProfileContent extends StatelessWidget {
 
     return ListView(
       physics: BouncingScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.symmetric(horizontal: 20),
       children: [
-        SizedBox(height: 20.h),
+        SizedBox(height: 20),
         Row(
           children: [
             Text("API Key", style: CustomTextStyles.m3Title()),
@@ -153,14 +152,14 @@ class _UserProfileContent extends StatelessWidget {
             )
           ],
         ),
-        SizedBox(height: 5.h),
+        SizedBox(height: 5),
         Card(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.w),
+            borderRadius: BorderRadius.circular(12),
           ),
           color: AppColors.primaryThemeGrey,
           child: InkWell(
-            borderRadius: BorderRadius.circular(12.w),
+            borderRadius: BorderRadius.circular(12),
             onLongPress: () {
               Clipboard.setData(ClipboardData(text: userEntity?.apiKey ?? ""));
               CustomSnackBar(
@@ -169,7 +168,7 @@ class _UserProfileContent extends StatelessWidget {
               ).show(context);
             },
             child: SizedBox(
-              height: 44.h,
+              height: 44,
               child: Center(
                 child: Text(
                   userEntity?.apiKey ?? "API Key отсутствует",
@@ -179,7 +178,7 @@ class _UserProfileContent extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: 10),
         Text.rich(
           TextSpan(
             style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
@@ -201,14 +200,14 @@ class _UserProfileContent extends StatelessWidget {
                   ],
               ),
         ),
-        SizedBox(height: 20.h),
+        SizedBox(height: 20),
         Text("Память", style: CustomTextStyles.m3Title()),
-        SizedBox(height: 10.h),
+        SizedBox(height: 10),
         Card(
           color: AppColors.primaryThemeGrey,
           child: Container(
-            height: 44.h,
-            padding: EdgeInsets.only(left: 20.w),
+            height: 44,
+            padding: EdgeInsets.only(left: 20),
             alignment: Alignment.centerLeft,
             child: Text.rich(
               TextSpan(
@@ -222,9 +221,9 @@ class _UserProfileContent extends StatelessWidget {
               ),
           ),
         ),
-        SizedBox(height: 20.h),
+        SizedBox(height: 20),
         Text("Настройки", style: CustomTextStyles.m3Title()),
-        SizedBox(height: 20.h),
+        SizedBox(height: 20),
         ...List.generate(
           items.length, (index) {
           return Column(
@@ -274,7 +273,7 @@ class _UserProfileContent extends StatelessWidget {
             ],
           );
         }),
-        SizedBox(height: 20.h),
+        SizedBox(height: 20),
         BlocBuilder<UserProfileBloc, UserProfileState>(
           builder: (context, state) {
             if(state is UserProfileLoaded){
@@ -290,7 +289,7 @@ class _UserProfileContent extends StatelessWidget {
             return const SizedBox();
           },
         ),
-        SizedBox(height: 20.h),
+        SizedBox(height: 20),
       ],
     );
   }

@@ -8,8 +8,7 @@ abstract class UserProfileRoutes {
       AutoRoute(
         page: UserProfileRoute.page, 
         initial: true, 
-      ),
-      AutoRoute(page: ChangeApiKeyRoute.page),
+      )
     ],
   );
 }

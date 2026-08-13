@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
@@ -35,12 +34,12 @@ class _CollectionsView extends StatelessWidget {
       backgroundColor: AppColors.primaryThemeBlack,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsetsGeometry.only(left: 20.w, right: 20.w),
+          padding: EdgeInsetsGeometry.only(left: 20, right: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 20.h),
+              SizedBox(height: 20),
               Expanded(
                   child: BlocBuilder<CollectionsBloc, CollectionsState>(
                     builder: (context, state) {
@@ -117,7 +116,7 @@ class _SearchCollectionContentState extends State<_SearchCollectionContent> {
                 });
               },
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: 10),
             Expanded(
               child: _CollectionsList(collections: displayedCollections)
             ),
@@ -137,7 +136,7 @@ class _CollectionsList extends StatelessWidget {
     return ListView.separated(
       physics: BouncingScrollPhysics(),
       itemCount: collections.length + 1,
-      separatorBuilder: (_, __) => SizedBox(height: 12.h), 
+      separatorBuilder: (_, __) => SizedBox(height: 12), 
       itemBuilder: (context, index) {
         if(index == 0){
           return _CreateCollectionCard();
@@ -242,21 +241,21 @@ class _CollectionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  height: 120.h,
-                  width: 120.w,
+                  height: 120,
+                  width: 120,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.w),
+                    borderRadius: BorderRadius.circular(8),
                     color: AppColors.primaryScheme,
                     ),
-                  child: Icon(Icons.image_not_supported, color: AppColors.primaryThemeGrey, size: 60.w),
+                  child: Icon(Icons.image_not_supported, color: AppColors.primaryThemeGrey, size: 60),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 5.h),
+                        SizedBox(height: 5),
                         Text(
                           collection.name ?? "Название отсутствует", 
                           overflow: TextOverflow.ellipsis, 
@@ -265,9 +264,9 @@ class _CollectionCard extends StatelessWidget {
                             fontSize: 17
                           ),
                         ),
-                        SizedBox(height: 10.h),
+                        SizedBox(height: 10),
                         Text(DataFormatter.formatFilmWordDeclension(collection.filmCount ?? 0), style: CustomTextStyles.m3Body(color: AppColors.primaryScheme)),
-                        SizedBox(height: 10.h),
+                        SizedBox(height: 10),
                         Text("Дата создания: ${DataFormatter.formatDateTime(date)}", style: CustomTextStyles.m3Body()),
                         ]
                       ),
@@ -324,21 +323,21 @@ class _CreateCollectionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  height: 120.h,
-                  width: 120.w,
+                  height: 120,
+                  width: 120,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.w),
+                    borderRadius: BorderRadius.circular(8),
                     color: AppColors.primaryScheme,
                     ),
-                  child: Icon(Icons.add, color: AppColors.primaryThemeGrey, size: 60.w),
+                  child: Icon(Icons.add, color: AppColors.primaryThemeGrey, size: 60),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 5.h),
+                        SizedBox(height: 5),
                         Text("Новая коллекция", style: CustomTextStyles.m3Title().copyWith(fontSize: 17)),
                         ]
                       ),

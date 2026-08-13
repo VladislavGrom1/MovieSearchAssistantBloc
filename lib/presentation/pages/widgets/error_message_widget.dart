@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 
 class ErrorMessageWidget extends StatelessWidget {
@@ -24,7 +23,7 @@ class ErrorMessageWidget extends StatelessWidget {
                 style: CustomTextStyles.m3Title(), 
                 textAlign: TextAlign.center
               ),
-              SizedBox(height: 20.h)
+              SizedBox(height: 20)
             ],
           )
         );

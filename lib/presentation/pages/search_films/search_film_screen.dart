@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
@@ -16,7 +15,7 @@ import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_se
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/widgets/poster_film_image.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_image.dart';
 
 @RoutePage()
 class SearchFilmScreen extends StatelessWidget {
@@ -49,12 +48,12 @@ class _SearchFilmView extends StatelessWidget {
         backgroundColor: AppColors.primaryThemeBlack,
         body: SafeArea(
           child: Padding(
-            padding: EdgeInsets.only(left: 20.w, right: 20.w),
+            padding: EdgeInsets.only(left: 20, right: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 20.h),
+                SizedBox(height: 20),
                 Expanded(
                   child: CustomRefreshIndicator(
                     onRefresh: () async {
@@ -110,7 +109,7 @@ class _SearchFilmContent extends StatelessWidget {
             useRealTimeChange: false,
             textInputAction: TextInputAction.search,
             ),
-        SizedBox(height: 10.h),
+        SizedBox(height: 10),
         Expanded(child: _CollectionsList(filmCollectionsMap: filmCollectionsMap)),
       ],
     );
@@ -147,14 +146,14 @@ class _CollectionsList extends StatelessWidget {
                 ],
               ),
               SizedBox(
-                  height: 200.h,
+                  height: 200,
                   child: _CollectionFilmsList(
                       filmCollectionsMap: filmCollectionsMap,
                       filmCollectionsName: filmCollectionsNamesList[index]))
             ],
           );
         },
-        separatorBuilder: (context, index) => SizedBox(height: 12.h),
+        separatorBuilder: (context, index) => SizedBox(height: 12),
         itemCount: FilmCollectionNames.filmCollectionNames.length);
   }
 }
@@ -174,7 +173,6 @@ class _CollectionFilmsList extends StatelessWidget {
         if(filmEntityList == null){
           return Text("Фильмы отсутствуют");
         }
-
         return ListView.separated(
             addAutomaticKeepAlives: false,
             addSemanticIndexes: false,
@@ -185,7 +183,7 @@ class _CollectionFilmsList extends StatelessWidget {
               final isSaved = savedFilmIds.contains(film.kinopoiskId);
               return _FilmCard(film: film, isSaved: isSaved);
             },
-            separatorBuilder: (context, index) => SizedBox(width: 12.w),
+            separatorBuilder: (context, index) => SizedBox(width: 12),
             itemCount: min(filmCollectionsMap[filmCollectionsName]!.length, 10));
       },
     );
@@ -221,9 +219,9 @@ class _FilmCard extends StatelessWidget {
               kinopoiskRating: film.ratingKinopoisk,
               showSavedIcon: isSaved,
             ),
-            SizedBox(height: 5.h),
+            SizedBox(height: 5),
             SizedBox(
-              width: 96.w,
+              width: 96,
               child: Text(
                 film.nameRu ?? film.nameOriginal!,
                 overflow: TextOverflow.ellipsis,

@@ -138,7 +138,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                           },
                           icon: Icon(Icons.clear, color: AppColors.primaryScheme)
                         )
-                      : SizedBox()
+                      : const SizedBox()
             ))
           ],
         ),

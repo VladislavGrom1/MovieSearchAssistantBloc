@@ -53,11 +53,11 @@ class _UserProfileView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text("Экспорт библиотеки", style: CustomTextStyles.m3Headline()),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text("Пожалуйста, подождите завершения операции", 
                         style: CustomTextStyles.m3Body(color: AppColors.primaryScheme), 
                         textAlign: TextAlign.center),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       CircularProgressIndicator(),
                       ],
                     ),
@@ -69,15 +69,15 @@ class _UserProfileView extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text("Импорт библиотеки", style: CustomTextStyles.m3Headline()),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text("Пожалуйста, подождите завершения операции", 
                         style: CustomTextStyles.m3Body(color: AppColors.primaryScheme), 
                         textAlign: TextAlign.center),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       CircularProgressIndicator(value: state.progress, color: AppColors.primaryScheme,),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text("${state.current} / ${state.total}", style: CustomTextStyles.m3Body(color: AppColors.primaryScheme)),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                     ],
                   ),
                 );
@@ -136,7 +136,7 @@ class _UserProfileContent extends StatelessWidget {
       physics: BouncingScrollPhysics(),
       padding: EdgeInsets.symmetric(horizontal: 20),
       children: [
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Row(
           children: [
             Text("API Key", style: CustomTextStyles.m3Title()),
@@ -151,7 +151,7 @@ class _UserProfileContent extends StatelessWidget {
             )
           ],
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -176,7 +176,7 @@ class _UserProfileContent extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text.rich(
           TextSpan(
             style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
@@ -198,9 +198,9 @@ class _UserProfileContent extends StatelessWidget {
                   ],
               ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Text("Память", style: CustomTextStyles.m3Title()),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Card(
           color: AppColors.primaryThemeGrey,
           child: Container(
@@ -219,9 +219,9 @@ class _UserProfileContent extends StatelessWidget {
               ),
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Text("Настройки", style: CustomTextStyles.m3Title()),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ...List.generate(
           items.length, (index) {
           return Column(
@@ -271,7 +271,7 @@ class _UserProfileContent extends StatelessWidget {
             ],
           );
         }),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         BlocBuilder<UserProfileBloc, UserProfileState>(
           builder: (context, state) {
             if(state is UserProfileLoaded){
@@ -287,7 +287,7 @@ class _UserProfileContent extends StatelessWidget {
             return const SizedBox();
           },
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
       ],
     );
   }

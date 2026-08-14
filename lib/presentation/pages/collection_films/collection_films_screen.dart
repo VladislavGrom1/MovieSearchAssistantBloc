@@ -188,7 +188,7 @@ class _CollectionFilmsViewState extends State<_CollectionFilmsView> {
               isSearchMode: _isSearch,
             );
           }
-          return SizedBox();
+          return const SizedBox();
         },
       ),
     )),
@@ -223,7 +223,7 @@ class _CollectionFilmsList extends StatelessWidget {
               isSearchMode: isSearchMode,
           );
         },
-        separatorBuilder: (context, index) => SizedBox(height: 12),
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemCount: savedFilms.length);
   }
 }
@@ -292,33 +292,33 @@ class _FilmCard extends StatelessWidget {
                 userRating: savedFilm.userRating,
                 showUserRating: true,
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       savedFilm.nameRu ?? savedFilm.nameOriginal ?? "-",
                       maxLines: 2,
                       style: CustomTextStyles.m3Title().copyWith(fontSize: 16),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       savedFilm.nameOriginal ?? savedFilm.nameRu ?? "-",
                       maxLines: 2,
                       style: CustomTextStyles.m3Body().copyWith(fontWeight: FontWeight.w400),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       DataFormatter.formatCountriesAndYear(savedFilm.countries, savedFilm.year),
                       maxLines: 1,
                       style: CustomTextStyles.m3Body(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       DataFormatter.formatGenres(savedFilm.genres),
                       maxLines: 1,

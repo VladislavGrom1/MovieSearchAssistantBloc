@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
+import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 
 @RoutePage()
 class HomeScreen extends StatelessWidget {
@@ -27,6 +28,7 @@ class HomeScreen extends StatelessWidget {
               unselectedItemColor: AppColors.primaryThemeGrey,
               currentIndex: tabsRouter.activeIndex,
               onTap: tabsRouter.setActiveIndex,
+              selectedLabelStyle: CustomTextStyles.m3ActionText().copyWith(height: 1.2),
               items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.search),

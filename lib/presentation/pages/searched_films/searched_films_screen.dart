@@ -157,7 +157,7 @@ class _FilmsList extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           controller: controller,
           itemCount: films.length + (state.isLoadingMore ? 1 : 0),
-          separatorBuilder: (_, __) => SizedBox(height: 12),
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             if (index >= films.length) {
               return const Padding(
@@ -216,33 +216,33 @@ class _FilmCard extends StatelessWidget {
                 kinopoiskRating: film.ratingKinopoisk,
                 showSavedIcon: isSaved,
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Text(
                         film.nameRu ?? film.nameOriginal ?? "-",
                         maxLines: 2,
                         style: CustomTextStyles.m3Title().copyWith(fontSize: 16),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Text(
                         film.nameOriginal ?? film.nameRu ?? "-",
                         maxLines: 2,
                         style: CustomTextStyles.m3Body().copyWith(fontWeight: FontWeight.w400),
                         overflow: TextOverflow.ellipsis,
                         ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         DataFormatter.formatCountriesAndYear(film.countries, film.year),
                         maxLines: 1,
                         style: CustomTextStyles.m3Body(color: AppColors.primaryScheme).copyWith(fontWeight: FontWeight.w600),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         DataFormatter.formatGenres(film.genres),
                         maxLines: 1,
@@ -252,7 +252,7 @@ class _FilmCard extends StatelessWidget {
                     ],
                   ),
               ),
-              SizedBox(width: 7)
+              const SizedBox(width: 7)
             ],
           ),
         ),

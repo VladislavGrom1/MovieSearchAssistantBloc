@@ -103,27 +103,85 @@ class _FilmInformationView extends StatelessWidget {
   }
 }
 
-class _FilmInformationContent extends StatelessWidget {
+class _FilmInformationContent extends StatefulWidget {
   final FilmEntity film;
   final FilmImagesEntity? filmImages;
   final List<String> collectionIds;
+
   const _FilmInformationContent(
       {required this.film,
       required this.filmImages,
       required this.collectionIds});
 
   @override
+  State<_FilmInformationContent> createState() => _FilmInformationContentState();
+}
+
+class _FilmInformationContentState extends State<_FilmInformationContent> {
+  static const double _expandedHeight = 500;
+
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _titleOpacity = ValueNotifier(0.0);
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_updateTitleOpacity);
+  }
+
+  void _updateTitleOpacity() {
+    final collapseRange = _expandedHeight - kToolbarHeight;
+    final offset = _scrollController.hasClients ? _scrollController.offset : 0.0;
+    final fadeStart = collapseRange * 0.85;
+    final fadeRange = collapseRange - fadeStart;
+    final progress = fadeRange <= 0
+        ? (offset >= collapseRange ? 1.0 : 0.0)
+        : ((offset - fadeStart) / fadeRange).clamp(0.0, 1.0);
+
+    if (_titleOpacity.value != progress) {
+      _titleOpacity.value = progress;
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_updateTitleOpacity);
+    _scrollController.dispose();
+    _titleOpacity.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final film = widget.film;
+    final filmImages = widget.filmImages;
+    final collectionIds = widget.collectionIds;
+
     return CustomScrollView(
+      controller: _scrollController,
       slivers: [
         SliverAppBar(
           backgroundColor: AppColors.primaryThemeBlack,
           surfaceTintColor: Colors.transparent,
           pinned: true,
           floating: false,
-          expandedHeight: 500,
+          expandedHeight: _expandedHeight,
           elevation: 0,
+          centerTitle: true,
           iconTheme: IconThemeData(color: AppColors.primaryScheme),
+          title: ValueListenableBuilder<double>(
+            valueListenable: _titleOpacity,
+            builder: (context, opacity, child) => Opacity(
+              opacity: opacity,
+              child: child,
+            ),
+            child: Text(
+              film.nameRu ?? film.nameOriginal ?? "Без названия",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: CustomTextStyles.m3ActionText(),
+            ),
+          ),
           flexibleSpace: FlexibleSpaceBar(
             collapseMode: CollapseMode.parallax,
             background: _PosterImageWidget(film: film),
@@ -134,31 +192,31 @@ class _FilmInformationContent extends StatelessWidget {
             padding: EdgeInsets.only(left: 20, right: 20),
             child: Column(
               children: [
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Text(
                   film.nameRu ?? film.nameOriginal ?? "Без названия",
                   maxLines: 5,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center, 
-                  style: CustomTextStyles.m3Headline()
+                  style: CustomTextStyles.m3Headline().copyWith(height: 1.1)
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "${film.ratingKinopoisk ?? "-"}", 
-                      style: CustomTextStyles.m3Body(color: AppColors.ratingGreen)
+                      style: CustomTextStyles.m3Body(color: _getRatingColor(film.ratingKinopoisk))
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       film.ratingKinopoiskVoteCount == null 
                       ? "Нет данных"
                       : DataFormatter.formatVoteCount(film.ratingKinopoiskVoteCount!),
                       style: CustomTextStyles.m3Body(color: AppColors.textDarkGrey),
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Flexible(
                       child: Text(
                         "${film.nameOriginal ?? film.nameRu ?? film.nameEn}",
@@ -168,151 +226,74 @@ class _FilmInformationContent extends StatelessWidget {
                     )
                   ]
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   film.serial!
                     ? "${film.startYear} - ${film.endYear ?? "настоящее время"}"
                     : "${film.year}",
                   style: CustomTextStyles.m3Body(color: AppColors.textDarkGrey),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   DataFormatter.formatCountries(film.countries), 
                   style: CustomTextStyles.m3Body(color: AppColors.textDarkGrey)
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   DataFormatter.formatGenres(film.genres),
                   style: CustomTextStyles.m3Body(),
                 ),
-                SizedBox(height: 20),
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    InkWell(
-                      enableFeedback: false,
-                      highlightColor: AppColors.primaryThemeGrey,
-                      splashColor: AppColors.primaryThemeGrey,
-                      onTap: () => _openCollectionSheet(context),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.bookmark_add_outlined,
-                              color: AppColors.primaryScheme,
-                              size: 28,
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              "Коллекции",
-                              style: CustomTextStyles.m3Body(color: AppColors.primaryScheme),
-                            ),
-                          ],
-                        ),
+                const SizedBox(height: 20),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryThemeGrey,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _ActionButton(
+                        icon: Icons.bookmark_add_outlined,
+                        label: "Коллекции",
+                        color: AppColors.primaryScheme,
+                        onTap: () => _openCollectionSheet(context),
                       ),
-                    ),
-                    BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
-                      builder: (context, savedFilmIds) {
-                        final isSaved = savedFilmIds.contains(film.kinopoiskId);
-                        final color = !isSaved ? AppColors.primaryThemeGrey : AppColors.primaryScheme;
-                        return InkWell(
-                          enableFeedback: false,
-                          highlightColor: AppColors.primaryThemeGrey,
-                          splashColor: AppColors.primaryThemeGrey,
-                          onTap: !isSaved ? null : () {
-                            _openCommentDialog(context);
-                          },
-                          borderRadius: BorderRadius.circular(8),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.comment_outlined,
-                                  color: color,
-                                  size: 30,
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  "Отзыв",
-                                  style: CustomTextStyles.m3Body(color: color),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }
-                    ),
-                    BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
-                      builder: (context, savedFilmIds) {
-                        final isSaved = savedFilmIds.contains(film.kinopoiskId);
-                        final color = !isSaved ? AppColors.primaryThemeGrey : AppColors.primaryScheme;
-                        return InkWell(
-                          enableFeedback: false,
-                          highlightColor: AppColors.primaryThemeGrey,
-                          splashColor: AppColors.primaryThemeGrey,
-                          onTap: !isSaved ? null : () {
-                            _openRatingSheet(context, film.userRating);
-                          },
-                          borderRadius: BorderRadius.circular(8),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.star_border,
-                                  color: color,
-                                  size: 30,
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  "Оценить",
-                                  style: CustomTextStyles.m3Body(color: color),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    InkWell(
-                      enableFeedback: false,
-                      highlightColor: AppColors.primaryThemeGrey,
-                      splashColor: AppColors.primaryThemeGrey,
-                      onTap: () {
-                        context.read<FilmInformationBloc>().add(LaunchUrl(url: film.webUrl));
-                      },
-                      borderRadius: BorderRadius.circular(8),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.public,
-                              color: AppColors.primaryScheme,
-                              size: 28,
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              "Подробнее",
-                              style: CustomTextStyles.m3Body(color: AppColors.primaryScheme),
-                            ),
-                          ],
-                        ),
+                      BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
+                        builder: (context, savedFilmIds) {
+                          final isSaved = savedFilmIds.contains(film.kinopoiskId);
+                          return _ActionButton(
+                            icon: Icons.comment_outlined,
+                            label: "Отзыв",
+                            color: isSaved ? AppColors.primaryScheme : AppColors.textDarkGrey,
+                            onTap: isSaved ? () => _openCommentDialog(context) : null,
+                          );
+                        },
                       ),
-                    ),
-                  ],
+                      BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
+                        builder: (context, savedFilmIds) {
+                          final isSaved = savedFilmIds.contains(film.kinopoiskId);
+                          return _ActionButton(
+                            icon: Icons.star_border_rounded,
+                            label: "Оценить",
+                            color: isSaved ? AppColors.primaryScheme : AppColors.textDarkGrey,
+                            onTap: isSaved ? () => _openRatingSheet(context, film.userRating) : null,
+                          );
+                        },
+                      ),
+                      _ActionButton(
+                        icon: Icons.public,
+                        label: "Подробнее",
+                        color: AppColors.primaryScheme,
+                        onTap: () => context.read<FilmInformationBloc>().add(LaunchUrl(url: film.webUrl)),
+                      ),
+                    ],
+                  ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Divider(color: AppColors.primaryScheme, thickness: 2),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Text(
                   film.slogan != null ? "«${film.slogan}»" : "Слоган отсутствует",
                   textAlign: TextAlign.left, 
@@ -322,15 +303,15 @@ class _FilmInformationContent extends StatelessWidget {
                     fontWeight: FontWeight.w600
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Text(
                   textAlign: TextAlign.left,
                   film.description ?? "Описание отсутствует", 
                   style: CustomTextStyles.m3Content().copyWith(),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Divider(color: AppColors.primaryScheme, thickness: 2),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Align(
                   alignment: AlignmentGeometry.centerLeft,
                   child: Text(
@@ -339,7 +320,7 @@ class _FilmInformationContent extends StatelessWidget {
                     textAlign: TextAlign.left,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _FilmRatingWidget(
                   imagePath: "assets/icons/kp.jpg", 
                   resourseName: "КиноПоиск", 
@@ -347,7 +328,7 @@ class _FilmInformationContent extends StatelessWidget {
                   voteCount: film.ratingKinopoiskVoteCount,
                   isUserRating: false,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 _FilmRatingWidget(
                   imagePath: "assets/icons/imdb.png", 
                   resourseName: "IMDB", 
@@ -355,14 +336,16 @@ class _FilmInformationContent extends StatelessWidget {
                   voteCount: film.ratingImdbVoteCount,
                   isUserRating: false,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 _FilmRatingWidget(
-                  imagePath: "assets/icons/movie_search_assistant_icon.png", 
+                  imagePath: "assets/icons/movie_search_assistant_icon_dark.png", 
                   resourseName: "Ваша оценка", 
                   rating: film.userRating, 
                   isUserRating: true,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
+                Divider(color: AppColors.primaryScheme, thickness: 2),
+                const SizedBox(height: 20),
                 Align(
                   alignment: AlignmentGeometry.centerLeft,
                   child: Text(
@@ -371,18 +354,18 @@ class _FilmInformationContent extends StatelessWidget {
                     textAlign: TextAlign.left,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Align(
                   alignment: AlignmentGeometry.centerLeft,
                   child: Text(
                     textAlign: TextAlign.left,
-                    film.userComment ?? "Пользовательский отзыв отсутствует", 
+                    film.userComment ?? "Отсутствует", 
                     style: CustomTextStyles.m3Content(),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Divider(color: AppColors.primaryScheme, thickness: 2),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Align(
                   alignment: AlignmentGeometry.centerLeft,
                   child: Text(
@@ -391,18 +374,27 @@ class _FilmInformationContent extends StatelessWidget {
                     textAlign: TextAlign.left,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _FilmScreenshotsWidget(
                   imageUrls: filmImages?.imageUrls, 
                   localImagePaths: film.localScreenshotPaths
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
               ],
             ),
           ),
         )
       ],
     );
+  }
+
+  Color _getRatingColor(num? rating) {
+    if (rating == null) return AppColors.ratingGrey;
+    if (rating >= 7 && rating <= 10) return AppColors.ratingGreen;
+    if (rating >= 6 && rating < 7) return AppColors.ratingOrange;
+    if (rating >= 5 && rating < 6) return AppColors.ratingGrey;
+    if (rating >= 0 && rating < 5) return AppColors.ratingRed;
+    return AppColors.ratingGrey;
   }
 
   void _openCollectionSheet(BuildContext context) {
@@ -469,48 +461,55 @@ class _PosterImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _buildImage(),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: const [0.0, 0.6, 1.0],
+              colors: [
+                Colors.transparent,
+                Colors.transparent,
+                AppColors.primaryThemeBlack.withValues(alpha: 0.95),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImage() {
     if (film.localPosterImagePath != null) {
       final fullPosterImagePath = ImagePathResolver.resolve(film.localPosterImagePath!);
-      return SizedBox(
-        width: 320,
-        height: 200,
-        child: Image.file(
-          File(fullPosterImagePath),
-          fit: BoxFit.cover,
-        ),
-      );
-    } else {
-      return CachedNetworkImage(
-        imageUrl: film.posterUrl ?? "",
-        cacheManager: getIt<FilmImageCacheService>().instance,
-        fit: BoxFit.cover,
-        width: 320,
-        height: 200,
-        placeholder: (context, url) => Skeletonizer(
-          enabled: true,
-          effect: const ShimmerEffect(
-            baseColor: AppColors.primaryThemeBlack,
-            highlightColor: AppColors.primaryThemeGrey,
-            duration: Duration(seconds: 4),
-          ),
-          child: Container(
-            color: AppColors.primaryThemeGrey,
-            width: 100,
-            height: 140,
-          )
-        ),
-        errorWidget: (context, url, error) => Container(
-          color: AppColors.primaryThemeBlack,
-          width: double.infinity,
-          height: double.infinity,
-          child: Icon(
-            Icons.image_not_supported, 
-            color: AppColors.primaryScheme,
-            size: 40
-          ),
-        ),
-      );
+      return Image.file(File(fullPosterImagePath), fit: BoxFit.cover);
     }
+    return CachedNetworkImage(
+      imageUrl: film.posterUrl ?? "",
+      cacheManager: getIt<FilmImageCacheService>().instance,
+      fit: BoxFit.cover,
+      placeholder: (context, url) => LayoutBuilder(
+        builder: (context, constraints) {
+          return Skeletonizer(
+            enabled: true,
+            effect: const ShimmerEffect(
+              baseColor: AppColors.primaryThemeBlack,
+              highlightColor: AppColors.primaryThemeGrey,
+              duration: Duration(seconds: 4),
+            ),
+            child: Container(
+              width: constraints.maxWidth.isFinite ? constraints.maxWidth : double.infinity,
+              height: constraints.maxHeight.isFinite ? constraints.maxHeight : 200,
+              color: AppColors.primaryThemeGrey,
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -597,7 +596,7 @@ class _FilmRatingWidget extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             if(!isUserRating) 
             Text(
               voteCount != null
@@ -607,6 +606,42 @@ class _FilmRatingWidget extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback? onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      enableFeedback: false,
+      highlightColor: AppColors.primaryThemeBlack,
+      splashColor: AppColors.primaryThemeBlack,
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 26),
+            const SizedBox(height: 4),
+            Text(label, style: CustomTextStyles.m3ActionText(color: color).copyWith(fontSize: 12)),
           ],
         ),
       ),
@@ -649,7 +684,7 @@ class _FilmScreenshotsWidget extends StatelessWidget {
         physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        separatorBuilder: (context, index) => SizedBox(width: 15),
+        separatorBuilder: (context, index) => const SizedBox(width: 15),
         itemCount: itemCount,
         itemBuilder: (context, index) {
           if (hasLocalImages) {
@@ -687,14 +722,18 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
       if (!_isShowing) {
         _overlayEntry = _createOverlayEntry(imagePath);
         Overlay.of(context).insert(_overlayEntry);
-        _isShowing = true;
+        setState(() {
+          _isShowing = true;
+        });
       }
     }
 
     void _closePhoto() {
       if (_isShowing) {
         _overlayEntry.remove();
-        _isShowing = false;
+        setState(() {
+          _isShowing = false;
+        });
       }
     }
 
@@ -720,6 +759,7 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
               onTap: _closePhoto,
               onDoubleTap: _handleDoubleTap,
               onDoubleTapDown: _handleDoubleTapDown,
+              onTapCancel: _closePhoto,
               child: Container(
                   height: context.screenHeight * 0.6,
                   width: context.screenWidth * 0.6,
@@ -781,61 +821,61 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
         imagePath = widget.url!;
       }
 
-      return GestureDetector(
-        onTap: () {
-          _showPhoto(imagePath);
+      return PopScope(
+        canPop: !_isShowing,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop && _isShowing) {
+            _closePhoto();
+          }
         },
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: RepaintBoundary(
-            child: Container(
-              constraints: BoxConstraints(
-                maxHeight: 200,
-              ),
-              child: widget.localPath != null 
-              ? Image.file(
-                  File(imagePath),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme))
-              : CachedNetworkImage(
-                  imageUrl: imagePath,
-                  cacheManager: getIt<FilmImageCacheService>().instance,
-                  fit: BoxFit.fill,
-                  placeholder: (context, url) => Skeletonizer(
-                    enabled: true,
-                    effect: const ShimmerEffect(
-                      baseColor: AppColors.primaryThemeBlack,
-                      highlightColor: AppColors.primaryThemeGrey,
-                      duration: Duration(seconds: 4),
-                    ),
-                    child: Container(
-                      color: AppColors.primaryThemeGrey,
-                      width: 200,
-                      height: 100,
-                    )
+        child: GestureDetector(
+          onTap: () {
+            _showPhoto(imagePath);
+          },
+          child: Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: RepaintBoundary(
+                child: widget.localPath != null 
+                  ? Image.file(
+                      File(imagePath),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme))
+                  : CachedNetworkImage(
+                      imageUrl: imagePath,
+                      cacheManager: getIt<FilmImageCacheService>().instance,
+                      fit: BoxFit.fill,
+                      placeholder: (context, url) => Skeletonizer(
+                        enabled: true,
+                        effect: const ShimmerEffect(
+                          baseColor: AppColors.primaryThemeBlack,
+                          highlightColor: AppColors.primaryThemeGrey,
+                          duration: Duration(seconds: 4),
+                        ),
+                        child: Container(
+                          color: AppColors.primaryThemeGrey,
+                          width: 200,
+                          height: 100,
+                        )
+                      ),
+                    errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
                   ),
-                  // progressIndicatorBuilder: (context, url, downloadProgress) => Center(
-                  //   child: Container(
-                  //     height: 100,
-                  //     width: 100,
-                  //     color: Colors.transparent,
-                  //     child: Center(
-                  //       child: SizedBox(
-                  //         height: 24,
-                  //         width: 24,
-                  //         child: CircularProgressIndicator(
-                  //             strokeWidth: 2,
-                  //             value: downloadProgress.progress,
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
+                ),
               ),
-            ),
+                ),
           ),
-            ),
       );
   }
 }
@@ -908,9 +948,9 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text("Оценить", style: CustomTextStyles.m3ActionText()),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   SizedBox(
                     height: 80,
                     child: PageView.builder(
@@ -944,7 +984,7 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
                       },
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: ElevatedButton(
@@ -993,9 +1033,9 @@ class _CollectionPickerSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text("Добавить в коллекцию", style: CustomTextStyles.m3Title()),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Flexible(
                       child: BlocBuilder<FilmInformationBloc, FilmInformationState>(
                         builder: (context, filmState) {
@@ -1093,7 +1133,7 @@ class _CollectionTile extends StatelessWidget {
       splashColor: AppColors.primaryThemeGrey,
       enabled: !isSavingAnyCollection || isLoadingThisCollection,
       trailing: isLoadingThisCollection
-          ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator())
+          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator())
           : Icon(
               isInCollection ? Icons.check_box : Icons.add,
               color: (isSavingAnyCollection && !isLoadingThisCollection)

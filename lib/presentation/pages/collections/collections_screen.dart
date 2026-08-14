@@ -39,7 +39,7 @@ class _CollectionsView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Expanded(
                   child: BlocBuilder<CollectionsBloc, CollectionsState>(
                     builder: (context, state) {
@@ -116,7 +116,7 @@ class _SearchCollectionContentState extends State<_SearchCollectionContent> {
                 });
               },
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Expanded(
               child: _CollectionsList(collections: displayedCollections)
             ),
@@ -136,7 +136,7 @@ class _CollectionsList extends StatelessWidget {
     return ListView.separated(
       physics: BouncingScrollPhysics(),
       itemCount: collections.length + 1,
-      separatorBuilder: (_, __) => SizedBox(height: 12), 
+      separatorBuilder: (_, __) => const SizedBox(height: 12), 
       itemBuilder: (context, index) {
         if(index == 0){
           return _CreateCollectionCard();
@@ -249,13 +249,13 @@ class _CollectionCard extends StatelessWidget {
                     ),
                   child: Icon(Icons.image_not_supported, color: AppColors.primaryThemeGrey, size: 60),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Text(
                           collection.name ?? "Название отсутствует", 
                           overflow: TextOverflow.ellipsis, 
@@ -264,9 +264,9 @@ class _CollectionCard extends StatelessWidget {
                             fontSize: 17
                           ),
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         Text(DataFormatter.formatFilmWordDeclension(collection.filmCount ?? 0), style: CustomTextStyles.m3Body(color: AppColors.primaryScheme)),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         Text("Дата создания: ${DataFormatter.formatDateTime(date)}", style: CustomTextStyles.m3Body()),
                         ]
                       ),
@@ -331,13 +331,13 @@ class _CreateCollectionCard extends StatelessWidget {
                     ),
                   child: Icon(Icons.add, color: AppColors.primaryThemeGrey, size: 60),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Text("Новая коллекция", style: CustomTextStyles.m3Title().copyWith(fontSize: 17)),
                         ]
                       ),

@@ -23,7 +23,7 @@ class ErrorMessageWidget extends StatelessWidget {
                 style: CustomTextStyles.m3Title(), 
                 textAlign: TextAlign.center
               ),
-              SizedBox(height: 20)
+              const SizedBox(height: 20)
             ],
           )
         );

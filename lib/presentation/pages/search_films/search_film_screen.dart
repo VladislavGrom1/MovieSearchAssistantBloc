@@ -53,7 +53,7 @@ class _SearchFilmView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Expanded(
                   child: CustomRefreshIndicator(
                     onRefresh: () async {
@@ -72,7 +72,7 @@ class _SearchFilmView extends StatelessWidget {
                         if (state is CollectionsFilmsLoadedSuccessful) {
                           return _SearchFilmContent(filmCollectionsMap: state.filmCollectionsMap);
                         }
-                        return SizedBox();
+                        return const SizedBox();
                       },
                     ),
                   ),
@@ -109,7 +109,7 @@ class _SearchFilmContent extends StatelessWidget {
             useRealTimeChange: false,
             textInputAction: TextInputAction.search,
             ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Expanded(child: _CollectionsList(filmCollectionsMap: filmCollectionsMap)),
       ],
     );
@@ -153,7 +153,7 @@ class _CollectionsList extends StatelessWidget {
             ],
           );
         },
-        separatorBuilder: (context, index) => SizedBox(height: 12),
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemCount: FilmCollectionNames.filmCollectionNames.length);
   }
 }
@@ -183,7 +183,7 @@ class _CollectionFilmsList extends StatelessWidget {
               final isSaved = savedFilmIds.contains(film.kinopoiskId);
               return _FilmCard(film: film, isSaved: isSaved);
             },
-            separatorBuilder: (context, index) => SizedBox(width: 12),
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
             itemCount: min(filmCollectionsMap[filmCollectionsName]!.length, 10));
       },
     );
@@ -219,7 +219,7 @@ class _FilmCard extends StatelessWidget {
               kinopoiskRating: film.ratingKinopoisk,
               showSavedIcon: isSaved,
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             SizedBox(
               width: 96,
               child: Text(

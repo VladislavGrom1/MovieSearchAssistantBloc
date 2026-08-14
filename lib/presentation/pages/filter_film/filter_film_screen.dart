@@ -84,7 +84,7 @@ class _FilterFilmContent extends StatelessWidget {
           genre: genre,
           yearRange: yearRange,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Padding(
           padding: EdgeInsetsGeometry.only(left: 20, right: 20),
           child: ElevatedButton(
@@ -98,7 +98,7 @@ class _FilterFilmContent extends StatelessWidget {
             child: Text("Показать", style: CustomTextStyles.m3ActionText(color: AppColors.textWhite)),
           ),
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Padding(
           padding: EdgeInsetsGeometry.only(left: 20, right: 20),
           child: ElevatedButton(

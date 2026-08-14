@@ -65,7 +65,7 @@ class CustomTextStyles {
 
   static TextStyle m3Body({Color? color}){
     return TextStyle(
-      fontSize: 14,
+      fontSize: 15,
       height: 1.2,
       letterSpacing: 0.25,
       fontWeight: FontWeight.w600,

@@ -188,7 +188,7 @@ class _UserRatingIcon extends StatelessWidget {
       right: 30,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.savedFilmIcon,
+          color: AppColors.primaryScheme,
           borderRadius: BorderRadius.circular(5.0),
         ),
         width: 22,

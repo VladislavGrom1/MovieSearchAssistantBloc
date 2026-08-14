@@ -77,7 +77,7 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Center(
             child: Text(
               "Movie Search Assistant", 
@@ -88,7 +88,7 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
               textAlign: TextAlign.center,
               )
             ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Center(
             child: Text.rich(
               TextSpan(
@@ -114,7 +114,7 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
                 textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           TextField(
             controller: _textEditingController,
             maxLength: 40,
@@ -132,7 +132,7 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
             style: CustomTextStyles.m3ActionText(),
             autofocus: true,
             onChanged: (_) => setState(() {})),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           ElevatedButton(
             style: ButtonStyle(
                 minimumSize: WidgetStatePropertyAll(Size(double.infinity, 40)),

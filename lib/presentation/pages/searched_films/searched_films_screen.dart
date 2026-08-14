@@ -197,7 +197,7 @@ class _FilmCard extends StatelessWidget {
                 filmName: film.nameRu ?? film.nameOriginal.toString()),
           );
         } else {
-          CustomSnackBar(message: "Не удалось получить информацию о фильме", color:AppColors.snackRed).show(context); 
+          CustomSnackBar(message: "Не удалось получить информацию о фильме").show(context); 
         }
       },
       child: Card(

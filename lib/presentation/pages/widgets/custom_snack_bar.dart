@@ -4,23 +4,31 @@ import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 
 class CustomSnackBar {
   final String message;
-  final Color color;
   final Duration? duration;
 
   const CustomSnackBar({
     required this.message,
-    required this.color,
     this.duration
   });
 
   SnackBar build(BuildContext context) {
     return SnackBar(
-      content: Text(
-        message,
-        style: CustomTextStyles.m3Content(color: AppColors.textWhite),
+      content: AnimatedOpacity(
+        opacity: 1.0,
+        duration: const Duration(milliseconds: 1),
+        curve: Curves.easeInOutCubic,
+        child: Text(
+          message,
+          style: CustomTextStyles.m3ActionText(color: AppColors.textWhite),
+        ),
       ),
-      backgroundColor: color,
-      duration: duration ?? Duration(seconds: 3),
+      backgroundColor: AppColors.primaryThemeGrey,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadiusGeometry.circular(16)
+      ),
+      duration: duration ?? Duration(seconds: 2, milliseconds: 500),
+      animation: null,
     );
   }
 

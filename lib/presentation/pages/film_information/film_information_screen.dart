@@ -98,7 +98,7 @@ class _FilmInformationView extends StatelessWidget {
 
   void _filmInformationBlocListener(BuildContext context, FilmInformationState state) {
     if (state is FilmActionFailure) {
-      CustomSnackBar(message: state.message, color: AppColors.snackRed).show(context);
+      CustomSnackBar(message: state.message).show(context);
     }
   }
 }
@@ -678,29 +678,48 @@ class ScreenshotFilm extends StatefulWidget {
 }
 
 class _ScreenshotFilmState extends State<ScreenshotFilm> {
+    final _transformationController = TransformationController();
     late OverlayEntry _overlayEntry;
+    late TapDownDetails _doubleTapDetails;
     bool _isShowing = false;
     
     void _showPhoto(String imagePath) {
-        if (!_isShowing) {
-          _overlayEntry = _createOverlayEntry(imagePath);
-          Overlay.of(context).insert(_overlayEntry);
-          _isShowing = true;
-        }
+      if (!_isShowing) {
+        _overlayEntry = _createOverlayEntry(imagePath);
+        Overlay.of(context).insert(_overlayEntry);
+        _isShowing = true;
       }
+    }
 
-      void _closePhoto() {
-        if (_isShowing) {
-          _overlayEntry.remove();
-          _isShowing = false;
-        }
+    void _closePhoto() {
+      if (_isShowing) {
+        _overlayEntry.remove();
+        _isShowing = false;
       }
+    }
+
+    void _handleDoubleTapDown(TapDownDetails details) {
+      _doubleTapDetails = details;
+    }
+
+    void _handleDoubleTap() {
+      if (_transformationController.value != Matrix4.identity()) {
+        _transformationController.value = Matrix4.identity();
+      } else {
+        final position = _doubleTapDetails.localPosition;
+        _transformationController.value = Matrix4.identity()
+          ..translate(-position.dx, -position.dy)
+          ..scale(2.0);
+      }
+    }
 
       OverlayEntry _createOverlayEntry(String imagePath) {
         return OverlayEntry(
           builder: (context) {
             return GestureDetector(
               onTap: _closePhoto,
+              onDoubleTap: _handleDoubleTap,
+              onDoubleTapDown: _handleDoubleTapDown,
               child: Container(
                   height: context.screenHeight * 0.6,
                   width: context.screenWidth * 0.6,
@@ -711,6 +730,7 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
                   ? InteractiveViewer(
                     minScale: 0.5,
                     maxScale: 3.0,
+                    transformationController: _transformationController,
                     constrained: true,
                     child: CachedNetworkImage(
                         imageUrl: imagePath,
@@ -738,6 +758,7 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
                   : InteractiveViewer(
                       minScale: 0.5,
                       maxScale: 3.0,
+                      transformationController: _transformationController,
                       constrained: true,
                       child: Image.file(
                         File(imagePath),

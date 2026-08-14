@@ -186,10 +186,10 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         return;
       }
 
-      if(result == "" || result == null){
+      if(result == ""){
         emit(UserProfileActionFailure(message: "Операция экспорта отменена"));
       } else{
-        emit(UserProfileActionSuccess(message: "Библиотека успешно экспортирована"));
+        emit(UserProfileActionSuccess(message: "Библиотека успешно сохранена в папку \"Загрузки\""));
       }
       emit(currentState);
     } catch(e){

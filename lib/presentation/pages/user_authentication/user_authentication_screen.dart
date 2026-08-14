@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
@@ -28,25 +29,33 @@ class _UserAuthenticationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: AppColors.primaryThemeBlack,
+        backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(left: 20, right: 20),
-            child: BlocListener<AuthenticationBloc, AuthenticationState>(
-                listener: _userAuthenticationBlocListener,
-                child: _UserAuthenticationContent()),
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/background/movie-background.png'),
+                fit: BoxFit.cover
+              )
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(left: 20, right: 20),
+              child: BlocListener<AuthenticationBloc, AuthenticationState>(
+                  listener: _userAuthenticationBlocListener,
+                  child: _UserAuthenticationContent()),
+            ),
           ),
         ));
   }
 
   void _userAuthenticationBlocListener(BuildContext context, AuthenticationState state) {
     if (state is AuthenticationSuccess) {
-      CustomSnackBar(message: "Успешный вход", color: AppColors.snackGreen).show(context);
+      CustomSnackBar(message: "Успешный вход").show(context);
       context.router.replace(HomeRoute());
     }
 
     if (state is AuthenticationFailure) {
-      CustomSnackBar(message: "Не удалось выполнить вход: ${state.message}", color: AppColors.snackRed).show(context);
+      CustomSnackBar(message: "Не удалось выполнить вход. ${state.message}").show(context);
     }
   }
 }
@@ -66,27 +75,33 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: 40),
+          SizedBox(height: 10),
           Center(
             child: Text(
               "Movie Search Assistant", 
-              style: CustomTextStyles.m3Headline(color: AppColors.primaryScheme))
+              style: CustomTextStyles.m3Headline(color: AppColors.primaryScheme).copyWith(
+                fontWeight: FontWeight.w800,
+                fontSize: 30
+              ),
+              textAlign: TextAlign.center,
+              )
             ),
           SizedBox(height: 20),
           Center(
             child: Text.rich(
               TextSpan(
-                style: CustomTextStyles.m3Content(),
+                style: CustomTextStyles.m3ActionText().copyWith(height: 1.2),
                 children: [
                   TextSpan(text: "Для использования возможностей приложения Вам потребуется зарегистрироваться на сайте "),
                   TextSpan(
                     text: "kinopoiskapiunofficial.tech",
-                    style: CustomTextStyles.m3Content(color: AppColors.primaryScheme).copyWith(
+                    style: CustomTextStyles.m3ActionText(color: AppColors.primaryScheme).copyWith(
                       decoration: TextDecoration.underline,
                       decorationColor: AppColors.primaryScheme,
-                      decorationThickness: 2
+                      decorationThickness: 2,
+                      height: 1.2
                     ),
                     recognizer: TapGestureRecognizer()
                     ..onTap = () {
@@ -104,9 +119,15 @@ class _UserAuthenticationContentState extends State<_UserAuthenticationContent> 
             controller: _textEditingController,
             maxLength: 40,
             maxLines: 1,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-Z0-9._\-]+$'))
+            ],
             decoration: InputDecoration(
               hintText: 'Введите API Key',
+              filled: true,
+              fillColor: AppColors.primaryThemeBlack,
               border: OutlineInputBorder(),
+              counterText: ""
             ),
             style: CustomTextStyles.m3ActionText(),
             autofocus: true,

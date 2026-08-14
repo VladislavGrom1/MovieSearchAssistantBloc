@@ -34,10 +34,10 @@ class _UserProfileView extends StatelessWidget {
       body: BlocListener<UserProfileBloc, UserProfileState>(
         listener: (context, state) {
           if (state is UserProfileActionSuccess) {
-            CustomSnackBar(message: state.message, color: AppColors.snackGreen).show(context);
+            CustomSnackBar(message: state.message).show(context);
           }
           if (state is UserProfileActionFailure) {
-            CustomSnackBar(message: state.message, color: AppColors.snackRed).show(context);
+            CustomSnackBar(message: state.message).show(context);
           }
         },
         child: SafeArea(
@@ -145,7 +145,6 @@ class _UserProfileContent extends StatelessWidget {
                 Clipboard.setData(ClipboardData(text: userEntity?.apiKey ?? ""));
                 CustomSnackBar(
                   message: "API Key скопирован в буфер обмена",
-                  color: AppColors.ratingGreen,
                 ).show(context);
               }, 
               icon: Icon(Icons.copy, color: AppColors.primaryScheme, size: 20)
@@ -164,7 +163,6 @@ class _UserProfileContent extends StatelessWidget {
               Clipboard.setData(ClipboardData(text: userEntity?.apiKey ?? ""));
               CustomSnackBar(
                 message: "API Key скопирован в буфер обмена",
-                color: AppColors.ratingGreen,
               ).show(context);
             },
             child: SizedBox(

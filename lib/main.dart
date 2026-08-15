@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_store_plus/media_store_plus.dart';
+import 'package:movie_search_assistant_bloc/app/file_service/local_data_migrator.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_cubit.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/network_listener.dart';
@@ -17,6 +18,7 @@ void main() async {
   ]);
   await MediaStore.ensureInitialized();
   MediaStore.appFolder = "MovieSearchAssistant";
+  await LocalDataMigration.ensureLocalStorageMigrated();
   runApp(const MyApp());
 }
 

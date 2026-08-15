@@ -89,4 +89,16 @@ class CollectionRepositoryImpl implements CollectionRepository{
       rethrow;
     }
   }
+
+  @override
+  Future<void> updateCollection(CollectionEntity collectionEntity) async {
+    try{
+      final collectionModel = CollectionModel.fromCollectionEntity(collectionEntity);
+      await collectionLocalDataSource.addCollection(collectionModel);
+    } on LocalDataSourceException{
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
 }

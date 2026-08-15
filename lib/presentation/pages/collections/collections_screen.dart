@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
@@ -167,13 +169,21 @@ class _CollectionsList extends StatelessWidget {
             "Очистить",
             () => _clearCollection(context, collection.id!)
           ),
+          onUpload: () => _uploadCollectionImage(context, collection),
+          onRemoveImage: () => _showConfirmActionDialog(
+            context,
+            "Удаление обложки",
+            "Вы действительно хотите удалить обложку коллекции?",
+            "Удалить",
+            () => _removeCollectionImage(context, collection)
+          ),
           onRemove: () => _showConfirmActionDialog(
             context, 
             "Удаление коллекции", 
             "Вы действительно хотите удалить коллекцию? Коллекция и её содержимое будут удалены.", 
             "Удалить", 
             () => _removeCollection(context, collection.id!)
-          )
+          ),
         );
       },
     );
@@ -181,6 +191,14 @@ class _CollectionsList extends StatelessWidget {
 
   void _clearCollection(BuildContext context, String collectionId){
     context.read<CollectionsBloc>().add(ClearCollection(collectionId: collectionId));  
+  }
+
+  void _uploadCollectionImage(BuildContext context, CollectionEntity collection){
+    context.read<CollectionsBloc>().add(UploadCollectionImage(collection: collection));
+  }
+
+  void _removeCollectionImage(BuildContext context, CollectionEntity collection){
+    context.read<CollectionsBloc>().add(RemoveCollectionImage(collection: collection));
   }
 
   void _removeCollection(BuildContext context, String collectionId){
@@ -211,12 +229,16 @@ class _CollectionsList extends StatelessWidget {
 class _CollectionCard extends StatelessWidget {
   final CollectionEntity collection;
   final Function onRename;
+  final Function onUpload;
+  final VoidCallback onRemoveImage;
   final VoidCallback onRemove;
   final VoidCallback onClear;
 
   const _CollectionCard({
     required this.collection,
     required this.onRename,
+    required this.onUpload,
+    required this.onRemoveImage,
     required this.onRemove,
     required this.onClear
   });
@@ -240,15 +262,7 @@ class _CollectionCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  height: 120,
-                  width: 120,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: AppColors.primaryScheme,
-                    ),
-                  child: Icon(Icons.image_not_supported, color: AppColors.primaryThemeGrey, size: 60),
-                  ),
+                  _CollectionCoverImage(imagePath: collection.imagePath),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -277,11 +291,16 @@ class _CollectionCard extends StatelessWidget {
                     enableFeedback: false,
                     onSelected: (value) {
                       if(value == "renameCollection") onRename(collection);
+                      if(value == "uploadImage") onUpload();
+                      if(value == "removeImage") onRemoveImage();
                       if(value == "removeCollection") onRemove();
                       if(value == "clearCollection") onClear();
                       },
                       itemBuilder: (_) => [
                         PopupMenuItem(value: 'renameCollection', child: Text("Переименовать коллекцию", style: CustomTextStyles.m3Body())),
+                        PopupMenuItem(value: 'uploadImage', child: Text("Поменять обложку", style: CustomTextStyles.m3Body())),
+                        if (collection.imagePath != null && collection.imagePath!.isNotEmpty)
+                          PopupMenuItem(value: 'removeImage', child: Text("Удалить обложку", style: CustomTextStyles.m3Body())),
                         PopupMenuItem(value: 'removeCollection', child: Text("Удалить коллекцию", style: CustomTextStyles.m3Body())),
                         PopupMenuItem(value: 'clearCollection',child: Text("Очистить коллекцию", style: CustomTextStyles.m3Body()))] 
                         )
@@ -289,6 +308,49 @@ class _CollectionCard extends StatelessWidget {
               ),
             ),
           );
+  }
+}
+
+class _CollectionCoverImage extends StatelessWidget {
+  final String? imagePath;
+
+  const _CollectionCoverImage({required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    if (imagePath == null || imagePath!.isEmpty) {
+      return _placeholder();
+    }
+
+    final file = File(ImagePathResolver.resolveCollection(imagePath!));
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.file(
+        file,
+        key: ValueKey(imagePath),
+        height: 120,
+        width: 120,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _placeholder(),
+      ),
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      height: 120,
+      width: 120,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: AppColors.primaryScheme,
+      ),
+      child: Icon(
+        Icons.image_not_supported,
+        color: AppColors.primaryThemeGrey,
+        size: 60,
+      ),
+    );
   }
 }
 

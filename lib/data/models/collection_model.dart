@@ -8,11 +8,13 @@ class CollectionModel {
   @HiveField(0) String? id;
   @HiveField(1) String? name;
   @HiveField(2) DateTime? createdAt;
+  @HiveField(3) String? imagePath;
 
   CollectionModel({
     this.id,
     this.name,
     this.createdAt,
+    this.imagePath
   });
 
   factory CollectionModel.fromCollectionEntity(CollectionEntity collectionEntity){
@@ -20,6 +22,7 @@ class CollectionModel {
       id: collectionEntity.id,
       name: collectionEntity.name,
       createdAt: collectionEntity.createdAt,
+      imagePath: collectionEntity.imagePath
     );
   }
 
@@ -27,6 +30,7 @@ class CollectionModel {
     "id": id,
     "name": name,
     "createdAt": createdAt?.toIso8601String(),
+    "imagePath": imagePath
   };
 
   factory CollectionModel.fromJson(Map<String, dynamic> json) {
@@ -36,6 +40,7 @@ class CollectionModel {
       createdAt: json["createdAt"] != null 
           ? DateTime.parse(json["createdAt"]) 
           : null,
+      imagePath: json["imagePath"] as String?
     );
   }
 }

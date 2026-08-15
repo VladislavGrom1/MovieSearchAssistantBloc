@@ -1,4 +1,3 @@
-
 import 'package:hive/hive.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/hive_storage_keys.dart';

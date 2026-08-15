@@ -29,22 +29,14 @@ class _UserAuthenticationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.primaryThemeBlack,
         body: SafeArea(
-          child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/background/movie-background.png'),
-                fit: BoxFit.cover
-              )
-            ),
-            child: Padding(
+          child: Padding(
               padding: EdgeInsets.only(left: 20, right: 20),
               child: BlocListener<AuthenticationBloc, AuthenticationState>(
                   listener: _userAuthenticationBlocListener,
                   child: _UserAuthenticationContent()),
             ),
-          ),
         ));
   }
 

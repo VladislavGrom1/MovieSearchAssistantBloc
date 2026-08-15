@@ -30,7 +30,8 @@ class WatchCollectionsUseCase {
               id: c.id,
               name: c.name,
               createdAt: c.createdAt,
-              filmCount: counts[c.id] ?? 0
+              filmCount: counts[c.id] ?? 0,
+              imagePath: c.imagePath
             );
           }).toList();
         }

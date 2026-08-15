@@ -10,7 +10,8 @@ class CustomSearchBar extends StatefulWidget {
     required this.useFilterButton,
     required this.useRealTimeChange,
     this.onClear,
-    this.textInputAction
+    this.textInputAction,
+    this.focusNode
   });
 
   final Function(String keyword, BuildContext context) onSearchSubmitted;
@@ -19,6 +20,7 @@ class CustomSearchBar extends StatefulWidget {
   final bool useRealTimeChange;
   final VoidCallback? onClear;
   final TextInputAction? textInputAction;
+  final FocusNode? focusNode;
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -26,12 +28,13 @@ class CustomSearchBar extends StatefulWidget {
 
 class _CustomSearchBarState extends State<CustomSearchBar> {
   final TextEditingController _searchController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  late FocusNode _focusNode;
   bool _hasFocus = false;
 
   @override
   void initState() {
     super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onFocusChange);
   }
 
@@ -39,7 +42,9 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   void dispose() {
     _focusNode.removeListener(_onFocusChange);
     _searchController.dispose();
-    _focusNode.dispose();
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 

@@ -10,11 +10,7 @@ class RenameCollectionUseCase {
 
   Future<void> call(CollectionEntity collection, String updatedName) async {
     try{
-      CollectionEntity updatedCollection = CollectionEntity(
-        id: collection.id,
-        name: updatedName,
-        createdAt: collection.createdAt,
-      );
+      CollectionEntity updatedCollection = collection.copyWith(name: updatedName);
       await collectionRepository.addCollection(CollectionModel.fromCollectionEntity(updatedCollection));
     } on LocalDataSourceException {
       rethrow;

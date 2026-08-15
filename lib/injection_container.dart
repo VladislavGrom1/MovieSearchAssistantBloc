@@ -33,6 +33,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/get_cache_size_use_c
 import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/remove_image_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/share_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
@@ -51,6 +52,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/search_collection_fi
 import 'package:movie_search_assistant_bloc/domain/usecases/search_filter_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_film_information_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_saved_film_from_server_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/upload_image_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
@@ -176,7 +178,14 @@ Future<void> initializeDependencies() async {
       imageStorageService: getIt(), 
       fileManagerService: getIt(), 
       zipService: getIt()));
-    
+    getIt.registerLazySingleton(() => UploadImageCollectionUseCase(
+      collectionRepository: getIt(),
+      imageStorageService: getIt()
+    ));
+    getIt.registerLazySingleton(() => RemoveImageCollectionUseCase(
+      collectionRepository: getIt(), 
+      imageStorageService: getIt()
+    ));
 
     // Blocs
     getIt.registerFactory(() => AuthenticationBloc(authenticationUseCase: getIt(), openUrlUseCase: getIt()));
@@ -200,7 +209,9 @@ Future<void> initializeDependencies() async {
       removeCollectionUseCase: getIt(),
       watchCollectionsUseCase: getIt(),
       clearCollectionUseCase: getIt(),
-      renameCollectionUseCase: getIt()
+      renameCollectionUseCase: getIt(),
+      uploadImageCollectionUseCase: getIt(),
+      removeImageCollectionUseCase: getIt()
     ));
     getIt.registerFactory(() => CollectionFilmsBloc(
       getSavedFilmsUseCase: getIt(),

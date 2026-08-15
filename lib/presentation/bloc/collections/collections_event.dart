@@ -54,3 +54,21 @@ class RenameCollection extends CollectionsEvent{
   @override
   List<Object> get props => [collection, updatedName];
 }
+
+class UploadCollectionImage extends CollectionsEvent{
+  final CollectionEntity collection;
+
+  const UploadCollectionImage({required this.collection});
+
+  @override
+  List<Object> get props => [collection];
+}
+
+class RemoveCollectionImage extends CollectionsEvent{
+  final CollectionEntity collection;
+ 
+  const RemoveCollectionImage({required this.collection});
+ 
+  @override
+  List<Object> get props => [collection];
+}

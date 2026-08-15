@@ -14,4 +14,6 @@ abstract class CollectionRepository {
   Future<void> removeAllCollection();
 
   Future<bool> collectionIsExist(String collectionId);
+
+  Future<void> updateCollection(CollectionEntity collection);
 }

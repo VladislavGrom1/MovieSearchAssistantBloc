@@ -155,7 +155,6 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
   Widget build(BuildContext context) {
     final film = widget.film;
     final filmImages = widget.filmImages;
-    final collectionIds = widget.collectionIds;
 
     return CustomScrollView(
       controller: _scrollController,

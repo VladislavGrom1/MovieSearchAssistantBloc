@@ -46,6 +46,13 @@ class _CollectionFilmsView extends StatefulWidget {
 class _CollectionFilmsViewState extends State<_CollectionFilmsView> {
   bool _isSearch = false;
   String _searchKeyword = '';
+  final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
   void _onSearchSubmitted(String keyword, BuildContext context) {
     setState(() {
@@ -58,6 +65,13 @@ class _CollectionFilmsViewState extends State<_CollectionFilmsView> {
       _isSearch = !_isSearch;
       if (!_isSearch) {
         _searchKeyword = '';
+        _searchFocusNode.unfocus();
+      }
+
+      if (_isSearch) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _searchFocusNode.requestFocus();
+        });
       }
     });
   }
@@ -90,6 +104,7 @@ class _CollectionFilmsViewState extends State<_CollectionFilmsView> {
                 onSearchSubmitted: _onSearchSubmitted,
                 useFilterButton: false,
                 useRealTimeChange: true,
+                focusNode: _searchFocusNode,
                 onClear: () {
                   setState(() {
                     _searchKeyword = '';

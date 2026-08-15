@@ -9,23 +9,28 @@ import 'package:path_provider/path_provider.dart';
 class ImageStorageService {
   final Dio _dio = Dio();
 
-  Future<Directory> _getFilmDir(int filmId) async {
-    try{
+  Future<Directory> _getEntityDir(String category, String entityId) async {
+    try {
       final baseDir = await getApplicationDocumentsDirectory();
-      final filmDir = Directory('${baseDir.path}/films/$filmId');
+      final entityDir = Directory('${baseDir.path}/$category/$entityId');
 
-      if (!await filmDir.exists()) {
-        await filmDir.create(recursive: true);
+      if (!await entityDir.exists()) {
+        await entityDir.create(recursive: true);
       }
 
-      return filmDir;
-    } catch(e){
+      return entityDir;
+    } catch (e) {
       rethrow;
     }
   }
 
+  Future<Directory> _getFilmDir(int filmId) => _getEntityDir('films', filmId.toString());
+
+  Future<Directory> _getCollectionDir(String collectionId) =>
+      _getEntityDir('collections', collectionId);
+
   Future<String?> _savePoster(String url, int filmId) async {
-    try{
+    try {
       final dir = await _getFilmDir(filmId);
       final filePath = '${dir.path}/poster.jpg';
 
@@ -34,13 +39,13 @@ class ImageStorageService {
       return result != null ? "$filmId/poster.jpg" : null;
     } on RemoteDataSourceException {
       rethrow;
-    } catch(e){
+    } catch (e) {
       rethrow;
     }
-  } 
+  }
 
   Future<List<String>> _saveScreenshots(List<String> urls, int filmId) async {
-    try{
+    try {
       final dir = await _getFilmDir(filmId);
 
       final limitedUrls = urls.take(3).toList();
@@ -64,12 +69,16 @@ class ImageStorageService {
       return results.whereType<String>().toList();
     } on RemoteDataSourceException {
       rethrow;
-    } catch(e){
+    } catch (e) {
       rethrow;
     }
   }
 
-  Future<String?> _downloadAndSaveImage(String url, String filePath, bool isPoster) async {
+  Future<String?> _downloadAndSaveImage(
+    String url,
+    String filePath,
+    bool isPoster,
+  ) async {
     try {
       final response = await _dio.get(
         url,
@@ -80,14 +89,15 @@ class ImageStorageService {
 
       if (originalBytes == null) return null;
 
-      final compressedBytes = await _compressImage(originalBytes, isPoster: isPoster);
+      final compressedBytes =
+          await _compressImage(originalBytes, isPoster: isPoster);
 
       final file = File(filePath);
       await file.writeAsBytes(compressedBytes);
 
       return file.path;
-    } on DioException catch(e){
-      if(e.response?.statusCode == 404){
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
         return null;
       }
       throw ExceptionMapper.mapDioException(e);
@@ -96,7 +106,11 @@ class ImageStorageService {
     }
   }
 
-  Future<(String?, List<String>?)> saveFilmImagesInDirectory(String? posterUrl, List<String>? screenshotUrls, int filmId) async {
+  Future<(String?, List<String>?)> saveFilmImagesInDirectory(
+    String? posterUrl,
+    List<String>? screenshotUrls,
+    int filmId,
+  ) async {
     try {
       final posterFuture = posterUrl != null
           ? _savePoster(posterUrl, filmId)
@@ -120,18 +134,66 @@ class ImageStorageService {
     }
   }
 
-  Future<String> getFullImagePath(String relativePath) async {
+  Future<String?> saveCollectionImage(
+    String sourcePath,
+    String collectionId,
+  ) async {
+    try {
+      final sourceFile = File(sourcePath);
+      if (!await sourceFile.exists()) return null;
+
+      final dir = await _getCollectionDir(collectionId);
+
+      final oldFiles = dir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.contains('cover_'));
+      for (final f in oldFiles) {
+        await f.delete();
+      }
+
+      final fileName = 'cover_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final filePath = '${dir.path}/$fileName';
+
+      final originalBytes = await sourceFile.readAsBytes();
+      final compressedBytes =
+          await _compressImage(originalBytes, isPoster: true);
+
+      final file = File(filePath);
+      await file.writeAsBytes(compressedBytes);
+
+      return "$collectionId/$fileName";
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteCollectionImage(String collectionId) async {
+    try {
+      final dir = await _getCollectionDir(collectionId);
+      if (await dir.exists()) {
+        await dir.delete(recursive: true);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> getFullImagePath(
+    String relativePath, {
+    String category = 'films',
+  }) async {
     final baseDir = await getApplicationDocumentsDirectory();
-    return "${baseDir.path}/films/$relativePath";
+    return "${baseDir.path}/$category/$relativePath";
   }
 
   Future<void> deleteFilmImages(int filmId) async {
-    try{
+    try {
       final dir = await _getFilmDir(filmId);
       if (await dir.exists()) {
         await dir.delete(recursive: true);
       }
-    } catch(e){
+    } catch (e) {
       rethrow;
     }
   }
@@ -140,41 +202,60 @@ class ImageStorageService {
     try {
       final baseDir = await getApplicationDocumentsDirectory();
       final filmsDir = Directory('${baseDir.path}/films');
-      
+
       if (await filmsDir.exists()) {
         await filmsDir.delete(recursive: true);
       }
-    } catch(e) {
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAllCollectionImages() async {
+    try {
+      final baseDir = await getApplicationDocumentsDirectory();
+      final filmsDir = Directory('${baseDir.path}/collections');
+
+      if (await filmsDir.exists()) {
+        await filmsDir.delete(recursive: true);
+      }
+    } catch (e) {
       rethrow;
     }
   }
 
   Future<void> copyAllImagesTo(String destinationPath) async {
     final baseDir = await getApplicationDocumentsDirectory();
-    final filmsDir = Directory('${baseDir.path}/films');
+    final rootDir = Directory(baseDir.path);
 
-    if (!await filmsDir.exists()) return;
+    for (final category in ['films', 'collections']) {
+      final categoryDir = Directory('${rootDir.path}/$category');
+      if (!await categoryDir.exists()) continue;
 
-    final filmFolders = filmsDir.listSync();
+      final entityFolders = categoryDir.listSync();
 
-    for (final entity in filmFolders) {
-      if (entity is Directory) {
-        final filmId = entity.path.split('/').last;
+      for (final entity in entityFolders) {
+        if (entity is Directory) {
+          final entityId = entity.path.split('/').last;
 
-        final newDir = Directory('$destinationPath/$filmId');
-        await newDir.create(recursive: true);
+          final newDir = Directory('$destinationPath/$category/$entityId');
+          await newDir.create(recursive: true);
 
-        for (final file in entity.listSync()) {
-          if (file is File) {
-            final newPath = '${newDir.path}/${file.uri.pathSegments.last}';
-            await file.copy(newPath);
+          for (final file in entity.listSync()) {
+            if (file is File) {
+              final newPath = '${newDir.path}/${file.uri.pathSegments.last}';
+              await file.copy(newPath);
+            }
           }
         }
       }
     }
   }
 
-  Future<Uint8List> _compressImage(Uint8List bytes, {bool isPoster = false}) async {
+  Future<Uint8List> _compressImage(
+    Uint8List bytes, {
+    bool isPoster = false,
+  }) async {
     return await FlutterImageCompress.compressWithList(
       bytes,
       quality: isPoster ? 80 : 60,

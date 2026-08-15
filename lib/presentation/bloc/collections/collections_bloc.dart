@@ -8,7 +8,9 @@ import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_c
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/remove_image_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/rename_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/upload_image_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_use_case.dart';
 
 part 'collections_event.dart';
@@ -21,6 +23,8 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   final WatchCollectionsUseCase watchCollectionsUseCase;
   final ClearCollectionUseCase clearCollectionUseCase;
   final RenameCollectionUseCase renameCollectionUseCase;
+  final UploadImageCollectionUseCase uploadImageCollectionUseCase;
+  final RemoveImageCollectionUseCase removeImageCollectionUseCase;
   StreamSubscription? _savedCollectionsSubscription;
 
   CollectionsBloc({
@@ -29,7 +33,9 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     required this.removeCollectionUseCase,
     required this.watchCollectionsUseCase,
     required this.clearCollectionUseCase,
-    required this.renameCollectionUseCase
+    required this.renameCollectionUseCase,
+    required this.uploadImageCollectionUseCase,
+    required this.removeImageCollectionUseCase
   }) : super(CollectionsInitial()) {
     on<GetCollections>(_getCollections);
     on<AddNewCollection>(_addNewCollection);
@@ -37,6 +43,8 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     on<UpdateCollections>(_updateCollections);
     on<ClearCollection>(_clearCollection);
     on<RenameCollection>(_renameCollection);
+    on<UploadCollectionImage>(_uploadCollectionImage);
+    on<RemoveCollectionImage>(_removeCollectionImage);
   }
  
   Future<void> _getCollections(GetCollections event, Emitter emit) async {
@@ -97,6 +105,26 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   Future<void> _renameCollection(RenameCollection event, Emitter emit) async {
     try{
       await renameCollectionUseCase.call(event.collection, event.updatedName);
+    } on LocalDataSourceException catch(e){
+      emit(CollectionsFailure(message: e.message));
+    } catch(e){
+      emit(CollectionsFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> _uploadCollectionImage(UploadCollectionImage event, Emitter emit) async {
+    try{
+      await uploadImageCollectionUseCase.call(event.collection);
+    } on LocalDataSourceException catch(e){
+      emit(CollectionsFailure(message: e.message));
+    } catch(e){
+      emit(CollectionsFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> _removeCollectionImage(RemoveCollectionImage event, Emitter emit) async {
+    try{
+      await removeImageCollectionUseCase.call(event.collection);
     } on LocalDataSourceException catch(e){
       emit(CollectionsFailure(message: e.message));
     } catch(e){

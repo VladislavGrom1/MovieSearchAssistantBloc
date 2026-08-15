@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/file_service.dart';
+import 'package:movie_search_assistant_bloc/app/file_service/import_data_migrator.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/zip_service.dart';
 import 'package:movie_search_assistant_bloc/data/models/export_data_model.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
@@ -9,6 +10,7 @@ import 'package:movie_search_assistant_bloc/domain/repository/collection_reposit
 import 'package:movie_search_assistant_bloc/domain/repository/film_collection_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:rxdart/rxdart.dart';
 
 class ImportLibraryUseCase {
   final FileService fileService;
@@ -16,6 +18,8 @@ class ImportLibraryUseCase {
   final FilmRepository filmRepository;
   final CollectionRepository collectionRepository;
   final FilmCollectionRepository filmCollectionRepository;
+
+  final ImportDataMigrator _migrator = ImportDataMigrator();
  
   ImportLibraryUseCase({
     required this.fileService,
@@ -46,30 +50,40 @@ class ImportLibraryUseCase {
  
       final jsonString = await jsonFile.readAsString();
       final jsonMap = jsonDecode(jsonString);
-      final exportData = ExportDataModel.fromJson(jsonMap);
+
+      final migratedJson = await _migrator.migrate(jsonMap, extractDir);
+
+      final exportData = ExportDataModel.fromJson(migratedJson);
  
       final appDir = await getApplicationDocumentsDirectory();
-      final filmsDir = Directory('${appDir.path}/films');
- 
-      if (!await filmsDir.exists()) {
-        await filmsDir.create(recursive: true);
-      }
- 
-      final importedFilmsDir = Directory(p.join(extractDir.path, "images"));
- 
-      final imageDirs = (await importedFilmsDir.exists())
-        ? (await importedFilmsDir
+      final importedImagesDir = Directory(p.join(extractDir.path, "images"));
+
+      final categoryDirs = (await importedImagesDir.exists())
+        ? (await importedImagesDir
             .list()
             .where((e) => e is Directory)
             .cast<Directory>()
             .toList())
         : <Directory>[];
+
+      final entityDirs = <MapEntry<String, Directory>>[];
+      for (final categoryDir in categoryDirs) {
+        final category = p.basename(categoryDir.path);
+        final entities = await categoryDir
+            .list()
+            .where((e) => e is Directory)
+            .cast<Directory>()
+            .toList();
+        for (final entityDir in entities) {
+          entityDirs.add(MapEntry(category, entityDir));
+        }
+      }
  
       int currentStep = 0;
  
       final totalSteps =
           1 +
-          imageDirs.length +
+          entityDirs.length +
           exportData.films.length +
           exportData.collections.length +
           exportData.links.length;
@@ -81,28 +95,37 @@ class ImportLibraryUseCase {
  
       step();
  
-      for (final entity in imageDirs) {
-        final filmId = p.basename(entity.path);
-        final targetDir = Directory('${filmsDir.path}/$filmId');
- 
+      for (final entry in entityDirs) {
+        final category = entry.key;
+        final entityDir = entry.value;
+        final entityId = p.basename(entityDir.path);
+        
+        if (category.contains('..') || entityId.contains('..')) continue;
+
+        final targetDir = Directory(p.join(appDir.path, category, entityId));
         if (!await targetDir.exists()) {
           await targetDir.create(recursive: true);
         }
- 
-        for (final file in entity.listSync()) {
+
+        final existingFiles = <String>{};
+        if (await targetDir.exists()) {
+          await for (final f in targetDir.list()) {
+            if (f is File) existingFiles.add(p.basename(f.path));
+          }
+        }
+
+        await for (final file in entityDir.list()) {
           if (file is File) {
             final fileName = p.basename(file.path);
-            final newPath = '${targetDir.path}/$fileName';
- 
-            final newFile = File(newPath);
-            if (!await newFile.exists()) {
-              await file.copy(newPath);
+            
+            if (!existingFiles.contains(fileName)) {
+              await file.copy(p.join(targetDir.path, fileName));
             }
           }
         }
- 
+        
         step();
-        await Future.delayed(const Duration(milliseconds: 1));
+        if (currentStep % 10 == 0) await Future.delayed(const Duration(milliseconds: 1));
       }
  
       for (final film in exportData.films) {

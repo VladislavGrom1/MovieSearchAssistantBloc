@@ -23,6 +23,7 @@ class ClearLibraryUseCase {
       await collectionRepository.removeAllCollection();
       await filmCollectionRepository.removeAllLinks();
       await imageStorageService.deleteAllFilmImages();
+      await imageStorageService.deleteAllCollectionImages();
     } on LocalDataSourceException{
       rethrow;
     } catch(e){

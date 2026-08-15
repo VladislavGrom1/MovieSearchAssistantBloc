@@ -13,7 +13,7 @@ class CustomSearchBar extends StatefulWidget {
     this.textInputAction,
     this.focusNode
   });
-
+ 
   final Function(String keyword, BuildContext context) onSearchSubmitted;
   final Function(BuildContext context)? onFilterSubmitted;
   final bool useFilterButton;
@@ -21,23 +21,23 @@ class CustomSearchBar extends StatefulWidget {
   final VoidCallback? onClear;
   final TextInputAction? textInputAction;
   final FocusNode? focusNode;
-
+ 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
 }
-
+ 
 class _CustomSearchBarState extends State<CustomSearchBar> {
   final TextEditingController _searchController = TextEditingController();
   late FocusNode _focusNode;
   bool _hasFocus = false;
-
+ 
   @override
   void initState() {
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onFocusChange);
   }
-
+ 
   @override
   void dispose() {
     _focusNode.removeListener(_onFocusChange);
@@ -47,108 +47,156 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
     }
     super.dispose();
   }
-
+ 
   void _onFocusChange(){
     setState(() {
       _hasFocus = _focusNode.hasFocus;
     });
   }
-
+ 
   void _clearText() {
     _searchController.clear();
     _focusNode.unfocus();
     widget.onClear?.call();
   }
-
+ 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      width: double.infinity,
       height: 50,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.primaryThemeGrey,
-          borderRadius: BorderRadius.circular(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: _hasFocus ? AppColors.primaryScheme : Colors.white.withOpacity(0.12),
+          width: _hasFocus ? 1.4 : 1,
         ),
-        child: Row(
-          children: [
-            AnimatedSwitcher(
-              duration: Duration(milliseconds: 200),
-                child: _hasFocus
-                  ? IconButton(
-                    onPressed: () {
-                      _focusNode.unfocus();
-                    }, 
-                    icon: Icon(Icons.arrow_back, color: AppColors.primaryScheme))
-                  : Padding(
-                    padding: EdgeInsets.only(left: 10),
-                    child: Icon(Icons.search, color: AppColors.secondaryThemeGrey),
-                  )
-            ),
-            Expanded(
-                child: TextField(
-              controller: _searchController,
-              focusNode: _focusNode,
-              textInputAction: widget.textInputAction,
-              onEditingComplete: () {
-                _focusNode.unfocus();
-              },
-              onTapOutside: (event) {
-                _focusNode.unfocus();
-              },
-              onSubmitted: (keyword) {
-                if (keyword == "") {
-                  return;
-                } else {
-                  widget.onSearchSubmitted(_searchController.text, context);
-                  //_clearText();
-                }
-              },
-              onChanged: (keyword) {
-                if(widget.useRealTimeChange) {
-                  widget.onSearchSubmitted(_searchController.text, context);
-                }
-              },
-              cursorColor: AppColors.primaryScheme,
-              style: CustomTextStyles.m3ActionText(),
-              decoration: InputDecoration(border: InputBorder.none),
-            )),
-            Padding(
-                padding: EdgeInsets.only(left: 5, right: 0),
+        boxShadow: _hasFocus
+            ? [
+                BoxShadow(
+                  color: AppColors.primaryScheme.withOpacity(0.35),
+                  blurRadius: 14,
+                  spreadRadius: 1,
+                ),
+              ]
+            : [],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.primaryThemeGrey.withOpacity(0.55),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 40,
+                height: 40,
                 child: AnimatedSwitcher(
-                    duration: Duration(milliseconds: 100),
-                    child: widget.useFilterButton
-                    ? _hasFocus
+                  duration: const Duration(milliseconds: 200),
+                  child: _hasFocus
                       ? IconButton(
-                          key: ValueKey('clear'),
+                          key: const ValueKey('back'),
                           onPressed: () {
-                            _clearText();
+                            _focusNode.unfocus();
                           },
-                          icon: Icon(Icons.clear, color: AppColors.primaryScheme)
+                          icon: Icon(Icons.arrow_back, color: AppColors.primaryScheme),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         )
-                      : IconButton(
-                          key: ValueKey('filter'),
-                          onPressed: () {
-                            _clearText();
-                            if(widget.useFilterButton){
-                              widget.onFilterSubmitted!(context);
-                            }
-                          },
-                          icon: Icon(Icons.filter_alt_outlined, color: AppColors.primaryScheme)
-                        )
-                    : _hasFocus 
-                      ? IconButton(
-                          key: ValueKey('clear'),
-                          onPressed: () {
-                            _clearText();
-                          },
-                          icon: Icon(Icons.clear, color: AppColors.primaryScheme)
-                        )
-                      : const SizedBox()
-            ))
-          ],
+                      : Center(
+                          key: const ValueKey('search_icon'),
+                          child: Icon(
+                            Icons.search,
+                            color: _hasFocus ? AppColors.primaryScheme : AppColors.secondaryThemeGrey,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  focusNode: _focusNode,
+                  textInputAction: widget.textInputAction,
+                  onEditingComplete: () {
+                    _focusNode.unfocus();
+                  },
+                  onTapOutside: (event) {
+                    _focusNode.unfocus();
+                  },
+                  onSubmitted: (keyword) {
+                    if (keyword == "") {
+                      return;
+                    } else {
+                      widget.onSearchSubmitted(_searchController.text, context);
+                      //_clearText();
+                    }
+                  },
+                  onChanged: (keyword) {
+                    if (widget.useRealTimeChange) {
+                      widget.onSearchSubmitted(_searchController.text, context);
+                    }
+                  },
+                  cursorColor: AppColors.primaryScheme,
+                  style: CustomTextStyles.m3ActionText(color: AppColors.textWhite),
+                  decoration: InputDecoration(
+                    hintStyle: CustomTextStyles.m3ActionText(color: AppColors.textDarkGrey),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 100),
+                  child: widget.useFilterButton
+                      ? _hasFocus
+                          ? IconButton(
+                              key: const ValueKey('clear'),
+                              onPressed: () {
+                                _clearText();
+                              },
+                              icon: Icon(Icons.clear, color: AppColors.primaryScheme),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            )
+                          : IconButton(
+                              key: const ValueKey('filter'),
+                              onPressed: () {
+                                _clearText();
+                                if (widget.useFilterButton) {
+                                  widget.onFilterSubmitted!(context);
+                                }
+                              },
+                              icon: Icon(Icons.filter_alt_outlined, color: AppColors.primaryScheme),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            )
+                      : _hasFocus
+                          ? IconButton(
+                              key: const ValueKey('clear'),
+                              onPressed: () {
+                                _clearText();
+                              },
+                              icon: Icon(Icons.clear, color: AppColors.primaryScheme),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            )
+                          : const SizedBox(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-

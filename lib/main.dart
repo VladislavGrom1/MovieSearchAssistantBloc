@@ -29,8 +29,21 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+
 class _MyAppState extends State<MyApp> {
   final _router = AppRouter();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      precacheImage(
+        const AssetImage('assets/background/movie_background.png'),
+        context,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(

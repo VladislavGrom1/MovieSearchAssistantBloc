@@ -10,7 +10,6 @@ import 'package:movie_search_assistant_bloc/domain/repository/collection_reposit
 import 'package:movie_search_assistant_bloc/domain/repository/film_collection_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-import 'package:rxdart/rxdart.dart';
 
 class ImportLibraryUseCase {
   final FileService fileService;

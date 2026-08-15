@@ -178,6 +178,7 @@ class _UserProfileContent extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text.rich(
+          textAlign: TextAlign.left,
           TextSpan(
             style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
             children: [
@@ -277,7 +278,7 @@ class _UserProfileContent extends StatelessWidget {
             if(state is UserProfileLoaded){
               return Center(
                 child: Text(
-                  "${state.appInfo?["appName"]} для Android ${state.appInfo?["appVersion"]} (${state.appInfo?["appBuild"]})",
+                  "${state.appInfo?["appName"]} для Android v${state.appInfo?["appVersion"]}",
                   maxLines: 2,
                   style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
                   textAlign: TextAlign.center,

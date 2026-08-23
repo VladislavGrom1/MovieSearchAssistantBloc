@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:media_store_plus/media_store_plus.dart';
+import 'package:movie_search_assistant_bloc/app/file_service/export_destination_service.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/zip_service.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/image_storage_service.dart';
 import 'package:movie_search_assistant_bloc/data/models/collection_model.dart';
@@ -19,7 +20,7 @@ class ExportLibraryUseCase {
   final FilmCollectionRepository filmCollectionRepository;
   final ImageStorageService imageStorageService;
   final ZipService zipService;
-  final MediaStore mediaStore;
+  final ExportDestinationService exportDestinationService;
  
   ExportLibraryUseCase({
     required this.filmRepository, 
@@ -27,7 +28,7 @@ class ExportLibraryUseCase {
     required this.filmCollectionRepository,
     required this.imageStorageService,
     required this.zipService,
-    required this.mediaStore,
+    required this.exportDestinationService,
   });
  
   Future<String> call() async {
@@ -99,59 +100,12 @@ class ExportLibraryUseCase {
         "ZIP size: ${await zipFile.length()} bytes",
       );
 
-      final saveInfo = await mediaStore.saveFile(
-        tempFilePath: zipPath,
-        dirType: DirType.download,
-        dirName: DirName.download,
-      );
-
-      log("saveInfo: $saveInfo");
-
-      if (saveInfo != null) {
-        log(
-          "Saved URI: ${saveInfo.uri}",
-        );
-
-        log(
-          "Saved name: ${saveInfo.name}",
-        );
-
-        log(
-          "Save status: ${saveInfo.saveStatus}",
-        );
-
-        return saveInfo.uri.toString();
-      }
-
-      final exists = await mediaStore.isFileExist(
+      final result = await exportDestinationService.saveZip(
+        zipPath: zipPath,
         fileName: fileName,
-        dirType: DirType.download,
-        dirName: DirName.download,
       );
 
-      log(
-        "File exists after saveFile: $exists",
-      );
-
-      if (exists) {
-        final uri = await mediaStore.getFileUri(
-          fileName: fileName,
-          dirType: DirType.download,
-          dirName: DirName.download,
-        );
-
-        if (uri != null) {
-          log(
-            "Recovered URI: $uri",
-          );
-
-          return uri.toString();
-        }
-      }
-
-      throw Exception(
-        "MediaStore не смог подтвердить сохранение файла",
-      );
+      return result;
     } finally {
       if (await exportDir.exists()) {
         await exportDir.delete(recursive: true);

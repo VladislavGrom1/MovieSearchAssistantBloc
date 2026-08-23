@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
+import 'package:movie_search_assistant_bloc/app/file_service/android_export_destination_service.dart';
+import 'package:movie_search_assistant_bloc/app/file_service/export_destination_service.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/file_service.dart';
+import 'package:movie_search_assistant_bloc/app/file_service/ios_export_destination_service.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/zip_service.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_cubit.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/network_service.dart';
@@ -92,9 +97,20 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => Connectivity());
     getIt.registerLazySingleton(() => NetworkService(getIt()));
     getIt.registerLazySingleton(() => FileService());
-    getIt.registerLazySingleton(() => MediaStore());
     getIt.registerLazySingleton(() => ZipService());
     getIt.registerLazySingleton(() => FilmImageCacheService());
+    if(Platform.isAndroid){
+      await MediaStore.ensureInitialized();
+      MediaStore.appFolder = "MovieSearchAssistant";
+      getIt.registerLazySingleton(() => MediaStore());
+      getIt.registerLazySingleton<ExportDestinationService>(
+        () => AndroidExportDestinationService(mediaStore: getIt())
+      );
+    } else{
+      getIt.registerLazySingleton<ExportDestinationService>(
+        () => IosExportDestinationService(fileService: getIt())
+      );
+    }
 
     // RemoteDataSources
     getIt.registerLazySingleton(() => UserRemoteDataSource(dio: getIt()));
@@ -150,8 +166,8 @@ Future<void> initializeDependencies() async {
       collectionRepository: getIt(), 
       filmCollectionRepository: getIt(), 
       imageStorageService: getIt(),
-      mediaStore: getIt(),
-      zipService: getIt()
+      zipService: getIt(),
+      exportDestinationService: getIt()
     ));
     getIt.registerLazySingleton(() => ImportLibraryUseCase(
       zipService: getIt(),

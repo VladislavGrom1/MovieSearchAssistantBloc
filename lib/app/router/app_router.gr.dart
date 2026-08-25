@@ -18,25 +18,25 @@ import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/search_fi
     as _i9;
 import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/user_profile/user_profile_wrapper_screen.dart'
     as _i13;
-import 'package:movie_search_assistant_bloc/presentation/pages/collection_films/collection_films_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/collection_films_screen.dart'
     as _i1;
-import 'package:movie_search_assistant_bloc/presentation/pages/collections/collections_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/collections_screen.dart'
     as _i3;
-import 'package:movie_search_assistant_bloc/presentation/pages/film_information/film_information_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/film_information_screen.dart'
     as _i4;
-import 'package:movie_search_assistant_bloc/presentation/pages/filter_film/filter_film_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/filter_film_screen.dart'
     as _i5;
-import 'package:movie_search_assistant_bloc/presentation/pages/filter_list/filter_list_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/filter_list_screen.dart'
     as _i6;
-import 'package:movie_search_assistant_bloc/presentation/pages/home/home_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/home_screen.dart'
     as _i7;
-import 'package:movie_search_assistant_bloc/presentation/pages/search_films/search_film_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/search_film_screen.dart'
     as _i8;
-import 'package:movie_search_assistant_bloc/presentation/pages/searched_films/searched_films_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/searched_films_screen.dart'
     as _i10;
-import 'package:movie_search_assistant_bloc/presentation/pages/user_authentication/user_authentication_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/user_authentication_screen.dart'
     as _i11;
-import 'package:movie_search_assistant_bloc/presentation/pages/user_profile/user_profile_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/user_profile_screen.dart'
     as _i12;
 
 /// generated route for

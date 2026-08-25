@@ -3,8 +3,8 @@
   <h1>Movie Search Assistant Bloc</h1>
   <p><em>Flutter-приложение для поиска фильмов, просмотра информации, создания личных коллекций </em></p>
   
-  [![Flutter](https://img.shields.io/badge/Flutter-3.35.4-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
-  [![Dart](https://img.shields.io/badge/Dart-3.9.2-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+  [![Flutter](https://img.shields.io/badge/Flutter-3.47.0-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+  [![Dart](https://img.shields.io/badge/Dart-3.13.0-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
   [![Platform](https://img.shields.io/badge/Platform-Android%20|%20iOS-lightgrey?style=for-the-badge)](https://github.com)
   
   <br>

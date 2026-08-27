@@ -70,13 +70,13 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: _hasFocus ? AppColors.primaryScheme : Colors.white.withOpacity(0.12),
+          color: _hasFocus ? AppColors.primaryScheme : Colors.white.withValues(alpha: 0.12),
           width: _hasFocus ? 1.4 : 1,
         ),
         boxShadow: _hasFocus
             ? [
                 BoxShadow(
-                  color: AppColors.primaryScheme.withOpacity(0.35),
+                  color: AppColors.primaryScheme.withValues(alpha: 0.35),
                   blurRadius: 14,
                   spreadRadius: 1,
                 ),
@@ -87,7 +87,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         borderRadius: BorderRadius.circular(14),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.primaryThemeGrey.withOpacity(0.55),
+            color: AppColors.primaryThemeGrey.withValues(alpha: 0.55),
             borderRadius: BorderRadius.circular(14),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8),

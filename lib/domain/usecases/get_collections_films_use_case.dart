@@ -20,10 +20,6 @@ class GetCollectionsFilmsUseCase {
 
   Future<Map<String, List<FilmEntity>?>?> call(List<String> collectionNames) async{
     try{
-      UserEntity? userEntity = await userRepository.getUserApiKeyInfoFromStorage();
-      if(userEntity == null) return null;
-      
-      apiClient.updateApiKeyHeaders(userEntity.apiKey!);
       final results = await Future.wait(
         collectionNames.map((name) => filmRepository.getCollectionFilms(name, 1))
       );

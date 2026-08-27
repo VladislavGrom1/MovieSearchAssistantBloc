@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
@@ -16,6 +15,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_u
 import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/share_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/use_shared_api_key_use_case.dart';
 
 part 'user_profile_event.dart';
 part 'user_profile_state.dart';
@@ -32,6 +32,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   final OpenUrlUseCase openUrlUseCase;
   final GetAppInfoUseCase getAppInfoUseCase;
   final ShareLibraryUseCase shareLibraryUseCase;
+  final UseSharedApiKeyUseCase useSharedApiKeyUseCase;
 
   Timer? _cacheTimer;
 
@@ -46,10 +47,12 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     required this.clearCacheUseCase,
     required this.openUrlUseCase,
     required this.getAppInfoUseCase,
-    required this.shareLibraryUseCase
+    required this.shareLibraryUseCase,
+    required this.useSharedApiKeyUseCase
   }) : super(UserProfileInitial()) {
     on<GetUserProfileInfo>(_getUserProfileInfo);
     on<UpdateApiKey>(_updateApiKey);
+    on<UseSharedApiKey>(_useSharedApiKey);
     on<ClearCacheDirectory>(_clearCacheDirectory);
     on<ClearLibrary>(_clearLibrary);
     on<ExportLibrary>(_exportLibrary);
@@ -132,6 +135,22 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(currentState);
     } catch(e){
       emit(UserProfileActionFailure(message: e.toString()));
+      emit(currentState);
+    }
+  }
+
+  Future<void> _useSharedApiKey(UseSharedApiKey event, Emitter emit) async {
+    final currentState = state;
+    if(currentState is! UserProfileLoaded) return;
+    try{
+      UserEntity updatedUserEntity = await useSharedApiKeyUseCase.call();
+      emit(UserProfileActionSuccess(message: "Вы вернулись на стандартный план"));
+      emit(currentState.copyWith(userEntity: updatedUserEntity));
+    } on LocalDataSourceException catch(e) {
+      emit(UserProfileActionFailure(message: e.message));
+      emit(currentState);
+    } catch(e){
+      emit(UserProfileActionFailure(message: "Не удалось переключиться на стандартный план"));
       emit(currentState);
     }
   }

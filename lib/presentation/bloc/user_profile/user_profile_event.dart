@@ -18,6 +18,8 @@ class UpdateApiKey extends UserProfileEvent{
   List<Object?> get props => [updatedApiKey];
 }
 
+class UseSharedApiKey extends UserProfileEvent{}
+
 class ExportLibrary extends UserProfileEvent{}
 
 class ShareLibrary extends UserProfileEvent{}

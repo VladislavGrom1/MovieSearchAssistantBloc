@@ -443,7 +443,7 @@ class SearchedFilmsRouteArgs {
 }
 
 /// generated route for
-/// [_i11.UserAuthenticationScreen]
+/// [_i11.OnboardingScreen]
 class UserAuthenticationRoute extends _i14.PageRouteInfo<void> {
   const UserAuthenticationRoute({List<_i14.PageRouteInfo>? children})
       : super(UserAuthenticationRoute.name, initialChildren: children);
@@ -453,7 +453,7 @@ class UserAuthenticationRoute extends _i14.PageRouteInfo<void> {
   static _i14.PageInfo page = _i14.PageInfo(
     name,
     builder: (data) {
-      return const _i11.UserAuthenticationScreen();
+      return const _i11.OnboardingScreen();
     },
   );
 }

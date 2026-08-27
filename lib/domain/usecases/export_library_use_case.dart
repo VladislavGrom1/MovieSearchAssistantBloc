@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:media_store_plus/media_store_plus.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/export_destination_service.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/zip_service.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/image_storage_service.dart';

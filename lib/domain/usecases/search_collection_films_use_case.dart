@@ -20,13 +20,8 @@ class SearchCollectionFilmsUseCase {
   Future<List<FilmEntity>?> call(String collectionName, int page) async{
     List<FilmEntity>? filmCollectionsMap = [];
     try{
-      UserEntity? userEntity = await userRepository.getUserApiKeyInfoFromStorage();
-      if(userEntity != null){
-        apiClient.updateApiKeyHeaders(userEntity.apiKey!);
-        filmCollectionsMap = await filmRepository.getCollectionFilms(collectionName, page);
-        return filmCollectionsMap;
-      }
-      return null;
+      filmCollectionsMap = await filmRepository.getCollectionFilms(collectionName, page);
+      return filmCollectionsMap;
     } on RemoteDataSourceException{
       rethrow;
     } on LocalDataSourceException{

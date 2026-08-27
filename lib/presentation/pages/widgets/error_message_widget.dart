@@ -17,10 +17,20 @@ class ErrorMessageWidget extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
-              Image.asset("assets/icons/errorIcon.png", fit: BoxFit.cover),
+              Image.asset(
+                width: 350,
+                "assets/icons/errorIcon.png", 
+                fit: BoxFit.cover
+              ),
+              Text(
+                "Что-то пошло не так",
+                style: CustomTextStyles.m3Title(),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 10),
               Text(
                 message, 
-                style: CustomTextStyles.m3Title(), 
+                style: CustomTextStyles.m3Body(), 
                 textAlign: TextAlign.center
               ),
               const SizedBox(height: 20)

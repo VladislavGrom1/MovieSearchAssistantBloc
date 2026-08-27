@@ -12,7 +12,7 @@ class AuthenticationGuard extends AutoRouteGuard{
     final userLocalDataSource = GetIt.instance<UserLocalDataSource>();
     try{
       final apiKeyInfo = userLocalDataSource.getUserApiKeyInfo();
-      if(apiKeyInfo?.apiKey != null){
+      if(apiKeyInfo != null){
         resolver.next(true);
       } else{
         resolver.redirectUntil(

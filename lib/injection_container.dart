@@ -58,6 +58,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/search_filter_films_
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_film_information_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_saved_film_from_server_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/upload_image_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/use_shared_api_key_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
@@ -202,9 +203,12 @@ Future<void> initializeDependencies() async {
       collectionRepository: getIt(), 
       imageStorageService: getIt()
     ));
+    getIt.registerLazySingleton(() => UseSharedApiKeyUseCase(userRepository: getIt(), apiClient: getIt()));
 
     // Blocs
-    getIt.registerFactory(() => AuthenticationBloc(authenticationUseCase: getIt(), openUrlUseCase: getIt()));
+    getIt.registerFactory(() => AuthenticationBloc( 
+      useSharedApiKeyUseCase: getIt()
+    ));
     getIt.registerFactory(() => SearchFilmsBloc(displayFilmCollectionsUseCase: getIt()));
     getIt.registerFactory(() => SearchedFilmsBloc(searchFilterFilmsUseCase: getIt(), searchCollectionFilmsUseCase: getIt()));
     getIt.registerFactory(() => FilterFilmBloc());
@@ -245,7 +249,8 @@ Future<void> initializeDependencies() async {
       clearCacheUseCase: getIt(),
       openUrlUseCase: getIt(),
       getAppInfoUseCase: getIt(),
-      shareLibraryUseCase: getIt()
+      shareLibraryUseCase: getIt(),
+      useSharedApiKeyUseCase: getIt()
     ));
 
     // Cubit

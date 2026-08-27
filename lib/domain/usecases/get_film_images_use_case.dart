@@ -19,13 +19,8 @@ class GetFilmImagesUseCase {
 
   Future<FilmImagesEntity?> call(int idFilm) async{
     try{
-      UserEntity? userEntity = await userRepository.getUserApiKeyInfoFromStorage();
-      if(userEntity != null){
-        apiClient.updateApiKeyHeaders(userEntity.apiKey!);
-        FilmImagesEntity? filmImagesEntity = await filmRepository.getFilmImages(idFilm);
-        return filmImagesEntity;
-      }
-      return null;
+      FilmImagesEntity? filmImagesEntity = await filmRepository.getFilmImages(idFilm);
+      return filmImagesEntity;
     } on RemoteDataSourceException{
       rethrow;
     } on LocalDataSourceException{

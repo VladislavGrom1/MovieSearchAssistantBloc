@@ -19,10 +19,10 @@ class CustomSnackBar {
         curve: Curves.easeInOutCubic,
         child: Text(
           message,
-          style: CustomTextStyles.m3ActionText(color: AppColors.textWhite),
+          style: CustomTextStyles.m3ActionText(color: AppColors.primaryThemeBlack),
         ),
       ),
-      backgroundColor: AppColors.primaryThemeGrey,
+      backgroundColor: AppColors.primaryScheme,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(16)

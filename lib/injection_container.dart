@@ -71,7 +71,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/filter_film/filter
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
-import 'package:movie_search_assistant_bloc/presentation/bloc/user_authentication/authentication_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/onboarding_screen/authentication_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 

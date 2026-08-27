@@ -34,7 +34,7 @@ import 'package:movie_search_assistant_bloc/presentation/pages/search_film_scree
     as _i8;
 import 'package:movie_search_assistant_bloc/presentation/pages/searched_films_screen.dart'
     as _i10;
-import 'package:movie_search_assistant_bloc/presentation/pages/user_authentication_screen.dart'
+import 'package:movie_search_assistant_bloc/presentation/pages/onboarding_screen.dart'
     as _i11;
 import 'package:movie_search_assistant_bloc/presentation/pages/user_profile_screen.dart'
     as _i12;

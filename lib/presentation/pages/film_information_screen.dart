@@ -293,20 +293,72 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                 const SizedBox(height: 20),
                 Divider(color: AppColors.primaryScheme, thickness: 2),
                 const SizedBox(height: 20),
-                Text(
-                  film.slogan != null ? "«${film.slogan}»" : "Слоган отсутствует",
-                  textAlign: TextAlign.left, 
-                  style: CustomTextStyles.m3Content().copyWith(
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: 0.5,
-                    fontWeight: FontWeight.w600
+                Container(
+                  width: double.maxFinite,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryThemeGrey,
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                  child: film.slogan == null 
+                  ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        const SizedBox(height: 20),
+                        Icon(Icons.rate_review_sharp, size: 48, color: AppColors.primaryScheme),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Слоган отсутствует", 
+                          style: CustomTextStyles.m3Body()
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                  )
+                  : Padding(
+                    padding: const EdgeInsets.only(top: 20, bottom: 20),
+                    child: Align(
+                      alignment: AlignmentGeometry.center,
+                      child: Text(
+                        "«${film.slogan}»",
+                        textAlign: TextAlign.center, 
+                        softWrap: true,
+                        style: CustomTextStyles.m3Content().copyWith(
+                          fontStyle: FontStyle.italic,
+                          letterSpacing: 0.5,
+                          fontWeight: FontWeight.w600
+                        ),
+                      ),
+                    ),
+                  )
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  textAlign: TextAlign.left,
-                  film.description ?? "Описание отсутствует", 
-                  style: CustomTextStyles.m3Content().copyWith(),
+                Container(
+                  width: double.maxFinite,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryThemeGrey,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: film.description == null 
+                  ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        const SizedBox(height: 40),
+                        Icon(Icons.rate_review_sharp, size: 48, color: AppColors.primaryScheme),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Описание отсутствует", 
+                          style: CustomTextStyles.m3Body()
+                        ),
+                        const SizedBox(height: 40),
+                      ],
+                  )
+                  : Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 20, top: 30, bottom: 30),
+                    child: Text(
+                        film.description!,
+                        style: CustomTextStyles.m3Body(),
+                        softWrap: true,
+                      ),
+                  )
                 ),
                 const SizedBox(height: 20),
                 Divider(color: AppColors.primaryScheme, thickness: 2),
@@ -354,13 +406,33 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Align(
-                  alignment: AlignmentGeometry.centerLeft,
-                  child: Text(
-                    textAlign: TextAlign.left,
-                    film.userComment ?? "Отсутствует", 
-                    style: CustomTextStyles.m3Content(),
+                Container(
+                  width: double.maxFinite,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryThemeGrey,
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                  child: film.userComment == null 
+                  ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        const SizedBox(height: 40),
+                        Icon(Icons.rate_review_sharp, size: 48, color: AppColors.primaryScheme),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Отзыв отсутствует", 
+                          style: CustomTextStyles.m3Body()
+                        ),
+                        const SizedBox(height: 40),
+                      ],
+                  )
+                  : Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 20, top: 40, bottom: 40),
+                    child: Text(
+                        film.userComment!,
+                        style: CustomTextStyles.m3Body()
+                      ),
+                  )
                 ),
                 const SizedBox(height: 20),
                 Divider(color: AppColors.primaryScheme, thickness: 2),
@@ -444,7 +516,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
               titleText: 'Изменить пользовательский отзыв', 
               hintText: 'Новый отзыв',
               maxLenght: 500,
-              maxLines: 20,
+              maxLines: 8,
               actionText: "Сохранить", 
               actionFunc: (controllerText) => context.read<FilmInformationBloc>().add(UpdateUserFilmInformation(userComment: controllerText))
             ),
@@ -485,10 +557,20 @@ class _PosterImageWidget extends StatelessWidget {
   Widget _buildImage() {
     if (film.localPosterImagePath != null) {
       final fullPosterImagePath = ImagePathResolver.resolve(film.localPosterImagePath!);
-      return Image.file(File(fullPosterImagePath), fit: BoxFit.cover);
+      return Image.file(
+        File(fullPosterImagePath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _placeholder(),
+      );
     }
+
+    final posterUrl = film.posterUrl;
+    if (posterUrl == null || posterUrl.isEmpty) {
+      return _placeholder();
+    }
+
     return CachedNetworkImage(
-      imageUrl: film.posterUrl ?? "",
+      imageUrl: posterUrl,
       cacheManager: getIt<FilmImageCacheService>().instance,
       fit: BoxFit.cover,
       placeholder: (context, url) => LayoutBuilder(
@@ -508,8 +590,43 @@ class _PosterImageWidget extends StatelessWidget {
           );
         },
       ),
+      errorWidget: (context, url, error) => _placeholder(),
     );
   }
+
+  Widget _placeholder() => Container(
+    color: AppColors.primaryThemeGrey,
+    child: Icon(Icons.image_not_supported, color: AppColors.primaryScheme, size: 48),
+  );
+
+  // Widget _buildImage() {
+  //   if (film.localPosterImagePath != null) {
+  //     final fullPosterImagePath = ImagePathResolver.resolve(film.localPosterImagePath!);
+  //     return Image.file(File(fullPosterImagePath), fit: BoxFit.cover);
+  //   }
+  //   return CachedNetworkImage(
+  //     imageUrl: film.posterUrl ?? "",
+  //     cacheManager: getIt<FilmImageCacheService>().instance,
+  //     fit: BoxFit.cover,
+  //     placeholder: (context, url) => LayoutBuilder(
+  //       builder: (context, constraints) {
+  //         return Skeletonizer(
+  //           enabled: true,
+  //           effect: const ShimmerEffect(
+  //             baseColor: AppColors.primaryThemeBlack,
+  //             highlightColor: AppColors.primaryThemeGrey,
+  //             duration: Duration(seconds: 4),
+  //           ),
+  //           child: Container(
+  //             width: constraints.maxWidth.isFinite ? constraints.maxWidth : double.infinity,
+  //             height: constraints.maxHeight.isFinite ? constraints.maxHeight : 200,
+  //             color: AppColors.primaryThemeGrey,
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
 }
 
 class _FilmRatingWidget extends StatelessWidget {
@@ -664,13 +781,22 @@ class _FilmScreenshotsWidget extends StatelessWidget {
     
     if (!hasLocalImages && !hasUrlImages) {
       return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.image_not_supported, size: 48, color: AppColors.primaryScheme),
-            SizedBox(height: 8),
-            Text("Кадры отсутствуют", style: CustomTextStyles.m3Body()),
-          ],
+        child: Container(
+          width: double.maxFinite,
+          decoration: BoxDecoration(
+            color: AppColors.primaryThemeGrey,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 40),
+              Icon(Icons.image_not_supported, size: 48, color: AppColors.primaryScheme),
+              SizedBox(height: 8),
+              Text("Кадры отсутствуют", style: CustomTextStyles.m3Body()),
+              SizedBox(height: 40),
+            ],
+          ),
         ),
       );
     }

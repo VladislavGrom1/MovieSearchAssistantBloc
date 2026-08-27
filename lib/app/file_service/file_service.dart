@@ -7,7 +7,7 @@ import 'package:share_plus/share_plus.dart';
 class FileService {
 
   Future<String?> saveFile(Uint8List fileBytes, String fileName) async {
-    final filePath = await FilePicker.platform.saveFile(
+    final filePath = await FilePicker.saveFile(
       dialogTitle: "Сохранить архив",
       fileName: fileName,
       type: FileType.custom,
@@ -19,33 +19,33 @@ class FileService {
       return null;
     }
 
-    return filePath;
+    return filePath.toString();
   }
 
   Future<File?> pickZipFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['zip'],
     );
 
-    if (result == null || result.files.single.path == null) {
+    if (result.single.path == null) {
       return null;
     }
 
-    return File(result.files.single.path!);
+    return File(result.single.path!);
   }
 
   Future<File?> pickJsonFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json']
     );
 
-    if (result == null || result.files.single.path == null) {
+    if (result.single.path == null) {
       return null;
     }
 
-    return File(result.files.single.path!);
+    return File(result.single.path!);
   }
 
   Future<String> shareZip(File zipFile) async {

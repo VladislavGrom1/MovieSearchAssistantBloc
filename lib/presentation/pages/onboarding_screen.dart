@@ -1,13 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/onboarding_screen/authentication_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/widgets/gradient_button.dart';
 
 @RoutePage()
 class OnboardingScreen extends StatelessWidget {
@@ -17,13 +17,13 @@ class OnboardingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<AuthenticationBloc>(),
-      child: _UserAuthenticationView(),
+      child: _OnboardingView(),
     );
   }
 }
 
-class _UserAuthenticationView extends StatelessWidget {
-  const _UserAuthenticationView();
+class _OnboardingView extends StatelessWidget {
+  const _OnboardingView();
 
   static const String _backgroundAsset = 'assets/background/movie_background.png';
 
@@ -35,9 +35,7 @@ class _UserAuthenticationView extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Container(color: AppColors.primaryThemeBlack),
-
           const _FadeInBackground(assetPath: _backgroundAsset),
-
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -52,7 +50,6 @@ class _UserAuthenticationView extends StatelessWidget {
               ),
             ),
           ),
-
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -154,49 +151,109 @@ class _UserAuthenticationContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _GradientTitle(text: "Movie Search Assistant"),
-          const SizedBox(height: 6),
-          Container(
-            width: 46,
-            height: 3,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primaryScheme, Color(0xFFd88ef0)],
-              ),
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-          const SizedBox(height: 22),
-          Text(
-            "Вы начнёте со стандартного плана — он не требует настройки. "
-            "Индивидуальный план с собственным ключом Kinopoisk можно "
-            "подключить позже в профиле.",
-            textAlign: TextAlign.center,
-            style: CustomTextStyles.m3ActionText(color: AppColors.secondaryThemeGrey).copyWith(height: 1.35),
-          ),
-          const SizedBox(height: 28),
-          BlocBuilder<AuthenticationBloc, AuthenticationState>(
-            builder: (context, state) {
-              final isLoading = state is AuthenticationLoading;
-              return GradientButton(
-                enabled: !isLoading,
-                textButton: isLoading ? "Подождите..." : "Начать",
-                onPressed: isLoading ? null : () => _start(context),
-              );
-            },
-          ),
-        ],
-      ),
+    return BlocBuilder<AuthenticationBloc, AuthenticationState>(
+      builder: (context, state) {
+        final isLoading = state is AuthenticationLoading;
+        return CarouselWidget(
+          onDone: () => _start(context)
+        );
+      },
     );
   }
 
   void _start(BuildContext context) {
     context.read<AuthenticationBloc>().add(StartWithSharedApiKey());
+  }
+}
+
+class CarouselWidget extends StatefulWidget {
+  const CarouselWidget({
+    super.key,
+    required this.onDone
+  });
+
+  final Function? onDone;
+
+  @override
+  State<CarouselWidget> createState() => _CarouselWidgetState();
+}
+
+class _CarouselWidgetState extends State<CarouselWidget> {
+
+  @override
+  Widget build(BuildContext context) {
+    final pageDecoration = PageDecoration(
+        titleTextStyle: CustomTextStyles.m3Headline(color: AppColors.primaryScheme).copyWith(
+          fontWeight: FontWeight.w800,
+          fontSize: 30,
+          letterSpacing: 0.2,
+          height: 1.2
+        ),
+        bodyTextStyle: CustomTextStyles.m3ActionText(color: AppColors.secondaryThemeGrey).copyWith(height: 1.35),
+        bodyAlignment: Alignment.center,
+        imageFlex: 1
+    );
+
+    return IntroductionScreen(
+      globalBackgroundColor: Colors.transparent,
+      // globalHeader: Align(
+      //   alignment: AlignmentGeometry.topCenter,
+      //   child: Padding(
+      //       padding: const EdgeInsetsGeometry.only(top: 20),
+      //       child: _GradientTitle(text: "Movie Search Assistant"),
+      //     )
+      // ),
+      pages: [
+        PageViewModel(
+          titleWidget: _GradientTitle(text: "Добро пожаловать в Movie Search Assistant"),
+          body: "Находите фильмы по вкусу, сохраняйте их в личные коллекции и возвращайтесь к ним в любое время — всё в одном приложении.",
+          image: const _OnboardingIcon(icon: Icons.movie),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
+          titleWidget: _GradientTitle(text: "Планируйте свой просмотр"),
+          body: "Ищите фильмы в готовых подборках, по названию или подбирайте их через фильтры — жанр, год, рейтинг.",
+          image: const _OnboardingIcon(icon: Icons.search),
+          decoration: pageDecoration
+        ),
+        PageViewModel(
+          titleWidget: _GradientTitle(text: "Создавайте свои коллекции"),
+          body: "Сохраняйте понравившиеся фильмы в коллекции, делитесь своей библиотекой с друзьями или переносите её на другое устройство.",
+          image: const _OnboardingIcon(icon: Icons.collections_bookmark),
+          decoration: pageDecoration
+        ),
+        PageViewModel(
+          titleWidget: _GradientTitle(text: "Планы работы приложения"),
+          body: "Стандартный план работает сразу, без каких-либо настроек. Индивидуальный план — это ваш личный API Key и собственный лимит запросов, независимый от нагрузки других пользователей. Переключиться можно в любой момент в профиле.",
+          image: const _OnboardingIcon(icon: Icons.bolt),
+          decoration: pageDecoration
+        )
+      ],
+      onDone: () => widget.onDone?.call(),
+      onSkip: () => widget.onDone?.call(),
+      showSkipButton: true,
+      allowImplicitScrolling: true,
+      skip: Text('Пропустить', style: CustomTextStyles.m3Content(color: AppColors.primaryScheme).copyWith(fontSize: 14)),
+      back: const Icon(Icons.arrow_back),
+      done: Text('Начать', style: CustomTextStyles.m3Content(color: AppColors.primaryScheme).copyWith(fontSize: 14)),
+      next: const Icon(Icons.arrow_forward, size: 20),
+      curve: Curves.fastLinearToSlowEaseIn,
+      controlsPadding: const EdgeInsets.only(bottom: 20),
+      dotsDecorator: const DotsDecorator(
+        size: Size(10.0, 10.0),
+        color: AppColors.primaryScheme,
+        activeSize: Size(22.0, 10.0),
+        activeShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+        ),
+      ),
+      dotsContainerDecorator: const ShapeDecoration(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        ),
+      ),
+    );
   }
 }
 
@@ -217,6 +274,7 @@ class _GradientTitle extends StatelessWidget {
       fontWeight: FontWeight.w800,
       fontSize: 30,
       letterSpacing: 0.2,
+      height: 1.2
     );
 
     final glowStyle = style.copyWith(
@@ -236,6 +294,38 @@ class _GradientTitle extends StatelessWidget {
         textAlign: TextAlign.center,
         style: glowStyle,
       ),
+    );
+  }
+}
+
+class _OnboardingIcon extends StatelessWidget {
+  const _OnboardingIcon({required this.icon});
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 200,
+      height: 200,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryScheme.withOpacity(0.25),
+            const Color(0xFFd88ef0).withOpacity(0.10),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryScheme.withOpacity(0.35),
+            blurRadius: 40,
+            spreadRadius: 4,
+          ),
+        ],
+      ),
+      child: Icon(icon, size: 80, color: AppColors.primaryScheme),
     );
   }
 }

@@ -9,7 +9,6 @@ import 'package:movie_search_assistant_bloc/app/util/constants/genre_ids.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/filter_data.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/filter_film/filter_film_bloc.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/widgets/gradient_button.dart';
 
 @RoutePage()
 class FilterFilmScreen extends StatelessWidget {
@@ -88,13 +87,31 @@ class _FilterFilmContent extends StatelessWidget {
         const SizedBox(height: 20),
         Padding(
           padding: EdgeInsetsGeometry.only(left: 20, right: 20),
-          child: GradientButton(
-            textButton: "Показать", 
-            enabled: true, 
-            onPressed: () {
-              goToSearchedFilmsScreen(context, country, genre, yearRange);
-            }
-          ),
+          child: Container(
+            width: double.infinity,
+            height: 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: AppColors.primaryScheme,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () {
+                  goToSearchedFilmsScreen(context, country, genre, yearRange);
+                },
+                child: Center(
+                  child: Text(
+                    "Показать",
+                    style: CustomTextStyles.m3Content(
+                      color: Colors.white,
+                    ).copyWith(letterSpacing: 0.3, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ),
+          )
         ),
         const SizedBox(height: 10),
         Padding(

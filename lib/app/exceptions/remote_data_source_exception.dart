@@ -21,9 +21,9 @@ class UnauthorizedFailure extends RemoteDataSourceException {
 }
 
 class TooManyRequests extends RemoteDataSourceException {
-  TooManyRequests() : super("Превышен лимит количества запросов к серверу в сутки. \n Пожалуйста, подождите до сброса лимита или перейдите на общий ");
+  TooManyRequests() : super("Превышен лимит количества запросов к серверу в сутки. \n Пожалуйста, подождите до сброса лимита или перейдите на стандартный план приложения в Профиле.");
 }
 
 class UnknownFailure extends RemoteDataSourceException{
-  UnknownFailure() : super("Неизвестная ошибка");
+  UnknownFailure() : super("Неизвестная ошибка. \n Попробуйте обновить страницу.");
 }

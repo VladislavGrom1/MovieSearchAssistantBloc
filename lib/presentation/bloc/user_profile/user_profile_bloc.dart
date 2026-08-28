@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
@@ -100,26 +101,6 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     }
   }
 
-  // Future<void> _updateUserProfileInfo(UpdateUserProfileInfo event, Emitter emit) async {
-  //   final currentState = state;
-  //   if(currentState is! UserProfileLoaded) return;
-  //   emit(UserProfileLoading());
-  //   try{
-  //     //UserEntity? updatedUserEntity = await updateUserApiKeyInfoUseCase.call(apiKey: currentState.userEntity?.apiKey ?? "");
-  //     double? cacheSizeMb = await getCacheSizeUseCase.call();
-  //     emit(currentState.copyWith(cacheSizeMB: cacheSizeMb)); 
-  //   } on RemoteDataSourceException catch(e) {
-  //     emit(UserProfileActionFailure(message: e.message));
-  //     emit(currentState);
-  //   } on LocalDataSourceException {
-  //     emit(UserProfileActionFailure(message: "Не удалось обновить информацию о пользователе"));
-  //     emit(currentState);
-  //   } catch(e){
-  //     emit(UserProfileActionFailure(message: e.toString()));
-  //     emit(currentState);
-  //   }
-  // }
-
   Future<void> _updateApiKey(UpdateApiKey event, Emitter emit) async {
     final currentState = state;
     if(currentState is! UserProfileLoaded) return;
@@ -208,7 +189,11 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       if(result == ""){
         emit(UserProfileActionFailure(message: "Операция экспорта отменена"));
       } else{
-        emit(UserProfileActionSuccess(message: "Библиотека успешно сохранена в папку \"Загрузки\""));
+        if(defaultTargetPlatform == TargetPlatform.android){
+          emit(UserProfileActionSuccess(message: "Библиотека успешно сохранена в папку \"Загрузки\""));
+        } else {
+          emit(UserProfileActionSuccess(message: "Библиотека успешно сохранена"));
+        }
       }
       emit(currentState);
     } catch(e){

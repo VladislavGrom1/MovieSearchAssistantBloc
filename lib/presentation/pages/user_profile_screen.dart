@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -247,14 +248,19 @@ class _UserProfileContent extends StatelessWidget {
         const SizedBox(height: 20),
         BlocBuilder<UserProfileBloc, UserProfileState>(
           builder: (context, state) {
-            if(state is UserProfileLoaded){
+            if (state is UserProfileLoaded) {
+              final platformName = switch (defaultTargetPlatform) {
+                TargetPlatform.iOS => "iOS",
+                TargetPlatform.android => "Android",
+                _ => "устройства",
+              };
               return Center(
                 child: Text(
-                  "${state.appInfo?["appName"]} для Android v${state.appInfo?["appVersion"]}",
+                  "${state.appInfo?["appName"]} для $platformName v${state.appInfo?["appVersion"]}",
                   maxLines: 2,
                   style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
                   textAlign: TextAlign.center,
-                  ),
+                ),
               );
             }
             return const SizedBox();

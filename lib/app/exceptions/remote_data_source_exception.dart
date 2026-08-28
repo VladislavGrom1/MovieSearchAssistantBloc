@@ -20,8 +20,12 @@ class UnauthorizedFailure extends RemoteDataSourceException {
   UnauthorizedFailure() : super("Неверный API ключ. \nAPI ключ недействителен.");
 }
 
-class TooManyRequests extends RemoteDataSourceException {
-  TooManyRequests() : super("Превышен лимит количества запросов к серверу в сутки. \nПожалуйста, подождите до сброса лимита или перейдите на стандартный план приложения в Профиле.");
+class TooManyRequestsPerDay extends RemoteDataSourceException {
+  TooManyRequestsPerDay() : super("Превышен лимит количества запросов к серверу в сутки. \nПожалуйста, подождите до сброса лимита или перейдите на стандартный план приложения в Профиле.");
+}
+
+class TooManyRequestsPerSecond extends RemoteDataSourceException {
+  TooManyRequestsPerSecond() : super("Высокая нагрузка на сервер за короткий промежуток времени. \nПожалуйста, подождите и попробуйте снова.");
 }
 
 class UnknownFailure extends RemoteDataSourceException{

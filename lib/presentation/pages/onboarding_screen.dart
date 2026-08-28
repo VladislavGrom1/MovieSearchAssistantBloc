@@ -153,7 +153,6 @@ class _UserAuthenticationContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, state) {
-        final isLoading = state is AuthenticationLoading;
         return CarouselWidget(
           onDone: () => _start(context)
         );
@@ -196,13 +195,6 @@ class _CarouselWidgetState extends State<CarouselWidget> {
 
     return IntroductionScreen(
       globalBackgroundColor: Colors.transparent,
-      // globalHeader: Align(
-      //   alignment: AlignmentGeometry.topCenter,
-      //   child: Padding(
-      //       padding: const EdgeInsetsGeometry.only(top: 20),
-      //       child: _GradientTitle(text: "Movie Search Assistant"),
-      //     )
-      // ),
       pages: [
         PageViewModel(
           titleWidget: _GradientTitle(text: "Добро пожаловать в Movie Search Assistant"),
@@ -313,19 +305,19 @@ class _OnboardingIcon extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryScheme.withOpacity(0.25),
-            const Color(0xFFd88ef0).withOpacity(0.10),
+            AppColors.primaryScheme.withOpacity(0.4),
+            const Color(0xFFd88ef0).withOpacity(0.25),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryScheme.withOpacity(0.35),
+            color: AppColors.primaryScheme.withOpacity(0.3),
             blurRadius: 40,
             spreadRadius: 4,
           ),
         ],
       ),
-      child: Icon(icon, size: 80, color: AppColors.primaryScheme),
+      child: Icon(icon, size: 80, color: Color.fromARGB(450, 211, 151, 236)),
     );
   }
 }

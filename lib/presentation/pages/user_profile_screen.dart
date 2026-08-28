@@ -142,11 +142,11 @@ class _UserProfileContent extends StatelessWidget {
         _PlanOptionCard(
           icon: Icons.public_rounded,
           title: "Стандартный",
-          priceLabel: "Бесплатно",
+          priceLabel: "Общий API Key",
           selected: !_hasOwnApiKey,
           features: const [
-            "Доступен сразу, без настройки",
-            "Общий лимит запросов на всех пользователей",
+            "Безлимитное число запросов в сутки",
+            "Не требуется регистрация",
             "Возможны задержки в часы пиковой нагрузки",
           ],
           onTap: () {
@@ -178,13 +178,13 @@ class _UserProfileContent extends StatelessWidget {
         _PlanOptionCard(
           icon: Icons.bolt_rounded,
           title: "Индивидуальный",
-          priceLabel: "Свой API Key",
+          priceLabel: "Личный API Key",
           badgeLabel: "Быстрее",
           selected: _hasOwnApiKey,
           features: const [
             "Персональный лимит запросов в сутки",
+            "Необходима регистрация",
             "Ответы сервера без задержек",
-            "Бесплатный API Key",
           ],
           onTap: () {
             if (_hasOwnApiKey) return;

@@ -1,47 +1,62 @@
 name: Flutter CI/CD
-
 on:
- push:
-   branches:
-     - "main"
-   paths-ignore:
-     - ".vscode/**"
-
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - ".vscode/**"
 jobs:
- build:
-   runs-on: ubuntu-latest
-   steps:
-     - uses: actions/checkout@v5
-     - uses: actions/setup-java@v4
-       with:
-         distribution: 'oracle'
-         java-version: '21'
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'oracle'
+          java-version: '21'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.47.0'
 
-     - uses: subosito/flutter-action@v2
-       with:
-        channel: 'stable'
-        flutter-version: '3.47.0'
-     
-     - name: Decode Keystore
-       run: |
+      - name: Decode Keystore
+        run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/release_key.jks
-
-     - name: Create key.properties
-       run: |
+      - name: Create key.properties
+        run: |
           echo "storeFile=release_key.jks" > android/key.properties
           echo "storePassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+      - run: flutter pub get
+      - run: sh ./scripts/flutter_analyze.sh
+      - run: flutter test
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Movie_Search_Assistant_Android
+          path: build/app/outputs/apk/release/*.apk
 
-     - run: flutter pub get
-
-     - run: sh ./scripts/flutter_analyze.sh
-
-     - run: flutter test
-
-     - run: flutter build apk --release
-
-     - uses: actions/upload-artifact@v4
-       with:
-         name: APK for test
-         path: build/app/outputs/apk/release/*.apk
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.47.0'
+      - run: flutter pub get
+      - run: sh ./scripts/flutter_analyze.sh
+      - run: flutter test
+      - name: Build iOS (unsigned)
+        run: flutter build ios --release --no-codesign
+      - name: Package .app for artifact
+        run: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/Runner.app
+          zip -r RunnerUnsigned.zip Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Movie_Search_Assistant_iOS
+          path: build/ios/iphoneos/RunnerUnsigned.zip

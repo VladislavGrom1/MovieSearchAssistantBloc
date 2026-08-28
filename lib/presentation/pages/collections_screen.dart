@@ -165,7 +165,17 @@ class _CollectionsList extends StatelessWidget {
           onClear: () => _showConfirmActionDialog(
             context,
             "Очищение коллекции",
-            "Вы действительно хотите очистить коллекцию? Содержимое коллекции будет удалено.",
+            Text.rich(
+                TextSpan(
+                  style: CustomTextStyles.m3Content(),
+                  children: [
+                    const TextSpan(text: "Вы действительно хотите "),
+                    TextSpan(text: "очистить", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                    const TextSpan(text: " коллекцию? Содержимое коллекции будет "),
+                    TextSpan(text: "удалено.", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                  ],
+                ),
+              ),
             "Очистить",
             () => _clearCollection(context, collection.id!)
           ),
@@ -173,14 +183,34 @@ class _CollectionsList extends StatelessWidget {
           onRemoveImage: () => _showConfirmActionDialog(
             context,
             "Удаление обложки",
-            "Вы действительно хотите удалить обложку коллекции?",
+            Text.rich(
+                TextSpan(
+                  style: CustomTextStyles.m3Content(),
+                  children: [
+                    const TextSpan(text: "Вы действительно хотите "),
+                    TextSpan(text: "удалить", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                    const TextSpan(text: " обложку коллекции?"),
+                  ],
+                ),
+              ),
             "Удалить",
             () => _removeCollectionImage(context, collection)
           ),
           onRemove: () => _showConfirmActionDialog(
             context, 
-            "Удаление коллекции", 
-            "Вы действительно хотите удалить коллекцию? Коллекция и её содержимое будут удалены.", 
+            "Удаление коллекции",
+            Text.rich(
+                TextSpan(
+                  style: CustomTextStyles.m3Content(),
+                  children: [
+                    const TextSpan(text: "Вы действительно хотите"),
+                    TextSpan(text: "удалить", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                    const TextSpan(text: " коллекцию? Коллекция и её содержимое будут "),
+                    TextSpan(text: "удалены", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                    const TextSpan(text: "."),
+                  ],
+                ),
+              ),  
             "Удалить", 
             () => _removeCollection(context, collection.id!)
           ),
@@ -208,7 +238,7 @@ class _CollectionsList extends StatelessWidget {
   void _showConfirmActionDialog(
     BuildContext context, 
     String titleText, 
-    String contentText, 
+    Widget content, 
     String actionText, 
     VoidCallback actionFunc
     ){
@@ -217,7 +247,7 @@ class _CollectionsList extends StatelessWidget {
       builder: (dialogContext) {
         return ConfirmAlertDialog(
           titleText: titleText, 
-          contentText: contentText, 
+          content: content, 
           actionText: actionText, 
           actionFunc: actionFunc
         );

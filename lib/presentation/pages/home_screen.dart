@@ -75,7 +75,16 @@ class HomeScreen extends StatelessWidget {
       builder: (dialogContext) {
         return ConfirmAlertDialog(
           titleText: "Выход из приложения",
-          contentText: "Вы действительно хотите закрыть приложение?",
+          content: Text.rich(
+                TextSpan(
+                  style: CustomTextStyles.m3Content(),
+                  children: [
+                    const TextSpan(text: "Вы действительно хотите "),
+                    TextSpan(text: "закрыть", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                    const TextSpan(text: " приложение?"),
+                  ],
+                ),
+              ),
           actionText: "Выйти",
           actionFunc: () => SystemNavigator.pop(),
         );

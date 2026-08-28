@@ -5,11 +5,11 @@ sealed class RemoteDataSourceException implements Exception{
 }
 
 class NetworkFailure extends RemoteDataSourceException {
-  NetworkFailure() : super("Отсутствует интернет-соединение. \n Проверьте подключение к интернету и попробуйте снова.");
+  NetworkFailure() : super("Отсутствует интернет-соединение. \nПроверьте подключение к интернету и попробуйте снова.");
 }
 
 class ServerFailure extends RemoteDataSourceException {
-  ServerFailure() : super("Сервер временно недоступен или не отвечает на запросы. \n Пожалуйста, попробуйте позже.");
+  ServerFailure() : super("Сервер временно недоступен или не отвечает на запросы. \nПожалуйста, попробуйте позже.");
 }
 
 class NotFoundFailure extends RemoteDataSourceException {
@@ -21,9 +21,9 @@ class UnauthorizedFailure extends RemoteDataSourceException {
 }
 
 class TooManyRequests extends RemoteDataSourceException {
-  TooManyRequests() : super("Превышен лимит количества запросов к серверу в сутки. \n Пожалуйста, подождите до сброса лимита или перейдите на стандартный план приложения в Профиле.");
+  TooManyRequests() : super("Превышен лимит количества запросов к серверу в сутки. \nПожалуйста, подождите до сброса лимита или перейдите на стандартный план приложения в Профиле.");
 }
 
 class UnknownFailure extends RemoteDataSourceException{
-  UnknownFailure() : super("Неизвестная ошибка. \n Попробуйте обновить страницу.");
+  UnknownFailure() : super("Неизвестная ошибка. \nПопробуйте обновить страницу.");
 }

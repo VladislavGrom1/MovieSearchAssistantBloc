@@ -4,7 +4,7 @@ import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 
 class TextFieldAlertDialog extends StatefulWidget {
   final String titleText;
-  final String? descriptionText;
+  final Widget? description;
   final String hintText;
   final int? maxLenght;
   final int? maxLines;
@@ -14,7 +14,7 @@ class TextFieldAlertDialog extends StatefulWidget {
   const TextFieldAlertDialog({
     super.key,
     required this.titleText,
-    this.descriptionText,
+    this.description,
     required this.hintText,
     this.maxLenght,
     this.maxLines,
@@ -59,11 +59,8 @@ class _TextFieldAlertDialogState extends State<TextFieldAlertDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.descriptionText != null) ...[
-              Text(
-                widget.descriptionText!,
-                style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
-              ),
+            if (widget.description != null) ...[
+              widget.description!,
               const SizedBox(height: 16),
             ],
             AnimatedContainer(

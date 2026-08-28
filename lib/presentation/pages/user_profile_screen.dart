@@ -139,121 +139,63 @@ class _UserProfileContent extends StatelessWidget {
         const SizedBox(height: 20),
         Text("Текущий план", style: CustomTextStyles.m3Title()),
         const SizedBox(height: 10),
-        Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          color: AppColors.primaryThemeGrey,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _PlanSegmentedControl(
-                  isIndividual: _hasOwnApiKey,
-                  onSelectStandard: () {
-                    if (!_hasOwnApiKey) return;
-                    _showConfirmActionDialog(
-                      context,
-                      "Вернуться на стандартный план?",
-                      "Приложение перестанет использовать ваш личный API Key и вернётся "
-                          "к стандартному плану. В часы пиковой нагрузки запросы к серверу могут "
-                          "выполняться немного дольше. Индивидуальный план можно "
-                          "подключить снова в любой момент.",
-                      "Вернуться",
-                      () => _useSharedApiKey(context),
-                    );
-                  },
-                  onSelectIndividual: () {
-                    if (_hasOwnApiKey) return;
-                    _showChangeApiKeyDialog(context);
-                  },
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _hasOwnApiKey
-                      ? "Используется ваш личный API Key и индивидуальный лимит запросов в сутки."
-                      : "Стандартный план для всех пользователей приложения. Неограниченный лимит запросов в сутки. В часы пиковой нагрузки возможны задержки получения данных от сервера.",
-                  style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
-                ),
-                if (_hasOwnApiKey) ...[
-                  const SizedBox(height: 14),
-                  InkWell(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: userEntity?.apiKey ?? ""));
-                      CustomSnackBar(
-                        message: "API Key скопирован в буфер обмена",
-                      ).show(context);
-                    },
-                    child: Column(
-                      children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text("Ваш API Key", style: CustomTextStyles.m3Body(color: AppColors.ratingGrey))
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryThemeBlack,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  userEntity!.apiKey!,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: CustomTextStyles.m3Content(),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Icon(Icons.copy, color: AppColors.primaryScheme, size: 18),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.center,
-                    child: TextButton(
-                      onPressed: () => _showChangeApiKeyDialog(context),
-                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                      child: Text(
-                        "Изменить API Key",
-                        style: CustomTextStyles.m3Body(color: AppColors.primaryScheme),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text.rich(
-          textAlign: TextAlign.left,
-          TextSpan(
-            style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
-            children: [
-              TextSpan(text: "Бесплатный API Key для индивидуального плана можно получить после регистрации на "),
-              TextSpan(
-                text: "kinopoiskapiunofficial.tech",
-                style: CustomTextStyles.m3Body(color: AppColors.primaryScheme).copyWith(
-                  decoration: TextDecoration.underline,
-                  decorationColor: AppColors.primaryScheme,
-                  decorationThickness: 2
-                ),
-                recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  _launchApiKeyUrl(context);
-                  },
-                  ),
-                  TextSpan(text: "."),
+        _PlanOptionCard(
+          icon: Icons.public_rounded,
+          title: "Стандартный",
+          priceLabel: "Бесплатно",
+          selected: !_hasOwnApiKey,
+          features: const [
+            "Доступен сразу, без настройки",
+            "Общий лимит запросов на всех пользователей",
+            "Возможны задержки в часы пиковой нагрузки",
+          ],
+          onTap: () {
+            if (!_hasOwnApiKey) return;
+            _showConfirmActionDialog(
+              context,
+              "Вернуться на стандартный план?",
+              Text.rich(
+                TextSpan(
+                  style: CustomTextStyles.m3Content(),
+                  children: [
+                    const TextSpan(text: "Приложение перестанет использовать ваш "),
+                    TextSpan(text: "API Key", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                    const TextSpan(text: " и переключится на "),
+                    TextSpan(text: "стандартный план", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                    const TextSpan(text: ". В часы пиковой нагрузки запросы могут обрабатываться дольше. "
+                        "Вернуться к "),
+                    TextSpan(text: "индивидуальному плану", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                    const TextSpan(text: " можно в любой момент."),
                   ],
+                ),
               ),
+              "Вернуться",
+              () => _useSharedApiKey(context),
+            );
+          }
+        ),
+        const SizedBox(height: 12),
+        _PlanOptionCard(
+          icon: Icons.bolt_rounded,
+          title: "Индивидуальный",
+          priceLabel: "Свой API Key",
+          badgeLabel: "Быстрее",
+          selected: _hasOwnApiKey,
+          features: const [
+            "Персональный лимит запросов в сутки",
+            "Ответы сервера без задержек",
+            "Бесплатный API Key",
+          ],
+          onTap: () {
+            if (_hasOwnApiKey) return;
+            _showChangeApiKeyDialog(context);
+          },
+          footer: _hasOwnApiKey
+              ? _ApiKeyCard(
+                  apiKey: userEntity?.apiKey ?? "",
+                  onEdit: () => _showChangeApiKeyDialog(context),
+                )
+              : _ApiKeyHint(onTap: () => _launchApiKeyUrl(context)),
         ),
         const SizedBox(height: 20),
         Text("Память", style: CustomTextStyles.m3Title()),
@@ -335,12 +277,23 @@ class _UserProfileContent extends StatelessWidget {
         return () => _clearCacheDirectory(context);
       case "Очистить библиотеку":
         return () => _showConfirmActionDialog(
-              context,
-              "Очищение библиотеки",
-              "Вы уверены, что хотите очистить библиотеку? В случае очищения все коллекции и сохранённые фильмы будут удалены.",
-              "Очистить",
-              () => _clearLibrary(context),
-            );
+        context,
+        "Очищение библиотеки",
+        Text.rich(
+          TextSpan(
+            style: CustomTextStyles.m3Content(),
+            children: [
+              const TextSpan(text: "Вы уверены, что хотите "),
+              TextSpan(text: "очистить библиотеку", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+              const TextSpan(text: "? Будут "),
+              TextSpan(text: "удалены", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+              const TextSpan(text: " все коллекции и сохранённые фильмы."),
+            ],
+          ),
+        ),
+        "Очистить",
+        () => _clearLibrary(context),
+      );
       default:
         return () {};
     }
@@ -354,11 +307,33 @@ class _UserProfileContent extends StatelessWidget {
           value: context.read<UserProfileBloc>(),
           child: TextFieldAlertDialog(
             titleText: _hasOwnApiKey ? 'Изменение API Key' : 'Индивидуальный план',
-            descriptionText: _hasOwnApiKey
+            description: _hasOwnApiKey
                 ? null
-                : "При индивидуальном плане приложение использует Ваш личный API Key со своим лимитом использования. "
-                  "Получение данных от сервера происходит без задержек. "
-                  "Бесплатный API Key можно получить после регистрации на kinopoiskapiunofficial.tech.",
+                : Text.rich(
+                    TextSpan(
+                      style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
+                      children: [
+                        const TextSpan(text: "Собственный "),
+                        TextSpan(text: "API Key", style: CustomTextStyles.m3Body(color: AppColors.primaryScheme)),
+                        const TextSpan(text: " даёт личный лимит запросов и ответы "),
+                        TextSpan(text: "без задержек", style: CustomTextStyles.m3Body(color: AppColors.primaryScheme)),
+                        const TextSpan(text: ". Получить бесплатно "),
+                        TextSpan(text: "API Key", style: CustomTextStyles.m3Body(color: AppColors.primaryScheme)),
+                        const TextSpan(text: " можно после регистрации на "),
+                        TextSpan(
+                          text: "kinopoiskapiunofficial.tech",
+                          style: CustomTextStyles.m3Body(color: AppColors.primaryScheme).copyWith(
+                            decoration: TextDecoration.underline,
+                            decorationColor: AppColors.primaryScheme,
+                            decorationThickness: 2,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.read<UserProfileBloc>().add(LaunchApiKeyUrl()),
+                        ),
+                        const TextSpan(text: "."),
+                      ],
+                    ),
+                  ),
             hintText: 'Введите ваш API Key',
             maxLenght: 40,
             maxLines: 1,
@@ -371,20 +346,20 @@ class _UserProfileContent extends StatelessWidget {
   }
 
   void _showConfirmActionDialog(
-    BuildContext context, 
-    String titleText, 
-    String contentText, 
-    String actionText, 
-    VoidCallback actionFunc
-    ){
+    BuildContext context,
+    String titleText,
+    Widget content,
+    String actionText,
+    VoidCallback actionFunc,
+    ) {
     showDialog(
-      context: context, 
+      context: context,
       builder: (dialogContext) {
         return ConfirmAlertDialog(
-          titleText: titleText, 
-          contentText: contentText, 
-          actionText: actionText, 
-          actionFunc: actionFunc
+          titleText: titleText,
+          content: content,
+          actionText: actionText,
+          actionFunc: actionFunc,
         );
       }
     );
@@ -423,40 +398,318 @@ class _UserProfileContent extends StatelessWidget {
   }
 }
 
-class _PlanSegmentedControl extends StatelessWidget {
-  final bool isIndividual;
-  final VoidCallback onSelectStandard;
-  final VoidCallback onSelectIndividual;
+class _PlanOptionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String priceLabel;
+  final String? badgeLabel;
+  final bool selected;
+  final List<String> features;
+  final VoidCallback onTap;
+  final Widget? footer;
 
-  const _PlanSegmentedControl({
-    required this.isIndividual,
-    required this.onSelectStandard,
-    required this.onSelectIndividual,
+  const _PlanOptionCard({
+    required this.icon,
+    required this.title,
+    required this.priceLabel,
+    this.badgeLabel,
+    required this.selected,
+    required this.features,
+    required this.onTap,
+    this.footer,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
       decoration: BoxDecoration(
-        color: AppColors.primaryThemeBlack,
-        borderRadius: BorderRadius.circular(10),
+        color: selected
+            ? Color.alphaBlend(AppColors.primaryScheme.withOpacity(0.12), AppColors.primaryThemeGrey)
+            : AppColors.primaryThemeGrey,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: selected ? AppColors.primaryScheme : Colors.white.withOpacity(0.06),
+          width: selected ? 1.4 : 1,
+        ),
+        boxShadow: selected
+            ? [
+                BoxShadow(
+                  color: AppColors.primaryScheme.withOpacity(0.18),
+                  blurRadius: 18,
+                  spreadRadius: -2,
+                  offset: const Offset(0, 6),
+                ),
+              ]
+            : [],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _PlanSegment(
-              label: "Стандартный",
-              selected: !isIndividual,
-              onTap: onSelectStandard,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          splashColor: AppColors.primaryScheme.withOpacity(0.08),
+          highlightColor: AppColors.primaryScheme.withOpacity(0.04),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? AppColors.primaryScheme
+                            : AppColors.primaryThemeBlack,
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        icon,
+                        size: 20,
+                        color: selected ? AppColors.primaryThemeBlack : AppColors.primaryScheme,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  title,
+                                  style: CustomTextStyles.m3ActionText(color: AppColors.textWhite)
+                                      .copyWith(fontSize: 17, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                              if (badgeLabel != null) ...[
+                                const SizedBox(width: 8),
+                                _Chip(label: badgeLabel!),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            priceLabel,
+                            style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _SelectionIndicator(selected: selected),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                ...features.map(
+                  (feature) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 16,
+                          color: selected ? AppColors.primaryScheme : AppColors.ratingGrey,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            feature,
+                            style: CustomTextStyles.m3Body(color: AppColors.secondaryThemeGrey),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (footer != null && selected) ...[
+                  const SizedBox(height: 4),
+                  footer!,
+                ],
+              ],
             ),
           ),
-          Expanded(
-            child: _PlanSegment(
-              label: "Индивидуальный",
-              selected: isIndividual,
-              onTap: onSelectIndividual,
-            ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectionIndicator extends StatelessWidget {
+  final bool selected;
+
+  const _SelectionIndicator({required this.selected});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: selected ? AppColors.primaryScheme : Colors.transparent,
+        border: Border.all(
+          color: selected ? AppColors.primaryScheme : AppColors.ratingGrey,
+          width: 1.6,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: selected
+          ? Icon(Icons.check_rounded, size: 14, color: AppColors.primaryThemeBlack)
+          : null,
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+
+  const _Chip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.primaryScheme.withOpacity(0.16),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: CustomTextStyles.m3FilmTitle(color: AppColors.primaryScheme).copyWith(fontSize: 11),
+      ),
+    );
+  }
+}
+
+class _ApiKeyCard extends StatefulWidget {
+  final String apiKey;
+  final VoidCallback onEdit;
+
+  const _ApiKeyCard({required this.apiKey, required this.onEdit});
+
+  @override
+  State<_ApiKeyCard> createState() => _ApiKeyCardState();
+}
+
+class _ApiKeyCardState extends State<_ApiKeyCard> {
+  bool _revealed = false;
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _maskedKey);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String get _maskedKey {
+    final key = widget.apiKey;
+    if (key.length <= 8) return "•" * key.length;
+    return "${key.substring(0, 4)}${"•" * 8}${key.substring(key.length - 4)}";
+  }
+
+  void _toggleReveal() {
+    setState(() {
+      _revealed = !_revealed;
+      _controller.text = _revealed ? widget.apiKey : _maskedKey;
+    });
+  }
+
+  void _copy(BuildContext context) {
+    Clipboard.setData(ClipboardData(text: widget.apiKey));
+    CustomSnackBar(message: "API Key скопирован в буфер обмена").show(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.primaryThemeBlack,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primaryScheme.withOpacity(0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.vpn_key_rounded, size: 15, color: AppColors.primaryScheme),
+              const SizedBox(width: 6),
+              Text("Ваш API Key", style: CustomTextStyles.m3Body(color: AppColors.ratingGrey)),
+              const Spacer(),
+              InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: widget.onEdit,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Text(
+                    "Изменить",
+                    style: CustomTextStyles.m3Body(color: AppColors.primaryScheme).copyWith(fontSize: 13),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 22,
+                  child: TextField(
+                    controller: _controller,
+                    readOnly: true,
+                    showCursor: false,
+                    maxLines: 1,
+                    scrollPhysics: const BouncingScrollPhysics(),
+                    style: CustomTextStyles.m3Content(color: AppColors.textWhite).copyWith(
+                      fontFamily: 'monospace',
+                      letterSpacing: _revealed ? 0.5 : 2,
+                    ),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: _toggleReveal,
+                icon: Icon(
+                  _revealed ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                  size: 18,
+                  color: AppColors.ratingGrey,
+                ),
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(6),
+                splashRadius: 18,
+              ),
+              IconButton(
+                onPressed: () => _copy(context),
+                icon: Icon(Icons.copy_rounded, size: 17, color: AppColors.primaryScheme),
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(6),
+                splashRadius: 18,
+              ),
+            ],
           ),
         ],
       ),
@@ -464,38 +717,47 @@ class _PlanSegmentedControl extends StatelessWidget {
   }
 }
 
-class _PlanSegment extends StatelessWidget {
-  final String label;
-  final bool selected;
+class _ApiKeyHint extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _PlanSegment({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+  const _ApiKeyHint({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primaryScheme : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: CustomTextStyles.m3ActionText(
-            color: selected ? AppColors.primaryThemeBlack : AppColors.ratingGrey,
-          ).copyWith(fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
-        ),
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.primaryThemeBlack,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline_rounded, size: 16, color: AppColors.ratingGrey),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                style: CustomTextStyles.m3Body(color: AppColors.ratingGrey).copyWith(fontSize: 13),
+                children: [
+                  const TextSpan(text: "Бесплатный API Key можно получить после регистрации на "),
+                  TextSpan(
+                    text: "kinopoiskapiunofficial.tech",
+                    style: CustomTextStyles.m3Body(color: AppColors.primaryScheme).copyWith(
+                      fontSize: 13,
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppColors.primaryScheme,
+                      decorationThickness: 2,
+                    ),
+                    recognizer: TapGestureRecognizer()..onTap = onTap,
+                  ),
+                  const TextSpan(text: "."),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -4,16 +4,16 @@ import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 
 class ConfirmAlertDialog extends StatelessWidget {
   final String titleText;
-  final String contentText;
+  final Widget content;
   final String actionText;
   final VoidCallback actionFunc;
 
   const ConfirmAlertDialog({
     super.key,
     required this.titleText,
-    required this.contentText,
+    required this.content,
     required this.actionText,
-    required this.actionFunc
+    required this.actionFunc,
   });
 
   @override
@@ -21,7 +21,7 @@ class ConfirmAlertDialog extends StatelessWidget {
     return AlertDialog(
       backgroundColor: AppColors.primaryThemeBlack,
       title: Text(titleText, style: CustomTextStyles.m3Title()),
-      content: Text(contentText, style: CustomTextStyles.m3Content()),
+      content: content,
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
@@ -32,7 +32,7 @@ class ConfirmAlertDialog extends StatelessWidget {
             actionFunc();
             Navigator.pop(context);
           },
-          child: Text(actionText, style: CustomTextStyles.m3Body(color: AppColors.primaryScheme))
+          child: Text(actionText, style: CustomTextStyles.m3Body(color: AppColors.primaryScheme)),
         )
       ],
     );

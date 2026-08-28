@@ -314,7 +314,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                       ],
                   )
                   : Padding(
-                    padding: const EdgeInsets.only(top: 20, bottom: 20),
+                    padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 20),
                     child: Align(
                       alignment: AlignmentGeometry.center,
                       child: Text(
@@ -598,35 +598,6 @@ class _PosterImageWidget extends StatelessWidget {
     color: AppColors.primaryThemeGrey,
     child: Icon(Icons.image_not_supported, color: AppColors.primaryScheme, size: 48),
   );
-
-  // Widget _buildImage() {
-  //   if (film.localPosterImagePath != null) {
-  //     final fullPosterImagePath = ImagePathResolver.resolve(film.localPosterImagePath!);
-  //     return Image.file(File(fullPosterImagePath), fit: BoxFit.cover);
-  //   }
-  //   return CachedNetworkImage(
-  //     imageUrl: film.posterUrl ?? "",
-  //     cacheManager: getIt<FilmImageCacheService>().instance,
-  //     fit: BoxFit.cover,
-  //     placeholder: (context, url) => LayoutBuilder(
-  //       builder: (context, constraints) {
-  //         return Skeletonizer(
-  //           enabled: true,
-  //           effect: const ShimmerEffect(
-  //             baseColor: AppColors.primaryThemeBlack,
-  //             highlightColor: AppColors.primaryThemeGrey,
-  //             duration: Duration(seconds: 4),
-  //           ),
-  //           child: Container(
-  //             width: constraints.maxWidth.isFinite ? constraints.maxWidth : double.infinity,
-  //             height: constraints.maxHeight.isFinite ? constraints.maxHeight : 200,
-  //             color: AppColors.primaryThemeGrey,
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
 }
 
 class _FilmRatingWidget extends StatelessWidget {

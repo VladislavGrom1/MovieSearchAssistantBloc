@@ -6,8 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 class LocalDataMigration {
-  static const int currentLocalStorageVersion = AppConfig.LOCAL_STORAGE_VERSION;
-  static const String versionFileName = AppConfig.VERSION_FILE_NAME;
+  static const int currentLocalStorageVersion = AppConfig.localStorageVersion;
+  static const String versionFileName = AppConfig.versionFileName;
  
   static Future<void> ensureLocalStorageMigrated() async {
     try {

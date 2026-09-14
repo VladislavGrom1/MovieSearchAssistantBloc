@@ -10,7 +10,7 @@ class ExportDataModel {
   final List<FilmCollectionLink> links;
 
   ExportDataModel({
-    this.version = AppConfig.LOCAL_STORAGE_VERSION,
+    this.version = AppConfig.localStorageVersion,
     required this.films,
     required this.collections,
     required this.links,

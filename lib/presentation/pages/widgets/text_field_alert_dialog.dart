@@ -70,13 +70,13 @@ class _TextFieldAlertDialogState extends State<TextFieldAlertDialog> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _focused ? AppColors.primaryScheme : Colors.white.withOpacity(0.12),
+              color: _focused ? AppColors.primaryScheme : Colors.white.withValues(alpha: 0.12),
               width: _focused ? 1.4 : 1,
             ),
             boxShadow: _focused
                 ? [
                     BoxShadow(
-                      color: AppColors.primaryScheme.withOpacity(0.35),
+                      color: AppColors.primaryScheme.withValues(alpha: 0.35),
                       blurRadius: 16,
                       spreadRadius: 1,
                     ),
@@ -87,7 +87,7 @@ class _TextFieldAlertDialogState extends State<TextFieldAlertDialog> {
             borderRadius: BorderRadius.circular(16),
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.primaryThemeBlack.withOpacity(0.55),
+                color: AppColors.primaryThemeBlack.withValues(alpha: 0.55),
                 borderRadius: BorderRadius.circular(16),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -1028,11 +1028,11 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
           initialSize = 0.35;
         }
     
-        initialSize = initialSize.clamp(0.28, 0.5);
+        initialSize = initialSize.clamp(0.3, 0.5);
 
         return DraggableScrollableSheet(
           expand: false,
-          minChildSize: 0.25,
+          minChildSize: 0.3,
           maxChildSize: 0.6,
           initialChildSize: initialSize,
           builder: (context, scrollController) {
@@ -1044,8 +1044,17 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Container(
+                    margin: EdgeInsets.only(top: 8, bottom: 6),
+                    width: 50,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryThemeGrey,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                   const SizedBox(height: 20),
-                  Text("Оценить", style: CustomTextStyles.m3ActionText()),
+                  Text("Оценить", style: CustomTextStyles.m3Title()),
                   const SizedBox(height: 20),
                   SizedBox(
                     height: 80,

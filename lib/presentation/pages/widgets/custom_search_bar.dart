@@ -133,6 +133,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                     if (keyword == "") {
                       return;
                     } else {
+                      _searchController.text = _searchController.text.trim();
                       widget.onSearchSubmitted(_searchController.text, context);
                       //_clearText();
                     }

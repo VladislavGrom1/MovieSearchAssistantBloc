@@ -15,7 +15,7 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  await LocalDataMigration.ensureLocalStorageMigrated();
+  await LocalDataMigration.ensureLocalStorageMigrated(); 
   runApp(const MyApp());
 }
 

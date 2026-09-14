@@ -272,8 +272,8 @@ class _GradientTitle extends StatelessWidget {
     final glowStyle = style.copyWith(
       color: Colors.white,
       shadows: [
-        Shadow(color: AppColors.primaryScheme.withOpacity(0.8), blurRadius: 18),
-        Shadow(color: AppColors.primaryScheme.withOpacity(0.5), blurRadius: 36),
+        Shadow(color: AppColors.primaryScheme.withValues(alpha: 0.8), blurRadius: 18),
+        Shadow(color: AppColors.primaryScheme.withValues(alpha: 0.5), blurRadius: 36),
       ],
     );
 
@@ -305,13 +305,13 @@ class _OnboardingIcon extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryScheme.withOpacity(0.4),
-            const Color(0xFFd88ef0).withOpacity(0.25),
+            AppColors.primaryScheme.withValues(alpha: 0.4),
+            const Color(0xFFd88ef0).withValues(alpha: 0.25),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryScheme.withOpacity(0.3),
+            color: AppColors.primaryScheme.withValues(alpha: 0.3),
             blurRadius: 40,
             spreadRadius: 4,
           ),

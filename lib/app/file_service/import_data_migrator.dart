@@ -4,7 +4,7 @@ import 'package:movie_search_assistant_bloc/app/util/constants/app_config.dart';
 import 'package:path/path.dart' as p;
  
 class ImportDataMigrator {
-  static const int currentLocalStorageVersion = AppConfig.LOCAL_STORAGE_VERSION;
+  static const int currentLocalStorageVersion = AppConfig.localStorageVersion;
   static const String versionKey = 'version';
  
   Future<Map<String, dynamic>> migrate(

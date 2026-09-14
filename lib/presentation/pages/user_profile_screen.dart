@@ -432,17 +432,17 @@ class _PlanOptionCard extends StatelessWidget {
       curve: Curves.easeOut,
       decoration: BoxDecoration(
         color: selected
-            ? Color.alphaBlend(AppColors.primaryScheme.withOpacity(0.12), AppColors.primaryThemeGrey)
+            ? Color.alphaBlend(AppColors.primaryScheme.withValues(alpha: 0.12), AppColors.primaryThemeGrey)
             : AppColors.primaryThemeGrey,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: selected ? AppColors.primaryScheme : Colors.white.withOpacity(0.06),
+          color: selected ? AppColors.primaryScheme : Colors.white.withValues(alpha: 0.06),
           width: selected ? 1.4 : 1,
         ),
         boxShadow: selected
             ? [
                 BoxShadow(
-                  color: AppColors.primaryScheme.withOpacity(0.18),
+                  color: AppColors.primaryScheme.withValues(alpha: 0.18),
                   blurRadius: 18,
                   spreadRadius: -2,
                   offset: const Offset(0, 6),
@@ -455,8 +455,8 @@ class _PlanOptionCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
-          splashColor: AppColors.primaryScheme.withOpacity(0.08),
-          highlightColor: AppColors.primaryScheme.withOpacity(0.04),
+          splashColor: AppColors.primaryScheme.withValues(alpha: 0.08),
+          highlightColor: AppColors.primaryScheme.withValues(alpha: 0.04),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -586,7 +586,7 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.primaryScheme.withOpacity(0.16),
+        color: AppColors.primaryScheme.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -649,7 +649,7 @@ class _ApiKeyCardState extends State<_ApiKeyCard> {
       decoration: BoxDecoration(
         color: AppColors.primaryThemeBlack,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryScheme.withOpacity(0.25)),
+        border: Border.all(color: AppColors.primaryScheme.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

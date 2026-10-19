@@ -10,9 +10,15 @@ class UpdateUserFilmInformationUseCase {
 
   Future<FilmEntity> call(FilmEntity film, int? userRating, String? userComment) async {
     try{
-      final filmWithUpdatedUserRating = film.copyWith(userRating: userRating ?? film.userRating, userComment: userComment ?? film.userComment);
-      await filmRepository.addFilmInLocalDataSource(FilmDetailModel.fromFilmEntity(filmWithUpdatedUserRating));
-      return filmWithUpdatedUserRating;
+      final savedFilm = await filmRepository.getFilmFromLocalDataSource(film.kinopoiskId!) ?? film;
+
+      final updated = savedFilm.copyWith(
+        userRating: userRating ?? savedFilm.userRating,
+        userComment: userComment ?? savedFilm.userComment,
+      );
+
+      await filmRepository.addFilmInLocalDataSource(FilmDetailModel.fromFilmEntity(updated));
+      return updated;
     } on LocalDataSourceException {
       rethrow;
     } catch(e){

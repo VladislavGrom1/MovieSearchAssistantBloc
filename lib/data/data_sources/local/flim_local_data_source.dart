@@ -20,6 +20,17 @@ class FilmLocalDataSource{
     }
   }
 
+  Stream<FilmDetailModel?> watchFilm(int idFilm) {
+    try {
+      final storageBox = Hive.box<FilmDetailModel>(HiveStorageKeys.filmDetailModelBox);
+      return storageBox.watch(key: idFilm).map((_) => storageBox.get(idFilm));
+    } on HiveError catch (e) {
+      throw LocalDataSourceException(message: e.message);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> addFilm(FilmDetailModel film) async {
     try{
       final storageBox = Hive.box<FilmDetailModel>(HiveStorageKeys.filmDetailModelBox);

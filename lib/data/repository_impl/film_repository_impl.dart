@@ -36,6 +36,19 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
+  Stream<FilmEntity?> watchFilm(int idFilm) {
+    try {
+      return filmLocalDataSource.watchFilm(idFilm).map(
+        (model) => model == null ? null : FilmEntity.fromFilmDetailModel(model),
+      );
+    } on LocalDataSourceException {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<List<FilmEntity>?> getCollectionFilms(String collectionName, int page) async {
     try{
       List<FilmBaseModel>? filmBaseModels = await filmRemoteDataSource.getCollectionFilms(collectionName, page);

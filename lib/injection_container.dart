@@ -60,6 +60,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/update_saved_film_fr
 import 'package:movie_search_assistant_bloc/domain/usecases/upload_image_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/use_shared_api_key_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_collections_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/watch_film_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_use_case.dart';
@@ -158,6 +159,7 @@ Future<void> initializeDependencies() async {
       imageStorageService: getIt()
     ));
     getIt.registerLazySingleton(() => RenameCollectionUseCase(collectionRepository: getIt()));
+    getIt.registerLazySingleton(() => WatchFilmUseCase(filmRepository: getIt()));
     getIt.registerLazySingleton(() => WatchLinksByFilmUseCase(filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchLinksByCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchLinksUseCase(filmCollectionRepository: getIt()));
@@ -221,6 +223,7 @@ Future<void> initializeDependencies() async {
       updateUserFilmInformationUseCase: getIt(),
       removeFilmFromCollectionUseCase: getIt(),
       watchLinksByFilmUseCase: getIt(),
+      watchFilmUseCase: getIt(),
       openUrlUseCase: getIt()
     ));
     getIt.registerFactory(() => CollectionsBloc(

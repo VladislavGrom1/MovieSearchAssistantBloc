@@ -16,6 +16,7 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
@@ -263,17 +264,6 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                         builder: (context, savedFilmIds) {
                           final isSaved = savedFilmIds.contains(film.kinopoiskId);
                           return _ActionButton(
-                            icon: Icons.comment_outlined,
-                            label: "Отзыв",
-                            color: isSaved ? AppColors.primaryScheme : AppColors.textDarkGrey,
-                            onTap: isSaved ? () => _openCommentDialog(context) : null,
-                          );
-                        },
-                      ),
-                      BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
-                        builder: (context, savedFilmIds) {
-                          final isSaved = savedFilmIds.contains(film.kinopoiskId);
-                          return _ActionButton(
                             icon: Icons.star_border_rounded,
                             label: "Оценить",
                             color: isSaved ? AppColors.primaryScheme : AppColors.textDarkGrey,
@@ -397,13 +387,43 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                 const SizedBox(height: 20),
                 Divider(color: AppColors.primaryScheme, thickness: 2),
                 const SizedBox(height: 20),
-                Align(
-                  alignment: AlignmentGeometry.centerLeft,
-                  child: Text(
-                    "Отзыв", 
-                    style: CustomTextStyles.m3Headline(), 
-                    textAlign: TextAlign.left,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      "Отзыв", 
+                      style: CustomTextStyles.m3Headline(), 
+                      textAlign: TextAlign.left,
+                    ),
+                    BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
+                      builder: (context, savedFilmIds) {
+                        final isSaved = savedFilmIds.contains(film.kinopoiskId);
+                        return IconButton(
+                          onPressed: isSaved ? () => _openCommentDialog(context) : null,
+                          icon: Icon(Icons.edit, color: isSaved ? AppColors.primaryScheme : AppColors.textDarkGrey),
+                        );
+                      },
+                    ),
+                    if (film.userComment != null && film.userComment!.isNotEmpty)
+                      IconButton(
+                        onPressed: () => _showConfirmActionDialog(
+                          context, 
+                          "Удалить отзыв", 
+                          Text.rich(
+                              TextSpan(
+                                style: CustomTextStyles.m3Content(),
+                                children: [
+                                  const TextSpan(text: "Вы действительно хотите "),
+                                  TextSpan(text: "удалить", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                                  const TextSpan(text: " отзыв?"),
+                                ],
+                              ),
+                            ),
+                          "Удалить",
+                          () => context.read<FilmInformationBloc>().add(UpdateUserFilmInformation(userComment: "")),
+                        ),
+                        icon: Icon(Icons.delete, color: AppColors.ratingRed),
+                    ),
+                  ]
                 ),
                 const SizedBox(height: 20),
                 Container(
@@ -412,7 +432,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                     color: AppColors.primaryThemeGrey,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: film.userComment == null 
+                  child: film.userComment == null || film.userComment!.isEmpty
                   ? Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -514,6 +534,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
           value: context.read<FilmInformationBloc>(),
           child: TextFieldAlertDialog(
               titleText: 'Изменить пользовательский отзыв', 
+              startText: widget.film.userComment,
               hintText: 'Новый отзыв',
               maxLenght: 500,
               maxLines: 8,
@@ -522,6 +543,26 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
             ),
           )
       );
+  }
+
+  void _showConfirmActionDialog(
+    BuildContext context, 
+    String titleText, 
+    Widget content, 
+    String actionText, 
+    VoidCallback actionFunc
+    ){
+    showDialog(
+      context: context, 
+      builder: (dialogContext) {
+        return ConfirmAlertDialog(
+          titleText: titleText, 
+          content: content, 
+          actionText: actionText, 
+          actionFunc: actionFunc
+        );
+      }
+    );
   }
 }
 

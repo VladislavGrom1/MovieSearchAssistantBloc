@@ -7,6 +7,8 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.d
 abstract class FilmRepository {
 
   Stream<List<FilmEntity>> watchFilms();
+
+  Stream<FilmEntity?> watchFilm(int idFilm);
   
   Future<List<FilmEntity>?> getCollectionFilms(String collectionName, int page);
 

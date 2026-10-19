@@ -4,6 +4,7 @@ import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 
 class TextFieldAlertDialog extends StatefulWidget {
   final String titleText;
+  final String? startText;
   final Widget? description;
   final String hintText;
   final int? maxLenght;
@@ -14,6 +15,7 @@ class TextFieldAlertDialog extends StatefulWidget {
   const TextFieldAlertDialog({
     super.key,
     required this.titleText,
+    this.startText,
     this.description,
     required this.hintText,
     this.maxLenght,
@@ -34,6 +36,9 @@ class _TextFieldAlertDialogState extends State<TextFieldAlertDialog> {
   @override
   void initState() {
     super.initState();
+    if (widget.startText != null) {
+      controller.text = widget.startText!;
+    }
     focusNode.addListener(() {
       setState(() {
         _focused = focusNode.hasFocus;

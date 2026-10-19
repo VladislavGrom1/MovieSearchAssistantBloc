@@ -62,6 +62,15 @@ class RefreshFilmInformation extends FilmInformationEvent {
   List<Object?> get props => [film];
 }
 
+class SavedFilmChanged extends FilmInformationEvent {
+  final FilmEntity? film;
+
+  const SavedFilmChanged(this.film);
+
+  @override
+  List<Object?> get props => [film];
+}
+
 class LaunchUrl extends FilmInformationEvent{
   final String? url;
 

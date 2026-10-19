@@ -203,7 +203,7 @@ class _CollectionsList extends StatelessWidget {
                 TextSpan(
                   style: CustomTextStyles.m3Content(),
                   children: [
-                    const TextSpan(text: "Вы действительно хотите"),
+                    const TextSpan(text: "Вы действительно хотите "),
                     TextSpan(text: "удалить", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
                     const TextSpan(text: " коллекцию? Коллекция и её содержимое будут "),
                     TextSpan(text: "удалены", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),

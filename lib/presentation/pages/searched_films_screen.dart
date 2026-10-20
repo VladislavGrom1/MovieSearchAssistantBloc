@@ -14,6 +14,7 @@ import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_re
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_with_library_status.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/soft_gradient_card.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/tap_scale.dart';
 
 @RoutePage()
@@ -189,15 +190,8 @@ class _FilmCard extends StatelessWidget {
           CustomSnackBar(message: "Не удалось получить информацию о фильме").show(context); 
         }
       },
-      child: Card(
-        color: AppColors.primaryThemeGrey,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: Row(
+      child: SoftGradientCard(
+        child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FilmPosterWithLibraryStatus(film: film),
@@ -241,7 +235,6 @@ class _FilmCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }

@@ -13,6 +13,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/s
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_search_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_image.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/soft_gradient_card.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/tap_scale.dart';
 
 @RoutePage()
@@ -288,15 +289,8 @@ class _FilmCard extends StatelessWidget {
           context.read<SelectionFilmsCubit>().enterSelection(savedFilm.kinopoiskId!);
         }
       },
-      child: Card(
-        color: AppColors.primaryThemeGrey,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: Row(
+      child: SoftGradientCard(
+        child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FilmPosterImage(
@@ -380,7 +374,6 @@ class _FilmCard extends StatelessWidget {
               )
             ],
           ),
-        ),
       ),
     );
   }

@@ -20,7 +20,11 @@ class WatchLinksByCollectionUseCase {
         filmCollectionRepository.watchLinksByCollectionId(collectionId),
         filmRepository.watchFilms(),
         (List<int> filmIds, List<FilmEntity> allFilms) {
-          return allFilms.where((film) => filmIds.contains(film.kinopoiskId)).toList();
+          final filmsById = {for (final film in allFilms) film.kinopoiskId: film};
+          return filmIds
+              .map((id) => filmsById[id])
+              .whereType<FilmEntity>()
+              .toList();
         },
       );
     } on LocalDataSourceException {

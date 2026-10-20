@@ -5,18 +5,21 @@ class AppColors {
   static const Color primaryThemeBlack = Color(0xFF151313);
   static const Color primaryThemeGrey = Color(0xFF302e2e);
   static const Color secondaryThemeGrey = Color(0xFFbfbfbf);
-
+ 
   static const Color ratingGreen = Color(0xFF047e29);
   static const Color ratingOrange = Color(0xFFb57807);
   static const Color ratingRed = Color(0xFF9e2121);
   static const Color ratingGrey = Color(0xFF888888);
-
+ 
   static const Color textGrey = Color(0xFFbfbfbf);
   static const Color textWhite = Color(0xFFefeeee);
   static const Color textDarkGrey = Color.fromARGB(255, 128, 124, 124);
-
+ 
   static const Color snackRed = Color(0xFF9e2121);
   static const Color snackGreen = Color(0xFF047e29);
-
-  static const Color savedFilmIcon = Colors.deepOrange;
+ 
+  static const Color cardGradientStart = Color.fromARGB(255, 74, 79, 171);
+  static const Color cardGradientEnd = Color.fromARGB(255, 81, 51, 115);
+  static const Color cardSecondaryText = Color.fromARGB(255, 146, 140, 181);
+  static const Color cardAccentText = Color(0xFFE2D9FF);
 }

@@ -34,34 +34,41 @@ class HomeScreen extends StatelessWidget {
           },
           child: Scaffold(
             body: child,
-            bottomNavigationBar: BottomNavigationBar(
-                enableFeedback: false,
-                type: BottomNavigationBarType.shifting,
-                backgroundColor: AppColors.primaryThemeBlack,
-                selectedItemColor: AppColors.primaryScheme,
-                unselectedItemColor: AppColors.primaryThemeGrey,
-                currentIndex: tabsRouter.activeIndex,
-                onTap: tabsRouter.setActiveIndex,
-                selectedLabelStyle: CustomTextStyles.m3ActionText().copyWith(height: 1.2),
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.search),
-                    label: "Поиск",
-                    backgroundColor: AppColors.primaryThemeBlack
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.library_books_outlined),
-                    label: "Коллекции",
-                    backgroundColor: AppColors.primaryThemeBlack
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.account_circle),
-                    label: "Профиль",
-                    backgroundColor: AppColors.primaryThemeBlack
-                  ),
-                ],
+            bottomNavigationBar: Theme(
+              data: Theme.of(context).copyWith(
+                splashFactory: NoSplash.splashFactory,
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
               ),
-          ),
+              child: BottomNavigationBar(
+                  enableFeedback: false,
+                  type: BottomNavigationBarType.shifting,
+                  backgroundColor: AppColors.primaryThemeBlack,
+                  selectedItemColor: AppColors.primaryScheme,
+                  unselectedItemColor: AppColors.primaryThemeGrey,
+                  currentIndex: tabsRouter.activeIndex,
+                  onTap: tabsRouter.setActiveIndex,
+                  selectedLabelStyle: CustomTextStyles.m3ActionText().copyWith(height: 1.2),
+                  items: const [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.search),
+                      label: "Поиск",
+                      backgroundColor: AppColors.primaryThemeBlack
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.library_books_outlined),
+                      label: "Коллекции",
+                      backgroundColor: AppColors.primaryThemeBlack
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.account_circle),
+                      label: "Профиль",
+                      backgroundColor: AppColors.primaryThemeBlack
+                    ),
+                  ],
+                ),
+            )
+          )
         );
       },
     );

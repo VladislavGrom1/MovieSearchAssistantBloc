@@ -378,7 +378,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                           "Удалить",
                           () => context.read<FilmInformationBloc>().add(UpdateUserFilmInformation(clearUserRating: true)),
                         ),
-                        icon: Icon(Icons.delete, color: AppColors.ratingRed),
+                        icon: Icon(Icons.delete, color: AppColors.primaryScheme),
                     ),
                   ]
                 ),
@@ -442,7 +442,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                           "Удалить",
                           () => context.read<FilmInformationBloc>().add(UpdateUserFilmInformation(userComment: "")),
                         ),
-                        icon: Icon(Icons.delete, color: AppColors.ratingRed),
+                        icon: Icon(Icons.delete, color: AppColors.primaryScheme),
                     ),
                   ]
                 ),

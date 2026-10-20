@@ -5,18 +5,24 @@ import 'package:movie_search_assistant_bloc/domain/repository/film_repository.da
 
 class UpdateUserFilmInformationUseCase {
   final FilmRepository filmRepository;
-
+ 
   UpdateUserFilmInformationUseCase({required this.filmRepository});
-
-  Future<FilmEntity> call(FilmEntity film, int? userRating, String? userComment) async {
+ 
+  Future<FilmEntity> call(
+    FilmEntity film,
+    int? userRating,
+    String? userComment, {
+    bool clearUserRating = false,
+  }) async {
     try{
       final savedFilm = await filmRepository.getFilmFromLocalDataSource(film.kinopoiskId!) ?? film;
-
+ 
       final updated = savedFilm.copyWith(
         userRating: userRating ?? savedFilm.userRating,
         userComment: userComment ?? savedFilm.userComment,
+        clearUserRating: clearUserRating,
       );
-
+ 
       await filmRepository.addFilmInLocalDataSource(FilmDetailModel.fromFilmEntity(updated));
       return updated;
     } on LocalDataSourceException {

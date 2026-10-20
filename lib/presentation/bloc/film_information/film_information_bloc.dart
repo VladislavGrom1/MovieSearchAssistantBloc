@@ -32,7 +32,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   final OpenUrlUseCase openUrlUseCase;
   StreamSubscription<List<String>>? _collectionIdsSubscription;
   StreamSubscription<FilmEntity?>? _filmSubscription;
-
+ 
   FilmInformationBloc({
     required this.getFilmInformationUseCase,
     required this.getSavedFilmUseCase,
@@ -54,11 +54,11 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
     on<SavedFilmChanged>(_onSavedFilmChanged);
     on<LaunchUrl>(_launchUrl);
   }
-
+ 
   Future<void> _subscribe(int filmId) async {
     await _collectionIdsSubscription?.cancel();
     await _filmSubscription?.cancel();
-
+ 
     _collectionIdsSubscription = watchLinksByFilmUseCase(filmId).listen(
       (ids) => add(UpdateFilmLinks(updatedCollectionIds: ids)),
     );
@@ -66,7 +66,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       (film) => add(SavedFilmChanged(film)),
     );
   }
-
+ 
   Future<void> _getFilmInformation(GetFilmInformation event, Emitter emit) async {
     emit(FilmLoading());
     try {
@@ -74,35 +74,35 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       List<String>? collectionIds; 
       
       (savedFilm, collectionIds) = await getSavedFilmUseCase.call(event.idFilm);
-
+ 
       FilmImagesEntity? filmImages;
-
+ 
       try {
         filmImages = await getFilmImagesUseCase.call(event.idFilm);
       } catch (_) {
         filmImages = null;
       }
-
+ 
       FilmEntity? film = savedFilm;
-
+ 
       if (film == null) {
         final (remoteFilm, ids) = await getFilmInformationUseCase.call(event.idFilm);
         film = remoteFilm;
         collectionIds = ids;
       }
-
+ 
       if (film == null) {
         emit(FilmFailure(message: "Не удалось получить информацию о фильме"));
         return;
       }
-
+ 
       emit(FilmLoaded(
         film: film,
         filmImages: filmImages,
         collectionIds: collectionIds,
         status: FilmStatus.success
       ));
-
+ 
       await _subscribe(event.idFilm);
     } on RemoteDataSourceException catch (e) {
       emit(FilmFailure(message: e.message));
@@ -112,7 +112,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       emit(FilmFailure(message: "Неизвестная ошибка"));
     }
   }
-
+ 
   Future<void> _addFilmToCollection(AddFilmToCollection event, Emitter emit) async {
     final currentState = state;
     if(currentState is! FilmLoaded) return;
@@ -130,7 +130,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       emit(currentState);
     }
   }
-
+ 
   Future<void> _removeFilmFromCollection(RemoveFilmFromCollection event, Emitter emit) async {
     final currentState = state;
     if(currentState is! FilmLoaded) return;
@@ -148,7 +148,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       emit(currentState);
     }
   }
-
+ 
   Future<void> _updateFilmLinks(UpdateFilmLinks event, Emitter emit) async {
     final currentState = state;
     if(currentState is! FilmLoaded) return;
@@ -160,12 +160,17 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       clearLoadingCollectionId: true
     ));
   }
-
+ 
   Future<void> _updateUserFilmInformation(UpdateUserFilmInformation event, Emitter emit) async {
     final currentState = state;
     if(currentState is! FilmLoaded) return;
     try{
-      await updateUserFilmInformationUseCase.call(currentState.film, event.userRating, event.userComment);
+      await updateUserFilmInformationUseCase.call(
+        currentState.film,
+        event.userRating,
+        event.userComment,
+        clearUserRating: event.clearUserRating,
+      );
     } on LocalDataSourceException catch(e){
       emit(FilmActionFailure(message: e.message));
       emit(currentState);
@@ -174,7 +179,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       emit(currentState);
     }
   }
-
+ 
   Future<void> _refreshFilmInformation(RefreshFilmInformation event, Emitter emit) async {
     final currentState = state;
     try{
@@ -191,7 +196,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
         final updatedFilm = await updateSavedFilmFromServerUseCase.call(event.film, newFilm, newFilmImages);
         emit(currentState.copyWith(film: updatedFilm, filmImages: newFilmImages, collectionIds: collectionIds, status: FilmStatus.success));
       }
-
+ 
       if(currentState is FilmFailure){
         if(newFilm != null) {
           emit(FilmLoaded(film: newFilm, filmImages: newFilmImages, collectionIds: collectionIds, status: FilmStatus.success));
@@ -208,7 +213,7 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       emit(currentState);
     }
   }
-
+ 
   Future<void> _launchUrl(LaunchUrl event, Emitter emit) async{
     final currentState = state;
     try{
@@ -222,23 +227,23 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       emit(currentState);
     }
   }
-
+ 
   Future<void> _onSavedFilmChanged(SavedFilmChanged event, Emitter emit) async {
     final currentState = state;
     if (currentState is! FilmLoaded) return;
-
+ 
     final savedFilm = event.film;
-
+ 
     if (savedFilm == null) {
       emit(currentState.copyWith(
         film: currentState.film.copyWith(clearUserData: true, clearLocalMedia: true),
       ));
       return;
     }
-
+ 
     emit(currentState.copyWith(film: savedFilm));
   }
-
+ 
   @override
   Future<void> close() {
     _collectionIdsSubscription?.cancel();

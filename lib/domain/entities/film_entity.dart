@@ -129,6 +129,8 @@ class FilmEntity extends Equatable {
     String? localPosterImagePath,
     List<String>? localScreenshotPaths,
     bool clearUserData = false,
+    bool clearUserRating = false,
+    bool clearUserComment = false,
     bool clearLocalMedia = false,
     // FilmDetailInformation
     String? kinopoiskHDId,
@@ -179,8 +181,8 @@ class FilmEntity extends Equatable {
       type: type ?? this.type,
       posterUrl: posterUrl ?? this.posterUrl,
       posterUrlPreview: posterUrlPreview ?? this.posterUrlPreview,
-      userComment: clearUserData ? null : (userComment ?? this.userComment),
-      userRating: clearUserData ? null : (userRating ?? this.userRating),
+      userComment: (clearUserData || clearUserComment) ? null : (userComment ?? this.userComment),
+      userRating: (clearUserData || clearUserRating) ? null : (userRating ?? this.userRating),
       localPosterImagePath: clearLocalMedia ? null : (localPosterImagePath ?? this.localPosterImagePath),
       localScreenshotPaths: clearLocalMedia ? null : (localScreenshotPaths ?? this.localScreenshotPaths),
       // FilmDetailInformation

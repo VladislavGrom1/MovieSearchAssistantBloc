@@ -64,12 +64,14 @@ import 'package:movie_search_assistant_bloc/domain/usecases/watch_film_use_case.
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_collection_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/watch_saved_films_status_use_case.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_films_cubit/selection_films_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/filter_film/filter_film_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_saved_films_status_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/onboarding_screen/authentication_bloc.dart';
@@ -163,6 +165,10 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => WatchLinksByFilmUseCase(filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchLinksByCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => WatchLinksUseCase(filmCollectionRepository: getIt()));
+    getIt.registerLazySingleton(() => WatchSavedFilmsStatusUseCase(
+      filmRepository: getIt(),
+      filmCollectionRepository: getIt(),
+    ));
     getIt.registerLazySingleton(() => WatchCollectionsUseCase(collectionRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => ExportLibraryUseCase(
       filmRepository: getIt(), 
@@ -259,5 +265,6 @@ Future<void> initializeDependencies() async {
     // Cubit
     getIt.registerFactory(() => SelectionFilmsCubit());
     getIt.registerFactory(() => WatchFilmCollectionLinksCubit(getIt()));
+    getIt.registerFactory(() => WatchSavedFilmsStatusCubit(getIt()));
     getIt.registerLazySingleton(() => NetworkCubit(getIt()));
 }

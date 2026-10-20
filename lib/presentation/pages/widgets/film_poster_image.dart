@@ -25,7 +25,7 @@ class FilmPosterImage extends StatelessWidget {
     this.showSavedIcon = false,
     this.showUserRating = false,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -50,7 +50,7 @@ class FilmPosterImage extends StatelessWidget {
       ),
     );
   }
-
+ 
   Widget _buildImage() {
     if (localImagePath != null && localImagePath!.isNotEmpty) {
       final fullPath = ImagePathResolver.resolve(localImagePath!);
@@ -92,23 +92,23 @@ class FilmPosterImage extends StatelessWidget {
     }
   }
 }
-
+ 
 enum RatingPosition {
   bottomRight,
   bottomLeft,
   topRight,
   topLeft,
 }
-
+ 
 class _RatingIcon extends StatelessWidget {
   final num? rating;
   final RatingPosition position;
-
+ 
   const _RatingIcon({
     required this.rating,
     this.position = RatingPosition.bottomRight,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     Color backgroundColor;
@@ -121,7 +121,7 @@ class _RatingIcon extends StatelessWidget {
       backgroundColor = _getRatingColor(rating!);
       ratingText = rating.toString();
     }
-
+ 
     return Positioned(
       bottom: position == RatingPosition.bottomRight || position == RatingPosition.bottomLeft ? 6 : null,
       top: position == RatingPosition.topRight || position == RatingPosition.topLeft ? 6 : null,
@@ -143,7 +143,7 @@ class _RatingIcon extends StatelessWidget {
       ),
     );
   }
-
+ 
   Color _getRatingColor(num rating) {
     if (rating >= 7 && rating <= 10) return AppColors.ratingGreen;
     if (rating >= 6 && rating < 7) return AppColors.ratingOrange;
@@ -152,7 +152,7 @@ class _RatingIcon extends StatelessWidget {
     return AppColors.ratingGrey;
   }
 }
-
+ 
 class _SavedIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -163,7 +163,7 @@ class _SavedIcon extends StatelessWidget {
         width: 20,
         height: 20,
         decoration: BoxDecoration(
-          color: AppColors.savedFilmIcon,
+          color: AppColors.primaryScheme,
           borderRadius: BorderRadius.circular(5.0),
         ),
         child: Icon(
@@ -175,12 +175,12 @@ class _SavedIcon extends StatelessWidget {
     );
   }
 }
-
+ 
 class _UserRatingIcon extends StatelessWidget {
   final num? rating;
-
+ 
   const _UserRatingIcon({required this.rating});
-
+ 
   @override
   Widget build(BuildContext context) {
     return Positioned(

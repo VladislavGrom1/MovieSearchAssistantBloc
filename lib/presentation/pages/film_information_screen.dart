@@ -353,13 +353,34 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                 const SizedBox(height: 20),
                 Divider(color: AppColors.primaryScheme, thickness: 2),
                 const SizedBox(height: 20),
-                Align(
-                  alignment: AlignmentGeometry.centerLeft,
-                  child: Text(
-                    "Рейтинг", 
-                    style: CustomTextStyles.m3Headline(), 
-                    textAlign: TextAlign.left,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      "Рейтинг", 
+                      style: CustomTextStyles.m3Headline(), 
+                      textAlign: TextAlign.left,
+                    ),
+                    if (film.userRating != null)
+                      IconButton(
+                        onPressed: () => _showConfirmActionDialog(
+                          context, 
+                          "Удалить пользовательский рейтинг", 
+                          Text.rich(
+                              TextSpan(
+                                style: CustomTextStyles.m3Content(),
+                                children: [
+                                  const TextSpan(text: "Вы действительно хотите "),
+                                  TextSpan(text: "удалить", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
+                                  const TextSpan(text: " пользовательский рейтинг?"),
+                                ],
+                              ),
+                            ),
+                          "Удалить",
+                          () => context.read<FilmInformationBloc>().add(UpdateUserFilmInformation(clearUserRating: true)),
+                        ),
+                        icon: Icon(Icons.delete, color: AppColors.ratingRed),
+                    ),
+                  ]
                 ),
                 const SizedBox(height: 20),
                 _FilmRatingWidget(
@@ -380,7 +401,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
                 const SizedBox(height: 10),
                 _FilmRatingWidget(
                   imagePath: "assets/icons/movie_search_assistant_icon_dark.png", 
-                  resourseName: "Ваша оценка", 
+                  resourseName: "Польз. рейтинг", 
                   rating: film.userRating, 
                   isUserRating: true,
                 ),

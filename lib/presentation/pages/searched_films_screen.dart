@@ -8,12 +8,12 @@ import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/app/util/data_formatter.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
-import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_saved_films_status_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/searched_films/searched_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_image.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_with_library_status.dart';
 
 @RoutePage()
 class SearchedFilmsScreen extends StatelessWidget {
@@ -24,7 +24,7 @@ class SearchedFilmsScreen extends StatelessWidget {
   final int? yearFrom;
   final int? yearTo;
   final String appBarTitle;
-
+ 
   const SearchedFilmsScreen({
     super.key,
     this.nameCollection,
@@ -35,7 +35,7 @@ class SearchedFilmsScreen extends StatelessWidget {
     this.yearTo,
     required this.appBarTitle,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -50,49 +50,49 @@ class SearchedFilmsScreen extends StatelessWidget {
                 yearTo: yearTo)),
         ),
         BlocProvider(
-          create: (_) => getIt<WatchFilmCollectionLinksCubit>(),
+          create: (_) => getIt<WatchSavedFilmsStatusCubit>(),
         ),
       ],
       child: _SearchedFilmView(appBarTitle: appBarTitle),
     );
   }
 }
-
+ 
 class _SearchedFilmView extends StatefulWidget {
   final String appBarTitle;
-
+ 
   const _SearchedFilmView({required this.appBarTitle});
-
+ 
   @override
   State<_SearchedFilmView> createState() => _SearchedFilmViewState();
 }
-
+ 
 class _SearchedFilmViewState extends State<_SearchedFilmView> {
   final ScrollController _scrollController = ScrollController();
-
+ 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
   }
-
+ 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
   }
-
+ 
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       context.read<SearchedFilmsBloc>().add(LoadNextPage());
     }
   }
-
+ 
   Future<void> _onRefresh() async {
     context.read<SearchedFilmsBloc>().add(RefreshFilmsPage());
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,54 +135,45 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
     );
   }
 }
-
+ 
 class _FilmsList extends StatelessWidget {
   final SearchedFilmsLoadedSuccessful state;
   final ScrollController controller;
-
+ 
   const _FilmsList({
     required this.state,
     required this.controller,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     final films = state.searchedFilms;
-
-    return BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
-      builder: (context, savedFilmIds) {
-        return ListView.separated(
-          addAutomaticKeepAlives: false,
-          addSemanticIndexes: false,
-          physics: const BouncingScrollPhysics(),
-          controller: controller,
-          itemCount: films.length + (state.isLoadingMore ? 1 : 0),
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            if (index >= films.length) {
-              return const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-    
-            final film = films[index];
-            final isSaved = savedFilmIds.contains(film.kinopoiskId);
-    
-            return _FilmCard(film: film, isSaved: isSaved);
-          },
-        );
+ 
+    return ListView.separated(
+      addAutomaticKeepAlives: false,
+      addSemanticIndexes: false,
+      physics: const BouncingScrollPhysics(),
+      controller: controller,
+      itemCount: films.length + (state.isLoadingMore ? 1 : 0),
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        if (index >= films.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return _FilmCard(film: films[index]);
       },
     );
   }
 }
-
+ 
 class _FilmCard extends StatelessWidget {
   final FilmEntity film;
-  final bool isSaved;
-
-  const _FilmCard({required this.film, required this.isSaved});
-
+ 
+  const _FilmCard({required this.film});
+ 
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -211,11 +202,7 @@ class _FilmCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FilmPosterImage(
-                networkImageUrl: film.posterUrlPreview,
-                kinopoiskRating: film.ratingKinopoisk,
-                showSavedIcon: isSaved,
-              ),
+              FilmPosterWithLibraryStatus(film: film),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(

@@ -9,18 +9,18 @@ import 'package:movie_search_assistant_bloc/app/util/constants/film_collection_n
 import 'package:movie_search_assistant_bloc/app/util/data_formatter.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
-import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_saved_films_status_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_search_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_image.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_with_library_status.dart';
 
 @RoutePage()
 class SearchFilmScreen extends StatelessWidget {
   const SearchFilmScreen({super.key});
-
+ 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -29,21 +29,21 @@ class SearchFilmScreen extends StatelessWidget {
           create: (_) => getIt<SearchFilmsBloc>()..add(DisplayFilmCollections()),
         ),
         BlocProvider(
-          create: (_) => getIt<WatchFilmCollectionLinksCubit>(),
+          create: (_) => getIt<WatchSavedFilmsStatusCubit>(),
         ),
       ],
       child: _SearchFilmView(),
     );
   }
 }
-
+ 
 class _SearchFilmView extends StatelessWidget {
   const _SearchFilmView();
-
+ 
   @override
   Widget build(BuildContext context) {
     final searchFilmBloc = context.read<SearchFilmsBloc>();
-
+ 
     return Scaffold(
         backgroundColor: AppColors.primaryThemeBlack,
         body: SafeArea(
@@ -64,11 +64,11 @@ class _SearchFilmView extends StatelessWidget {
                         if (state is SearchFilmsLoading) {
                           return Center(child: CircularProgressIndicator());
                         }
-
+ 
                         if (state is CollectionsFilmsLoadedFailure) {
                           return Center(child: ErrorMessageWidget(message: state.message));
                         }
-
+ 
                         if (state is CollectionsFilmsLoadedSuccessful) {
                           return _SearchFilmContent(filmCollectionsMap: state.filmCollectionsMap);
                         }
@@ -83,20 +83,20 @@ class _SearchFilmView extends StatelessWidget {
         ));
   }
 }
-
+ 
 class _SearchFilmContent extends StatelessWidget {
   final Map<String, List<FilmEntity>?> filmCollectionsMap;
-
+ 
   const _SearchFilmContent({required this.filmCollectionsMap});
-
+ 
   void onSearchSubmitted(String keyword, BuildContext context) {
     context.router.push(SearchedFilmsRoute(keyword: keyword, appBarTitle: "Поиск: $keyword"));
   }
-
+ 
   void onFilterSubmitted(BuildContext context) {
     context.router.push(FilterFilmRoute());
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -115,12 +115,12 @@ class _SearchFilmContent extends StatelessWidget {
     );
   }
 }
-
+ 
 class _CollectionsList extends StatelessWidget {
   final Map<String, List<FilmEntity>?> filmCollectionsMap;
-
+ 
   const _CollectionsList({required this.filmCollectionsMap});
-
+ 
   @override
   Widget build(BuildContext context) {
     final filmCollectionsNamesList = FilmCollectionNames.filmCollectionNames;
@@ -157,45 +157,37 @@ class _CollectionsList extends StatelessWidget {
         itemCount: FilmCollectionNames.filmCollectionNames.length);
   }
 }
-
+ 
 class _CollectionFilmsList extends StatelessWidget {
   final Map<String, List<FilmEntity>?> filmCollectionsMap;
   final String filmCollectionsName;
-
+ 
   const _CollectionFilmsList({required this.filmCollectionsMap, required this.filmCollectionsName});
-
+ 
   @override
   Widget build(BuildContext context) {
-    List<FilmEntity>? filmEntityList = filmCollectionsMap[filmCollectionsName];
-
-    return BlocBuilder<WatchFilmCollectionLinksCubit, Set<int>>(
-      builder: (context, savedFilmIds) {
-        if(filmEntityList == null){
-          return Text("Фильмы отсутствуют");
-        }
-        return ListView.separated(
-            addAutomaticKeepAlives: false,
-            addSemanticIndexes: false,
-            physics: const BouncingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) {
-              final film = filmEntityList[index];
-              final isSaved = savedFilmIds.contains(film.kinopoiskId);
-              return _FilmCard(film: film, isSaved: isSaved);
-            },
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
-            itemCount: min(filmCollectionsMap[filmCollectionsName]!.length, 10));
-      },
-    );
+    final filmEntityList = filmCollectionsMap[filmCollectionsName];
+ 
+    if (filmEntityList == null) {
+      return const Text("Фильмы отсутствуют");
+    }
+ 
+    return ListView.separated(
+        addAutomaticKeepAlives: false,
+        addSemanticIndexes: false,
+        physics: const BouncingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) => _FilmCard(film: filmEntityList[index]),
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
+        itemCount: min(filmEntityList.length, 10));
   }
 }
-
+ 
 class _FilmCard extends StatelessWidget {
   final FilmEntity film;
-  final bool isSaved;
-  
-  const _FilmCard({required this.film, required this.isSaved});
-
+ 
+  const _FilmCard({required this.film});
+ 
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -208,22 +200,18 @@ class _FilmCard extends StatelessWidget {
                 filmId: film.kinopoiskId!,
                 filmName: film.nameRu ?? film.nameOriginal.toString()));
           } else {
-            CustomSnackBar(message: "Не удалось получить информацию о фильме");
+            CustomSnackBar(message: "Не удалось получить информацию о фильме").show(context);
           }
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FilmPosterImage(
-              networkImageUrl: film.posterUrlPreview,
-              kinopoiskRating: film.ratingKinopoisk,
-              showSavedIcon: isSaved,
-            ),
+            FilmPosterWithLibraryStatus(film: film),
             const SizedBox(height: 5),
             SizedBox(
               width: 96,
               child: Text(
-                film.nameRu ?? film.nameOriginal!,
+                film.nameRu ?? film.nameOriginal ?? "-",
                 overflow: TextOverflow.ellipsis,
                 maxLines: 3,
                 style: CustomTextStyles.m3FilmTitle()

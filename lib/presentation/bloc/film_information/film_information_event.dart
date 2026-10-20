@@ -46,11 +46,16 @@ class UpdateFilmLinks extends FilmInformationEvent {
 class UpdateUserFilmInformation extends FilmInformationEvent {
   final int? userRating;
   final String? userComment;
-
-  const UpdateUserFilmInformation({this.userRating, this.userComment});
-
+  final bool clearUserRating;
+ 
+  const UpdateUserFilmInformation({
+    this.userRating,
+    this.userComment,
+    this.clearUserRating = false,
+  });
+ 
   @override
-  List<Object?> get props => [userRating, userComment];
+  List<Object?> get props => [userRating, userComment, clearUserRating];
 }
 
 class RefreshFilmInformation extends FilmInformationEvent {

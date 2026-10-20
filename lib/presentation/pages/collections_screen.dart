@@ -12,6 +12,7 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_search_bar.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/tap_scale.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
 
 @RoutePage()
@@ -277,10 +278,7 @@ class _CollectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final date = collection.createdAt;
 
-    return InkWell(
-      enableFeedback: false,
-      highlightColor: Colors.transparent,
-      splashColor: Colors.transparent,
+    return TapScale(
       onTap: () {
         context.router.push(CollectionFilmsRoute(
           collectionId: collection.id!,
@@ -389,10 +387,7 @@ class _CreateCollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-        enableFeedback: false,
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
+    return TapScale(
         onTap: () => showDialog(
           context: context,
           builder: (dialogContext) {

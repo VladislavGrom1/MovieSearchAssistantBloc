@@ -13,6 +13,12 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
+      //duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      transitionBuilder: (context, child, animation) => FadeTransition(
+        opacity: animation,
+        child: child,
+      ),
       routes: [
           SearchFilmWrapperRoute(),
           CollectionsRoute(),

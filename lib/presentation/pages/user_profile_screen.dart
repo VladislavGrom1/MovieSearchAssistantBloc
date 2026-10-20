@@ -11,6 +11,7 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/tap_scale.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
 
 @RoutePage()
@@ -427,123 +428,120 @@ class _PlanOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        color: selected
-            ? Color.alphaBlend(AppColors.primaryScheme.withValues(alpha: 0.12), AppColors.primaryThemeGrey)
-            : AppColors.primaryThemeGrey,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: selected ? AppColors.primaryScheme : Colors.white.withValues(alpha: 0.06),
-          width: selected ? 1.4 : 1,
-        ),
-        boxShadow: selected
-            ? [
-                BoxShadow(
-                  color: AppColors.primaryScheme.withValues(alpha: 0.18),
-                  blurRadius: 18,
-                  spreadRadius: -2,
-                  offset: const Offset(0, 6),
-                ),
-              ]
-            : [],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+    return TapScale(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          color: selected
+              ? Color.alphaBlend(AppColors.primaryScheme.withValues(alpha: 0.12), AppColors.primaryThemeGrey)
+              : AppColors.primaryThemeGrey,
           borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          splashColor: AppColors.primaryScheme.withValues(alpha: 0.08),
-          highlightColor: AppColors.primaryScheme.withValues(alpha: 0.04),
+          border: Border.all(
+            color: selected ? AppColors.primaryScheme : Colors.white.withValues(alpha: 0.06),
+            width: selected ? 1.4 : 1,
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryScheme.withValues(alpha: 0.18),
+                    blurRadius: 18,
+                    spreadRadius: -2,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
+              : [],
+        ),
+        child: Material(
+          color: Colors.transparent,
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AppColors.primaryScheme
-                            : AppColors.primaryThemeBlack,
-                        borderRadius: BorderRadius.circular(11),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? AppColors.primaryScheme
+                              : AppColors.primaryThemeBlack,
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          icon,
+                          size: 20,
+                          color: selected ? AppColors.primaryThemeBlack : AppColors.primaryScheme,
+                        ),
                       ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        icon,
-                        size: 20,
-                        color: selected ? AppColors.primaryThemeBlack : AppColors.primaryScheme,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    title,
+                                    style: CustomTextStyles.m3ActionText(color: AppColors.textWhite)
+                                        .copyWith(fontSize: 17, fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                                if (badgeLabel != null) ...[
+                                  const SizedBox(width: 8),
+                                  _Chip(label: badgeLabel!),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              priceLabel,
+                              style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
+                      const SizedBox(width: 8),
+                      _SelectionIndicator(selected: selected),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  ...features.map(
+                    (feature) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  title,
-                                  style: CustomTextStyles.m3ActionText(color: AppColors.textWhite)
-                                      .copyWith(fontSize: 17, fontWeight: FontWeight.w700),
-                                ),
-                              ),
-                              if (badgeLabel != null) ...[
-                                const SizedBox(width: 8),
-                                _Chip(label: badgeLabel!),
-                              ],
-                            ],
+                          Icon(
+                            Icons.check_circle_rounded,
+                            size: 16,
+                            color: selected ? AppColors.primaryScheme : AppColors.ratingGrey,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            priceLabel,
-                            style: CustomTextStyles.m3Body(color: AppColors.ratingGrey),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              feature,
+                              style: CustomTextStyles.m3Body(color: AppColors.secondaryThemeGrey),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    _SelectionIndicator(selected: selected),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                ...features.map(
-                  (feature) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.check_circle_rounded,
-                          size: 16,
-                          color: selected ? AppColors.primaryScheme : AppColors.ratingGrey,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            feature,
-                            style: CustomTextStyles.m3Body(color: AppColors.secondaryThemeGrey),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
-                ),
-                if (footer != null && selected) ...[
-                  const SizedBox(height: 4),
-                  footer!,
+                  if (footer != null && selected) ...[
+                    const SizedBox(height: 4),
+                    footer!,
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-        ),
       ),
     );
   }

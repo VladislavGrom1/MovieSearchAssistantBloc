@@ -14,6 +14,7 @@ import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_re
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_with_library_status.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/tap_scale.dart';
 
 @RoutePage()
 class SearchedFilmsScreen extends StatelessWidget {
@@ -176,10 +177,7 @@ class _FilmCard extends StatelessWidget {
  
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      enableFeedback: false,
-      highlightColor: Colors.transparent,
-      splashColor: Colors.transparent,
+    return TapScale(
       onTap: () {
         if (film.kinopoiskId != null) {
           context.router.push(

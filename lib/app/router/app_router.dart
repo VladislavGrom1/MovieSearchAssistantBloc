@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/router/auto_router_guards/authentication_guard.dart';
 import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/search_film/search_film_routes.dart';
@@ -28,6 +29,16 @@ class AppRouter extends RootStackRouter{
 
   @override
   RouteType get defaultRouteType => RouteType.custom(
-    transitionsBuilder: TransitionsBuilders.noTransition,
-  );
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
+      final curvedSecondary = CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut);
+      return FadeTransition(
+        opacity: Tween<double>(begin: 1.0, end: 0.0).animate(curvedSecondary),
+        child: FadeTransition(
+          opacity: curved,
+          child: child,
+          ),
+        );
+      },
+    );
 }

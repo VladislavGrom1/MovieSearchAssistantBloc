@@ -75,16 +75,8 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       
       (savedFilm, collectionIds) = await getSavedFilmUseCase.call(event.idFilm);
  
-      FilmImagesEntity? filmImages;
- 
-      try {
-        filmImages = await getFilmImagesUseCase.call(event.idFilm);
-      } catch (_) {
-        filmImages = null;
-      }
- 
       FilmEntity? film = savedFilm;
- 
+      
       if (film == null) {
         final (remoteFilm, ids) = await getFilmInformationUseCase.call(event.idFilm);
         film = remoteFilm;
@@ -94,6 +86,12 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       if (film == null) {
         emit(FilmFailure(message: "Не удалось получить информацию о фильме"));
         return;
+      }
+
+      FilmImagesEntity? filmImages;
+
+      if(film.localScreenshotPaths == null){
+        filmImages = await getFilmImagesUseCase.call(event.idFilm);
       }
  
       emit(FilmLoaded(

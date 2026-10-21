@@ -4,12 +4,18 @@ import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_ex
 class ExceptionMapper {
   static RemoteDataSourceException mapDioException(DioException e) {
     switch (e.type) {
+      
       case DioExceptionType.connectionError:
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
         return NetworkFailure();
-
+ 
+      case DioExceptionType.receiveTimeout:
+        return ServerFailure();
+ 
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
-
+ 
         if (statusCode == 401) {
           return UnauthorizedFailure();
         } else if (statusCode == 402){
@@ -22,7 +28,7 @@ class ExceptionMapper {
           return ServerFailure();
         }
         return UnknownFailure();
-
+ 
       default:
         return UnknownFailure();
     }

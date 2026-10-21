@@ -4,30 +4,35 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class NetworkService {
+  static const Duration _checkInterval = Duration(seconds: 3);
   static const Duration _lookupTimeout = Duration(seconds: 2);
-  static const Duration _retryInterval = Duration(seconds: 2);
  
   final Connectivity _connectivity;
+  final List<String> _hosts;
  
-  NetworkService(this._connectivity);
+  NetworkService(this._connectivity, {String? apiHost})
+      : _hosts = [
+          'google.com',
+          'yandex.ru',
+        ];
  
   Stream<bool> get onStatusChange {
     late final StreamController<bool> controller;
-    StreamSubscription? connectivitySubscription;
-    Timer? retryTimer;
-    var cancelled = false;
-    var lastCheckId = 0;
+    StreamSubscription<dynamic>? connectivitySubscription;
+    Timer? timer;
+    bool? last;
+    var checking = false;
  
     Future<void> check() async {
-      retryTimer?.cancel();
-      final checkId = ++lastCheckId;
+      if (checking) return;
+      checking = true;
       final isConnected = await hasConnection();
+      checking = false;
  
-      if (cancelled || checkId != lastCheckId) return;
- 
-      controller.add(isConnected);
-      if (!isConnected) {
-        retryTimer = Timer(_retryInterval, check);
+      if (controller.isClosed) return;
+      if (isConnected != last) {
+        last = isConnected;
+        controller.add(isConnected);
       }
     }
  
@@ -36,10 +41,10 @@ class NetworkService {
         check();
         connectivitySubscription =
             _connectivity.onConnectivityChanged.listen((_) => check());
+        timer = Timer.periodic(_checkInterval, (_) => check());
       },
       onCancel: () {
-        cancelled = true;
-        retryTimer?.cancel();
+        timer?.cancel();
         connectivitySubscription?.cancel();
       },
     );
@@ -48,12 +53,14 @@ class NetworkService {
   }
  
   Future<bool> hasConnection() async {
-    try {
-      final resultYandex =
-          await InternetAddress.lookup('yandex.ru').timeout(_lookupTimeout);
-      return resultYandex.isNotEmpty && resultYandex[0].rawAddress.isNotEmpty;
-    } catch (_) {
-      return false;
+    for (final host in _hosts) {
+      try {
+        final result =
+            await InternetAddress.lookup(host).timeout(_lookupTimeout);
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) return true;
+      } catch (_) {
+      }
     }
+    return false;
   }
 }

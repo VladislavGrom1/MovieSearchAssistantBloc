@@ -617,67 +617,85 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
   }
 }
  
-class _SimilarFilmsSliver extends StatelessWidget {
+class _SimilarFilmsSliver extends StatefulWidget {
   final int filmId;
  
   const _SimilarFilmsSliver({required this.filmId});
  
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<NetworkCubit, NetworkStatus>(
-      buildWhen: (previous, current) =>
-          (previous == NetworkStatus.connected) != (current == NetworkStatus.connected),
-      builder: (context, status) {
-        if (status != NetworkStatus.connected) {
-          return const SliverToBoxAdapter();
-        }
-        return _SimilarFilmsContent(filmId: filmId);
-      },
-    );
-  }
+  State<_SimilarFilmsSliver> createState() => _SimilarFilmsSliverState();
 }
  
-class _SimilarFilmsContent extends StatefulWidget {
-  final int filmId;
- 
-  const _SimilarFilmsContent({required this.filmId});
- 
-  @override
-  State<_SimilarFilmsContent> createState() => _SimilarFilmsContentState();
-}
- 
-class _SimilarFilmsContentState extends State<_SimilarFilmsContent> {
+class _SimilarFilmsSliverState extends State<_SimilarFilmsSliver> {
   @override
   void initState() {
     super.initState();
-    context.read<SimilarFilmsCubit>().load(widget.filmId);
+    if (context.read<NetworkCubit>().state != NetworkStatus.disconnected) {
+      context.read<SimilarFilmsCubit>().load(widget.filmId);
+    }
   }
  
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SimilarFilmsCubit, SimilarFilmsState>(
-      builder: (context, state) {
-        if (state is SimilarFilmsLoaded && state.films.isEmpty) {
-          return const SliverToBoxAdapter();
-        }
+    final isOffline = context.select<NetworkCubit, bool>(
+      (cubit) => cubit.state == NetworkStatus.disconnected,
+    );
  
-        return SliverToBoxAdapter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _SimilarFilmsHeader(),
-              _buildBody(context, state),
-              const SizedBox(height: 20),
-            ],
-          ),
-        );
-      },
+    return BlocListener<NetworkCubit, NetworkStatus>(
+      listenWhen: (previous, current) =>
+          current == NetworkStatus.connected && previous != NetworkStatus.connected,
+      listener: (context, _) =>
+          context.read<SimilarFilmsCubit>().load(widget.filmId),
+      child: BlocBuilder<SimilarFilmsCubit, SimilarFilmsState>(
+        builder: (context, state) {
+          final visible = !isOffline && _isVisible(state);
+ 
+          return SliverToBoxAdapter(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              alignment: Alignment.topCenter,
+              child: visible
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _SimilarFilmsHeader(),
+                        _SimilarFilmsBody(
+                          state: state,
+                          onRetry: () => context
+                              .read<SimilarFilmsCubit>()
+                              .load(widget.filmId),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    )
+                  : const SizedBox(width: double.infinity),
+            ),
+          );
+        },
+      ),
     );
   }
  
-  Widget _buildBody(BuildContext context, SimilarFilmsState state) {
-    if (state is SimilarFilmsLoaded) {
-      final films = state.films;
+  bool _isVisible(SimilarFilmsState state) => switch (state) {
+        SimilarFilmsInitial() => false,
+        SimilarFilmsLoading() => true,
+        SimilarFilmsLoaded(:final films) => films.isNotEmpty,
+        SimilarFilmsFailure() => true,
+      };
+}
+ 
+class _SimilarFilmsBody extends StatelessWidget {
+  final SimilarFilmsState state;
+  final VoidCallback onRetry;
+ 
+  const _SimilarFilmsBody({required this.state, required this.onRetry});
+ 
+  @override
+  Widget build(BuildContext context) {
+    final current = state;
+ 
+    if (current is SimilarFilmsLoaded) {
+      final films = current.films;
       return SizedBox(
         height: 200,
         child: ListView.separated(
@@ -697,7 +715,7 @@ class _SimilarFilmsContentState extends State<_SimilarFilmsContent> {
       );
     }
  
-    if (state is SimilarFilmsFailure) {
+    if (current is SimilarFilmsFailure) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -711,7 +729,7 @@ class _SimilarFilmsContentState extends State<_SimilarFilmsContent> {
               ),
               const SizedBox(height: 10),
               TextButton(
-                onPressed: () => context.read<SimilarFilmsCubit>().load(widget.filmId),
+                onPressed: onRetry,
                 child: Text(
                   "Повторить",
                   style: CustomTextStyles.m3ActionText(color: AppColors.primaryScheme),

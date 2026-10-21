@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
@@ -101,7 +102,10 @@ Future<void> initializeDependencies() async {
 
     // Services
     getIt.registerLazySingleton(() => Connectivity());
-    getIt.registerLazySingleton(() => NetworkService(getIt()));
+    getIt.registerLazySingleton(() => NetworkService(
+      getIt(),
+      apiHost: Uri.parse(getIt<Dio>().options.baseUrl).host,
+    ));
     getIt.registerLazySingleton(() => FileService());
     getIt.registerLazySingleton(() => ZipService());
     getIt.registerLazySingleton(() => FilmImageCacheService());

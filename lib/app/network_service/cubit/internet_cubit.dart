@@ -3,17 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/network_service.dart';
 
 enum NetworkStatus { initial, connected, disconnected }
-
+ 
 class NetworkCubit extends Cubit<NetworkStatus> {
   final NetworkService networkInfoService;
-  StreamSubscription? _subscription;
-
+  StreamSubscription<bool>? _subscription;
+ 
   NetworkCubit(this.networkInfoService) : super(NetworkStatus.initial) {
     _subscription = networkInfoService.onStatusChange.listen((isConnected) {
+      if (isClosed) return;
       emit(isConnected ? NetworkStatus.connected : NetworkStatus.disconnected);
     });
   }
-
+ 
   @override
   Future<void> close() {
     _subscription?.cancel();

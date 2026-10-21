@@ -68,6 +68,16 @@ class _FilmInformationView extends StatelessWidget {
       ],
       child: Scaffold(
         backgroundColor: AppColors.primaryThemeBlack,
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'film-information-home',
+          tooltip: 'Вернуться к началу',
+          onPressed: () {
+            context.router.popUntilRoot();
+          },
+          backgroundColor: AppColors.primaryScheme,
+          foregroundColor: AppColors.primaryThemeBlack,
+          child: const Icon(Icons.home),
+        ),
         body: SafeArea(
             child: CustomRefreshIndicator(
           onRefresh: () async {
@@ -714,19 +724,22 @@ class _SimilarFilmsBody extends StatelessWidget {
         ),
       );
     }
- 
+
     if (current is SimilarFilmsFailure) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+      Center(
+        child: Container(
+          width: double.maxFinite,
+          decoration: BoxDecoration(
+            color: AppColors.primaryThemeGrey,
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Не удалось загрузить похожие фильмы",
-                textAlign: TextAlign.center,
-                style: CustomTextStyles.m3Body(),
-              ),
+              const SizedBox(height: 40),
+              Icon(Icons.image_not_supported, size: 48, color: AppColors.primaryScheme),
+              const SizedBox(height: 8),
+              Text("Не удалось загрузить похожие фильмы", style: CustomTextStyles.m3Body()),
               const SizedBox(height: 10),
               TextButton(
                 onPressed: onRetry,
@@ -735,6 +748,7 @@ class _SimilarFilmsBody extends StatelessWidget {
                   style: CustomTextStyles.m3ActionText(color: AppColors.primaryScheme),
                 ),
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),

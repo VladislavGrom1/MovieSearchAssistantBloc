@@ -92,6 +92,16 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryThemeBlack,
+      floatingActionButton: FloatingActionButton(
+          heroTag: 'searched-films-home',
+          tooltip: 'Вернуться к началу',
+          onPressed: () {
+            context.router.popUntilRoot();
+          },
+          backgroundColor: AppColors.primaryScheme,
+          foregroundColor: AppColors.primaryThemeBlack,
+          child: const Icon(Icons.home),
+      ),
       appBar: AppBar(
         title: Text(
           widget.appBarTitle,

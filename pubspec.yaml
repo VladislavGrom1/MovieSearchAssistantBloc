@@ -2,7 +2,7 @@ name: movie_search_assistant_bloc
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.4.0+6
+version: 1.5.0+7
 
 environment:
   sdk: '>=3.0.6 <4.0.0'

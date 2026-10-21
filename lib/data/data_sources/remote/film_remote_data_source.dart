@@ -18,7 +18,7 @@ class FilmRemoteDataSource {
         type: collectionName,
         page: page
       );
-      if(response.data != null){
+      if(response.data != null && response.data!.items.isNotEmpty){
         for(var film in response.data!.items){
           collectionFilms.add(FilmBaseModel.fromFilmCollectionResponseItems(film));
         }
@@ -44,7 +44,7 @@ class FilmRemoteDataSource {
         yearTo: yearTo,
         page: page
       );
-      if(response.data != null){
+      if(response.data != null && response.data!.items.isNotEmpty){
         for(var film in response.data!.items){
           filterFilms.add(FilmBaseModel.fromFilmSearchByFiltersResponseItems(film));
         }
@@ -66,6 +66,27 @@ class FilmRemoteDataSource {
       );
       if(response.data != null){
         return FilmDetailModel.fromFilm(response.data!);
+      }
+      return null;
+    } on DioException catch(e){
+      throw ExceptionMapper.mapDioException(e);
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  Future<List<FilmBaseModel>?> getSimilarFilms(int idFilm) async{
+    FilmsApi filmsApi = FilmsApi(dio, standardSerializers);
+    List<FilmBaseModel> similarFilms = [];
+    try{
+      Response<SimilarFilmResponse> response = await filmsApi.apiV22FilmsIdSimilarsGet(
+        id: idFilm
+      );
+      if(response.data != null && response.data!.items.isNotEmpty){
+        for(var film in response.data!.items){
+          similarFilms.add(FilmBaseModel.fromSimilarFilmResponseItems(film));
+        }
+        return similarFilms;
       }
       return null;
     } on DioException catch(e){

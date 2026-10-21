@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -114,7 +113,12 @@ class _CollectionFilmsViewState extends State<_CollectionFilmsView> {
                 },
               );
             }
-            return Text(widget.collectionName, style: CustomTextStyles.m3Title());
+            return Text(
+              widget.collectionName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: CustomTextStyles.m3ActionText(),
+            );
           },
         ),
         actions: [
@@ -179,12 +183,12 @@ class _CollectionFilmsViewState extends State<_CollectionFilmsView> {
           }
 
           if (state is CollectionFilmsFailure) {
-            return Center(child: Text(state.message));
+            return Center(child: ErrorMessageWidget(message: state.message));
           }
 
           if (state is CollectionFilmsLoaded) {
             if (state.savedFilms.isEmpty) {
-              return ErrorMessageWidget(message: "Коллекция пуста");
+              return Center(child: ErrorMessageWidget(message: "Коллекция пуста. Добавьте хотя бы один фильм."));
             }
             
             final filteredFilms = _getFilteredFilms(state.savedFilms);

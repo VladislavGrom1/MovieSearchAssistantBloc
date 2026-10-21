@@ -6,8 +6,9 @@ import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_post
 
 class FilmPosterWithLibraryStatus extends StatelessWidget {
   final FilmEntity film;
+  final bool showRating;
  
-  const FilmPosterWithLibraryStatus({super.key, required this.film});
+  const FilmPosterWithLibraryStatus({super.key, required this.film, this.showRating = true});
  
   @override
   Widget build(BuildContext context) {
@@ -17,6 +18,7 @@ class FilmPosterWithLibraryStatus extends StatelessWidget {
         return FilmPosterImage(
           networkImageUrl: film.posterUrlPreview,
           kinopoiskRating: film.ratingKinopoisk,
+          showRating: showRating,
           showSavedIcon: status.isSaved,
           showUserRating: status.isSaved,
           userRating: status.userRating,

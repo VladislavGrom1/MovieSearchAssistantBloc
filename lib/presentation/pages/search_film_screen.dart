@@ -13,10 +13,8 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/search_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_search_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_with_library_status.dart';
-import 'package:movie_search_assistant_bloc/presentation/pages/widgets/tap_scale.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_card.dart';
 
 @RoutePage()
 class SearchFilmScreen extends StatelessWidget {
@@ -178,45 +176,8 @@ class _CollectionFilmsList extends StatelessWidget {
         addSemanticIndexes: false,
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) => _FilmCard(film: filmEntityList[index]),
+        itemBuilder: (context, index) => FilmPosterCard(film: filmEntityList[index]),
         separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemCount: min(filmEntityList.length, 10));
-  }
-}
- 
-class _FilmCard extends StatelessWidget {
-  final FilmEntity film;
- 
-  const _FilmCard({required this.film});
- 
-  @override
-  Widget build(BuildContext context) {
-    return TapScale(
-        onTap: () {
-          if (film.kinopoiskId != null) {
-            context.router.push(FilmInformationRoute(
-                filmId: film.kinopoiskId!,
-                filmName: film.nameRu ?? film.nameOriginal.toString()));
-          } else {
-            CustomSnackBar(message: "Не удалось получить информацию о фильме").show(context);
-          }
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FilmPosterWithLibraryStatus(film: film),
-            const SizedBox(height: 5),
-            SizedBox(
-              width: 96,
-              child: Text(
-                film.nameRu ?? film.nameOriginal ?? "-",
-                overflow: TextOverflow.ellipsis,
-                maxLines: 3,
-                style: CustomTextStyles.m3FilmTitle()
-              ),
-            )
-          ],
-        ),
-    );
   }
 }

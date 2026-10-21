@@ -12,6 +12,7 @@ import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_search_bar.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/tap_scale.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
 
@@ -51,7 +52,7 @@ class _CollectionsView extends StatelessWidget {
                       }
 
                       if (state is CollectionsFailure) {
-                        return Center(child: Text(state.message));
+                        return Center(child: ErrorMessageWidget(message: state.message));
                       }
 
                       if (state is CollectionsLoaded) {

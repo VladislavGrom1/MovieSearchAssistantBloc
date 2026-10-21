@@ -19,7 +19,12 @@ class FilterListScreen extends StatelessWidget {
     return Scaffold(
         backgroundColor: AppColors.primaryThemeBlack,
         appBar: AppBar(
-          title: Text(_filterTypeToString(), style: CustomTextStyles.m3Title()),
+          title: Text(
+            _filterTypeToString(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: CustomTextStyles.m3ActionText(),
+          ),
         ),
         body: SafeArea(
           child: Column(

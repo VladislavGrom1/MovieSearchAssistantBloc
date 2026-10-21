@@ -75,6 +75,17 @@ class FilmBaseModel {
     );
   }
 
+  factory FilmBaseModel.fromSimilarFilmResponseItems(SimilarFilmResponseItems film) {
+    return FilmBaseModel(
+      kinopoiskId: film.filmId,
+      nameRu: film.nameRu,
+      nameEn: film.nameEn,
+      nameOriginal: film.nameOriginal,
+      posterUrl: film.posterUrl,
+      posterUrlPreview: film.posterUrlPreview,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
     "kinopoiskId": kinopoiskId,
     "nameRu": nameRu,

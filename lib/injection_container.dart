@@ -35,6 +35,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_ca
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_app_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_cache_size_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_similar_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
@@ -68,6 +69,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/watch_saved_films_st
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_films_cubit/selection_films_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/cubit/similar_films_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/filter_film/filter_film_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
@@ -139,6 +141,7 @@ Future<void> initializeDependencies() async {
     ));
     getIt.registerLazySingleton(() => GetFilmImagesUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => GetSavedFilmsUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
+    getIt.registerLazySingleton(() => GetSimilarFilmsUseCase(filmRepository: getIt()));
     getIt.registerLazySingleton(() => GetSavedFilmUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => GetApiKeyInfoFromStorageUseCase(userRepository: getIt()));
     getIt.registerLazySingleton(() => AddFilmToCollectionUseCase(filmRepository: getIt(), filmCollectionRepository: getIt(), imageStorageService: getIt()));
@@ -266,5 +269,6 @@ Future<void> initializeDependencies() async {
     getIt.registerFactory(() => SelectionFilmsCubit());
     getIt.registerFactory(() => WatchFilmCollectionLinksCubit(getIt()));
     getIt.registerFactory(() => WatchSavedFilmsStatusCubit(getIt()));
+    getIt.registerFactory(() => SimilarFilmsCubit(getSimilarFilmsUseCase: getIt()));
     getIt.registerLazySingleton(() => NetworkCubit(getIt()));
 }

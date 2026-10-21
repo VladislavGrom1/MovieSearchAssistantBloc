@@ -16,6 +16,8 @@ abstract class FilmRepository {
 
   Future<FilmEntity?> getFilmInformation(int idFilm);
 
+  Future<List<FilmEntity>> getSimilarFilms(int idFilm);
+
   Future<bool> filmIsSaved(int idFilm);
 
   Future<FilmImagesEntity?> getFilmImages(int idFilm);

@@ -15,6 +15,7 @@ class FilmPosterImage extends StatelessWidget {
   final num? userRating;
   final bool showSavedIcon;
   final bool showUserRating;
+  final bool showRating;
   
   const FilmPosterImage({
     super.key,
@@ -24,6 +25,7 @@ class FilmPosterImage extends StatelessWidget {
     this.userRating,
     this.showSavedIcon = false,
     this.showUserRating = false,
+    this.showRating = true,
   });
  
   @override
@@ -35,16 +37,17 @@ class FilmPosterImage extends StatelessWidget {
           children: [
             _buildImage(),
             
-            _RatingIcon(
-              rating: kinopoiskRating,
-              position: RatingPosition.bottomRight,
-            ),
+            if (showRating)
+              _RatingIcon(
+                rating: kinopoiskRating,
+                position: RatingPosition.bottomRight,
+              ),
             
             if (showSavedIcon)
               _SavedIcon(),
             
             if (showUserRating)
-              _UserRatingIcon(rating: userRating),
+              _UserRatingIcon(rating: userRating, right: showRating ? 30 : 4),
           ],
         ),
       ),
@@ -178,14 +181,15 @@ class _SavedIcon extends StatelessWidget {
  
 class _UserRatingIcon extends StatelessWidget {
   final num? rating;
+  final double right;
  
-  const _UserRatingIcon({required this.rating});
+  const _UserRatingIcon({required this.rating, this.right = 30});
  
   @override
   Widget build(BuildContext context) {
     return Positioned(
       bottom: 6,
-      right: 30,
+      right: right,
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.primaryScheme,

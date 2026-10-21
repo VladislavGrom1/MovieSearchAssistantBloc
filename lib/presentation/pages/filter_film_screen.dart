@@ -30,8 +30,10 @@ class _FilterFilmView extends StatelessWidget {
         backgroundColor: AppColors.primaryThemeBlack,
         appBar: AppBar(
           title: Text(
-            "Поиск фильмов", 
-            style: CustomTextStyles.m3Title()
+            "Поиск фильмов",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: CustomTextStyles.m3ActionText(),
           ),
         ),
         body: SafeArea(

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/film_image_cache_service.dart';
 import 'package:movie_search_assistant_bloc/app/cache_service/image_path_resolver.dart';
+import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_cubit.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
 import 'package:movie_search_assistant_bloc/app/util/data_formatter.dart';
@@ -14,11 +15,15 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/cubit/similar_films_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/film_information/film_information_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_film_collection_links_cubit.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_saved_films_status_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_refresh_indicator.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_card.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/text_field_alert_dialog.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -28,10 +33,10 @@ class FilmInformationScreen extends StatelessWidget {
       {super.key,
       @PathParam('filmId') required this.filmId,
       @PathParam('filmName') required this.filmName});
-
+ 
   final int filmId;
   final String filmName;
-
+ 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(providers: [
@@ -41,17 +46,19 @@ class FilmInformationScreen extends StatelessWidget {
       BlocProvider(
         create: (_) => getIt<CollectionsBloc>()..add(GetCollections()),
       ),
-      BlocProvider(create: (_) => getIt<WatchFilmCollectionLinksCubit>())
+      BlocProvider(create: (_) => getIt<WatchFilmCollectionLinksCubit>()),
+      BlocProvider(create: (_) => getIt<WatchSavedFilmsStatusCubit>()),
+      BlocProvider(create: (_) => getIt<SimilarFilmsCubit>()),
     ], child: _FilmInformationView(filmId: filmId, filmName: filmName));
   }
 }
-
+ 
 class _FilmInformationView extends StatelessWidget {
   const _FilmInformationView({required this.filmId, required this.filmName});
-
+ 
   final int filmId;
   final String filmName;
-
+ 
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
@@ -70,7 +77,7 @@ class _FilmInformationView extends StatelessWidget {
               final currentFilm = state.film;
               filmInformationBloc.add(RefreshFilmInformation(film: currentFilm));
             }
-
+ 
             if (state is FilmFailure) {
               filmInformationBloc.add(GetFilmInformation(idFilm: filmId));
             }
@@ -80,14 +87,34 @@ class _FilmInformationView extends StatelessWidget {
             if (state is FilmLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (state is FilmFailure) {
-              return Center(child: Text(state.message));
-            }
             if (state is FilmLoaded) {
               return _FilmInformationContent(
+                filmId: filmId,
                 film: state.film,
                 filmImages: state.filmImages,
                 collectionIds: state.collectionIds,
+              );
+            }
+            if (state is FilmFailure) {
+              return Scaffold(
+                backgroundColor: AppColors.primaryThemeBlack,
+                appBar: AppBar(
+                  title: Text(
+                    filmName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: CustomTextStyles.m3ActionText(),
+                  ),
+                  backgroundColor: AppColors.primaryThemeBlack,
+                  surfaceTintColor: Colors.transparent,
+                  elevation: 0,
+                  iconTheme: IconThemeData(color: AppColors.primaryScheme),
+                ),
+                body: Center(
+                  child: ErrorMessageWidget(
+                    message: state.message
+                  ),
+                )
               );
             }
             return const SizedBox();
@@ -96,40 +123,42 @@ class _FilmInformationView extends StatelessWidget {
       ),
     );
   }
-
+ 
   void _filmInformationBlocListener(BuildContext context, FilmInformationState state) {
     if (state is FilmActionFailure) {
       CustomSnackBar(message: state.message).show(context);
     }
   }
 }
-
+ 
 class _FilmInformationContent extends StatefulWidget {
+  final int filmId;
   final FilmEntity film;
   final FilmImagesEntity? filmImages;
   final List<String> collectionIds;
-
+ 
   const _FilmInformationContent(
-      {required this.film,
+      {required this.filmId,
+      required this.film,
       required this.filmImages,
       required this.collectionIds});
-
+ 
   @override
   State<_FilmInformationContent> createState() => _FilmInformationContentState();
 }
-
+ 
 class _FilmInformationContentState extends State<_FilmInformationContent> {
   static const double _expandedHeight = 500;
-
+ 
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<double> _titleOpacity = ValueNotifier(0.0);
-
+ 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_updateTitleOpacity);
   }
-
+ 
   void _updateTitleOpacity() {
     final collapseRange = _expandedHeight - kToolbarHeight;
     final offset = _scrollController.hasClients ? _scrollController.offset : 0.0;
@@ -138,12 +167,12 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
     final progress = fadeRange <= 0
         ? (offset >= collapseRange ? 1.0 : 0.0)
         : ((offset - fadeStart) / fadeRange).clamp(0.0, 1.0);
-
+ 
     if (_titleOpacity.value != progress) {
       _titleOpacity.value = progress;
     }
   }
-
+ 
   @override
   void dispose() {
     _scrollController.removeListener(_updateTitleOpacity);
@@ -151,12 +180,12 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
     _titleOpacity.dispose();
     super.dispose();
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     final film = widget.film;
     final filmImages = widget.filmImages;
-
+ 
     return CustomScrollView(
       controller: _scrollController,
       slivers: [
@@ -495,11 +524,12 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
               ],
             ),
           ),
-        )
+        ),
+        _SimilarFilmsSliver(filmId: widget.filmId),
       ],
     );
   }
-
+ 
   Color _getRatingColor(num? rating) {
     if (rating == null) return AppColors.ratingGrey;
     if (rating >= 7 && rating <= 10) return AppColors.ratingGreen;
@@ -508,7 +538,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
     if (rating >= 0 && rating < 5) return AppColors.ratingRed;
     return AppColors.ratingGrey;
   }
-
+ 
   void _openCollectionSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -537,7 +567,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
       },
     );
   }
-
+ 
   void _openRatingSheet(BuildContext context, int? currentUserRating) {
     showModalBottomSheet(
       context: context,
@@ -547,7 +577,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
           child: _RatingPickerSheet(currentUserRating: currentUserRating))
       );
   }
-
+ 
   void _openCommentDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -565,7 +595,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
           )
       );
   }
-
+ 
   void _showConfirmActionDialog(
     BuildContext context, 
     String titleText, 
@@ -586,12 +616,148 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
     );
   }
 }
-
+ 
+class _SimilarFilmsSliver extends StatelessWidget {
+  final int filmId;
+ 
+  const _SimilarFilmsSliver({required this.filmId});
+ 
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<NetworkCubit, NetworkStatus>(
+      buildWhen: (previous, current) =>
+          (previous == NetworkStatus.connected) != (current == NetworkStatus.connected),
+      builder: (context, status) {
+        if (status != NetworkStatus.connected) {
+          return const SliverToBoxAdapter();
+        }
+        return _SimilarFilmsContent(filmId: filmId);
+      },
+    );
+  }
+}
+ 
+class _SimilarFilmsContent extends StatefulWidget {
+  final int filmId;
+ 
+  const _SimilarFilmsContent({required this.filmId});
+ 
+  @override
+  State<_SimilarFilmsContent> createState() => _SimilarFilmsContentState();
+}
+ 
+class _SimilarFilmsContentState extends State<_SimilarFilmsContent> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<SimilarFilmsCubit>().load(widget.filmId);
+  }
+ 
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SimilarFilmsCubit, SimilarFilmsState>(
+      builder: (context, state) {
+        if (state is SimilarFilmsLoaded && state.films.isEmpty) {
+          return const SliverToBoxAdapter();
+        }
+ 
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _SimilarFilmsHeader(),
+              _buildBody(context, state),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+ 
+  Widget _buildBody(BuildContext context, SimilarFilmsState state) {
+    if (state is SimilarFilmsLoaded) {
+      final films = state.films;
+      return SizedBox(
+        height: 200,
+        child: ListView.separated(
+          addAutomaticKeepAlives: false,
+          addSemanticIndexes: false,
+          physics: const BouncingScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: films.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (context, index) => FilmPosterCard(
+            key: ValueKey(films[index].kinopoiskId),
+            film: films[index],
+            showRating: false,
+          ),
+        ),
+      );
+    }
+ 
+    if (state is SimilarFilmsFailure) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Не удалось загрузить похожие фильмы",
+                textAlign: TextAlign.center,
+                style: CustomTextStyles.m3Body(),
+              ),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () => context.read<SimilarFilmsCubit>().load(widget.filmId),
+                child: Text(
+                  "Повторить",
+                  style: CustomTextStyles.m3ActionText(color: AppColors.primaryScheme),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+ 
+    return const SizedBox(
+      height: 100,
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+}
+ 
+class _SimilarFilmsHeader extends StatelessWidget {
+  const _SimilarFilmsHeader();
+ 
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Divider(color: AppColors.primaryScheme, thickness: 2),
+          const SizedBox(height: 20),
+          Text(
+            "Похожие фильмы",
+            style: CustomTextStyles.m3Headline(),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
+ 
 class _PosterImageWidget extends StatelessWidget {
   const _PosterImageWidget({required this.film});
-
+ 
   final FilmEntity film;
-
+ 
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -615,7 +781,7 @@ class _PosterImageWidget extends StatelessWidget {
       ],
     );
   }
-
+ 
   Widget _buildImage() {
     if (film.localPosterImagePath != null) {
       final fullPosterImagePath = ImagePathResolver.resolve(film.localPosterImagePath!);
@@ -625,12 +791,12 @@ class _PosterImageWidget extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) => _placeholder(),
       );
     }
-
+ 
     final posterUrl = film.posterUrl;
     if (posterUrl == null || posterUrl.isEmpty) {
       return _placeholder();
     }
-
+ 
     return CachedNetworkImage(
       imageUrl: posterUrl,
       cacheManager: getIt<FilmImageCacheService>().instance,
@@ -655,20 +821,20 @@ class _PosterImageWidget extends StatelessWidget {
       errorWidget: (context, url, error) => _placeholder(),
     );
   }
-
+ 
   Widget _placeholder() => Container(
     color: AppColors.primaryThemeGrey,
     child: Icon(Icons.image_not_supported, color: AppColors.primaryScheme, size: 48),
   );
 }
-
+ 
 class _FilmRatingWidget extends StatelessWidget {
   final String imagePath;
   final String resourseName;
   final num? rating;
   final int? voteCount;
   final bool isUserRating;
-
+ 
   const _FilmRatingWidget({
     required this.imagePath,
     required this.resourseName,
@@ -676,7 +842,7 @@ class _FilmRatingWidget extends StatelessWidget {
     this.voteCount,
     required this.isUserRating
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -701,7 +867,7 @@ class _FilmRatingWidget extends StatelessWidget {
       ),
     );
   }
-
+ 
   Widget _buildRatingCircle(BuildContext context) {
     return SizedBox(
       width: 90,
@@ -729,7 +895,7 @@ class _FilmRatingWidget extends StatelessWidget {
       ),
     );
   }
-
+ 
   Widget _buildRatingInfo(BuildContext context, bool isUserRating) {
     return Expanded(
       child: Padding(
@@ -761,20 +927,20 @@ class _FilmRatingWidget extends StatelessWidget {
     );
   }
 }
-
+ 
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
   final VoidCallback? onTap;
-
+ 
   const _ActionButton({
     required this.icon,
     required this.label,
     required this.color,
     required this.onTap,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -797,16 +963,16 @@ class _ActionButton extends StatelessWidget {
     );
   }
 }
-
+ 
 class _FilmScreenshotsWidget extends StatelessWidget {
   final List<String>? imageUrls;
   final List<String>? localImagePaths;
-
+ 
   const _FilmScreenshotsWidget({
     required this.imageUrls,
     required this.localImagePaths
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     final hasLocalImages = localImagePaths?.isNotEmpty == true;
@@ -833,9 +999,9 @@ class _FilmScreenshotsWidget extends StatelessWidget {
         ),
       );
     }
-
+ 
     final itemCount = hasLocalImages ? localImagePaths!.length : imageUrls!.length;
-
+ 
     return SizedBox(
       height: 200,
       child: ListView.separated(
@@ -855,21 +1021,21 @@ class _FilmScreenshotsWidget extends StatelessWidget {
     );
   }
 }
-
+ 
 class ScreenshotFilm extends StatefulWidget {
     const ScreenshotFilm({
       super.key, 
       this.url,
       this.localPath
       });
-
+ 
     final String? url;
     final String? localPath;
-
+ 
   @override
   State<ScreenshotFilm> createState() => _ScreenshotFilmState();
 }
-
+ 
 class _ScreenshotFilmState extends State<ScreenshotFilm> {
     final _transformationController = TransformationController();
     late OverlayEntry _overlayEntry;
@@ -885,7 +1051,7 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
         });
       }
     }
-
+ 
     void _closePhoto() {
       if (_isShowing) {
         _overlayEntry.remove();
@@ -894,11 +1060,11 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
         });
       }
     }
-
+ 
     void _handleDoubleTapDown(TapDownDetails details) {
       _doubleTapDetails = details;
     }
-
+ 
     void _handleDoubleTap() {
       if (_transformationController.value != Matrix4.identity()) {
         _transformationController.value = Matrix4.identity();
@@ -909,7 +1075,7 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
           ..scale(2.0);
       }
     }
-
+ 
       OverlayEntry _createOverlayEntry(String imagePath) {
         return OverlayEntry(
           builder: (context) {
@@ -968,17 +1134,17 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
           },
         );
       }
-
+ 
     @override
     Widget build(BuildContext context) {
       String imagePath;
-
+ 
       if (widget.localPath != null) {
         imagePath = ImagePathResolver.resolve(widget.localPath!);
       } else {
         imagePath = widget.url!;
       }
-
+ 
       return PopScope(
         canPop: !_isShowing,
         onPopInvokedWithResult: (didPop, result) {
@@ -1037,33 +1203,33 @@ class _ScreenshotFilmState extends State<ScreenshotFilm> {
       );
   }
 }
-
+ 
 class _RatingPickerSheet extends StatefulWidget {
   final int? currentUserRating;
-
+ 
   const _RatingPickerSheet({required this.currentUserRating});
-
+ 
   @override
   State<_RatingPickerSheet> createState() => _RatingPickerSheetState();
 }
-
+ 
 class _RatingPickerSheetState extends State<_RatingPickerSheet> {
   late final PageController _controller;
   late double currentPage;
   late int selectedRating;
-
+ 
   @override
   void initState() {
     super.initState();
     final initialPage = (widget.currentUserRating ?? 5) - 1;
     selectedRating = widget.currentUserRating ?? 5;
     currentPage = initialPage.toDouble();
-
+ 
     _controller = PageController(
       viewportFraction: 0.25,
       initialPage: initialPage,
     );
-
+ 
     _controller.addListener(() {
       setState(() {
         currentPage = _controller.page ?? currentPage;
@@ -1071,7 +1237,7 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
       });
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -1079,7 +1245,7 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
         final screenSize = MediaQuery.of(context).size;
         final aspectRatio = screenSize.height / screenSize.width;
         double initialSize;
-
+ 
         if (aspectRatio > 1.7) {
           initialSize = 0.28;
         } 
@@ -1091,7 +1257,7 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
         }
     
         initialSize = initialSize.clamp(0.3, 0.5);
-
+ 
         return DraggableScrollableSheet(
           expand: false,
           minChildSize: 0.3,
@@ -1180,13 +1346,13 @@ class _RatingPickerSheetState extends State<_RatingPickerSheet> {
     );
   }
 }
-
+ 
 class _CollectionPickerSheet extends StatelessWidget {
   const _CollectionPickerSheet();
-
+ 
   @override
   Widget build(BuildContext context) {
-
+ 
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1231,15 +1397,15 @@ class _CollectionPickerSheet extends StatelessWidget {
     );
         }
   }
-
+ 
 class _CollectionsList extends StatelessWidget {
   final List<String> collectionsIds;
   final List<CollectionEntity> collections;
-
+ 
   const _CollectionsList(
       {required this.collectionsIds,
       required this.collections});
-
+ 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -1257,10 +1423,10 @@ class _CollectionsList extends StatelessWidget {
         });
   }
 }
-
+ 
 class _CreateCollectionTile extends StatelessWidget {
   const _CreateCollectionTile();
-
+ 
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -1282,19 +1448,19 @@ class _CreateCollectionTile extends StatelessWidget {
             }));
   }
 }
-
+ 
 class _CollectionTile extends StatelessWidget {
   final CollectionEntity collection;
   final bool isInCollection;
-
+ 
   const _CollectionTile({required this.collection, required this.isInCollection});
-
+ 
   @override
   Widget build(BuildContext context) {
     final state = context.read<FilmInformationBloc>().state as FilmLoaded;
     final isLoadingThisCollection = state.loadingCollectionId == collection.id;
     final isSavingAnyCollection = state.loadingCollectionId != null;
-
+ 
     return ListTile(
       title: Text(collection.name ?? "Без названия", style: CustomTextStyles.m3ActionText().copyWith(fontWeight: FontWeight.w600)),
       splashColor: AppColors.primaryThemeGrey,

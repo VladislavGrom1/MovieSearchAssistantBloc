@@ -158,6 +158,24 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
+  Future<List<FilmEntity>> getSimilarFilms(int idFilm) async{
+    try{
+      List<FilmEntity> similarFilmsEntity = [];
+      List<FilmBaseModel>? filmBaseModels = await filmRemoteDataSource.getSimilarFilms(idFilm);
+      if(filmBaseModels != null){
+        for(final film in filmBaseModels){
+          similarFilmsEntity.add(FilmEntity.fromFilmBaseModel(film));
+        }
+      }
+      return similarFilmsEntity;
+    } on RemoteDataSourceException{
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  @override
   Future<List<FilmEntity>> getAllFilmsFromLocalDataSource() async {
     try{
       List<FilmEntity> savedFilmsEntity = [];

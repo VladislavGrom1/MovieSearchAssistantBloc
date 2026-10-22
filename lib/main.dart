@@ -46,6 +46,7 @@ class _MyAppState extends State<MyApp> {
     return BlocProvider(
         create: (_) => getIt<NetworkCubit>(),
         child: MaterialApp.router(
+          debugShowCheckedModeBanner: false,
           builder: (context, child) {
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
@@ -61,6 +62,7 @@ class _MyAppState extends State<MyApp> {
               iconTheme: IconThemeData(
               color: AppColors.primaryScheme
               ),
+              systemOverlayStyle: SystemUiOverlayStyle.light,
             ),
             splashColor: AppColors.primaryThemeGrey,
             hoverColor: AppColors.primaryThemeGrey,

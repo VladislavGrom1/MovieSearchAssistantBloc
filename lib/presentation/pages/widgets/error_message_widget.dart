@@ -15,26 +15,30 @@ class ErrorMessageWidget extends StatelessWidget {
       builder: (context, constraints) {
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            children: [
-              Image.asset(
-                width: 350,
-                "assets/icons/errorIcon.png", 
-                fit: BoxFit.cover
-              ),
-              Text(
-                "Что-то пошло не так",
-                style: CustomTextStyles.m3Title(),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 10),
-              Text(
-                message, 
-                style: CustomTextStyles.m3Body(), 
-                textAlign: TextAlign.center
-              ),
-              const SizedBox(height: 20)
-            ],
+          child: Padding(
+            padding: const EdgeInsetsGeometry.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                Image.asset(
+                  width: 350,
+                  "assets/icons/errorIcon.png", 
+                  fit: BoxFit.cover
+                ),
+                Text(
+                  "Что-то пошло не так",
+                  style: CustomTextStyles.m3Title(),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  message, 
+                  style: CustomTextStyles.m3Body(), 
+                  textAlign: TextAlign.center,
+                  softWrap: true,
+                ),
+                const SizedBox(height: 20)
+              ],
+            ),
           )
         );
       },

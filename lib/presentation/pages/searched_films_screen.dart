@@ -103,6 +103,7 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
           child: const Icon(Icons.home),
       ),
       appBar: AppBar(
+        centerTitle: true,
         title: Text(
           widget.appBarTitle,
           maxLines: 1,

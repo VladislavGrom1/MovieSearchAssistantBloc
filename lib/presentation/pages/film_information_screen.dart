@@ -61,76 +61,76 @@ class _FilmInformationView extends StatelessWidget {
  
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<FilmInformationBloc, FilmInformationState>(
-            listener: _filmInformationBlocListener),
-      ],
-      child: Scaffold(
-        backgroundColor: AppColors.primaryThemeBlack,
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'film-information-home',
-          tooltip: 'Вернуться к началу',
-          onPressed: () {
-            context.router.popUntilRoot();
-          },
-          backgroundColor: AppColors.primaryScheme,
-          foregroundColor: AppColors.primaryThemeBlack,
-          child: const Icon(Icons.home),
-        ),
-        body: SafeArea(
-            child: CustomRefreshIndicator(
-          onRefresh: () async {
-            final filmInformationBloc = context.read<FilmInformationBloc>();
-            final state = filmInformationBloc.state;
-            if (state is FilmLoaded) {
-              final currentFilm = state.film;
-              filmInformationBloc.add(RefreshFilmInformation(film: currentFilm));
-            }
- 
-            if (state is FilmFailure) {
-              filmInformationBloc.add(GetFilmInformation(idFilm: filmId));
-            }
-          },
-          child: BlocBuilder<FilmInformationBloc, FilmInformationState>(
-              builder: (context, state) {
-            if (state is FilmLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is FilmLoaded) {
-              return _FilmInformationContent(
-                filmId: filmId,
-                film: state.film,
-                filmImages: state.filmImages,
-                collectionIds: state.collectionIds,
-              );
-            }
-            if (state is FilmFailure) {
-              return Scaffold(
-                backgroundColor: AppColors.primaryThemeBlack,
-                appBar: AppBar(
-                  title: Text(
-                    filmName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: CustomTextStyles.m3ActionText(),
-                  ),
-                  backgroundColor: AppColors.primaryThemeBlack,
-                  surfaceTintColor: Colors.transparent,
-                  elevation: 0,
-                  iconTheme: IconThemeData(color: AppColors.primaryScheme),
-                ),
-                body: Center(
-                  child: ErrorMessageWidget(
-                    message: state.message
-                  ),
-                )
-              );
-            }
-            return const SizedBox();
-          }),
-        )),
+    return Scaffold(
+      backgroundColor: AppColors.primaryThemeBlack,
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'film-information-home',
+        tooltip: 'Вернуться к началу',
+        onPressed: () => context.router.popUntilRoot(),
+        backgroundColor: AppColors.primaryScheme,
+        foregroundColor: AppColors.primaryThemeBlack,
+        child: const Icon(Icons.home),
       ),
+      body: MultiBlocListener(
+          listeners: [
+            BlocListener<FilmInformationBloc, FilmInformationState>(
+                listener: _filmInformationBlocListener),
+          ],
+          child: SafeArea(
+            child: CustomRefreshIndicator(
+              onRefresh: () async {
+                final filmInformationBloc = context.read<FilmInformationBloc>();
+                final state = filmInformationBloc.state;
+                if (state is FilmLoaded) {
+                  filmInformationBloc.add(RefreshFilmInformation(film: state.film));
+                }
+                if (state is FilmFailure) {
+                  filmInformationBloc.add(GetFilmInformation(idFilm: filmId));
+                }
+              },
+              child: BlocBuilder<FilmInformationBloc, FilmInformationState>(
+                builder: (context, state) {
+                  if (state is FilmLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is FilmLoaded) {
+                    return _FilmInformationContent(
+                      filmId: filmId,
+                      film: state.film,
+                      filmImages: state.filmImages,
+                      collectionIds: state.collectionIds,
+                    );
+                  }
+                  if (state is FilmFailure) {
+                    return Column(
+                      children: [
+                        AppBar(
+                          centerTitle: true,
+                          title: Text(
+                            filmName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: CustomTextStyles.m3ActionText(),
+                          ),
+                          backgroundColor: AppColors.primaryThemeBlack,
+                          surfaceTintColor: Colors.transparent,
+                          elevation: 0,
+                          iconTheme: IconThemeData(color: AppColors.primaryScheme),
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: ErrorMessageWidget(message: state.message),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
+            ),
+          ),
+        ),
     );
   }
  
@@ -536,6 +536,7 @@ class _FilmInformationContentState extends State<_FilmInformationContent> {
           ),
         ),
         _SimilarFilmsSliver(filmId: widget.filmId),
+        SliverToBoxAdapter(child: SizedBox(height: 35))
       ],
     );
   }
@@ -726,7 +727,7 @@ class _SimilarFilmsBody extends StatelessWidget {
     }
 
     if (current is SimilarFilmsFailure) {
-      Center(
+      return Center(
         child: Container(
           width: double.maxFinite,
           decoration: BoxDecoration(

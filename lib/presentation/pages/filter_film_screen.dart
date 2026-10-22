@@ -29,6 +29,7 @@ class _FilterFilmView extends StatelessWidget {
     return Scaffold(
         backgroundColor: AppColors.primaryThemeBlack,
         appBar: AppBar(
+          centerTitle: true,
           title: Text(
             "Поиск фильмов",
             maxLines: 1,

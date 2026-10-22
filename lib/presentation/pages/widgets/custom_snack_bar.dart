@@ -24,6 +24,7 @@ class CustomSnackBar {
       ),
       backgroundColor: AppColors.primaryScheme,
       behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(left: 20, right: 20),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(16)
       ),

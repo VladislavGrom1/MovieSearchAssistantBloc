@@ -19,6 +19,7 @@ class FilterListScreen extends StatelessWidget {
     return Scaffold(
         backgroundColor: AppColors.primaryThemeBlack,
         appBar: AppBar(
+          centerTitle: true,
           title: Text(
             _filterTypeToString(),
             maxLines: 1,

@@ -93,6 +93,7 @@ class _CollectionFilmsViewState extends State<_CollectionFilmsView> {
     return Scaffold(
       backgroundColor: AppColors.primaryThemeBlack,
       appBar: AppBar(
+        centerTitle: true,
         automaticallyImplyLeading: !_isSearch,
         title: BlocBuilder<SelectionFilmsCubit, SelectionFilmsState>(
           builder: (context, state) {

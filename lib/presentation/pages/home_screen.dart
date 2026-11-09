@@ -21,6 +21,7 @@ class HomeScreen extends StatelessWidget {
       ),
       routes: [
           SearchFilmWrapperRoute(),
+          AiFilmsWrapperRoute(),
           CollectionsRoute(),
           UserProfileRoute()
         ],
@@ -42,10 +43,12 @@ class HomeScreen extends StatelessWidget {
               ),
               child: BottomNavigationBar(
                   enableFeedback: false,
-                  type: BottomNavigationBarType.shifting,
+                  type: BottomNavigationBarType.fixed,
                   backgroundColor: AppColors.primaryThemeBlack,
                   selectedItemColor: AppColors.primaryScheme,
                   unselectedItemColor: AppColors.primaryThemeGrey,
+                  showSelectedLabels: false,
+                  showUnselectedLabels: false,
                   currentIndex: tabsRouter.activeIndex,
                   onTap: tabsRouter.setActiveIndex,
                   selectedLabelStyle: CustomTextStyles.m3ActionText().copyWith(height: 1.2),
@@ -53,6 +56,11 @@ class HomeScreen extends StatelessWidget {
                     BottomNavigationBarItem(
                       icon: Icon(Icons.search),
                       label: "Поиск",
+                      backgroundColor: AppColors.primaryThemeBlack
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.auto_awesome),
+                      label: "AI-подбор",
                       backgroundColor: AppColors.primaryThemeBlack
                     ),
                     BottomNavigationBarItem(

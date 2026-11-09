@@ -20,12 +20,15 @@ import 'package:movie_search_assistant_bloc/data/data_sources/local/flim_local_d
 import 'package:movie_search_assistant_bloc/data/data_sources/local/hive_init.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/image_storage_service.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/user_local_data_source.dart';
+import 'package:movie_search_assistant_bloc/data/data_sources/remote/ai_film_remote_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/remote/film_remote_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/remote/user_remote_data_source.dart';
+import 'package:movie_search_assistant_bloc/data/repository_impl/ai_film_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/collection_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/film_collection_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/film_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/user_repository_impl.dart';
+import 'package:movie_search_assistant_bloc/domain/repository/ai_film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/collection_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_collection_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
@@ -67,6 +70,8 @@ import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_colle
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_saved_films_status_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_ai_film_recommendations_use_case.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/ai_films/ai_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_films_cubit/selection_films_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
@@ -125,12 +130,14 @@ Future<void> initializeDependencies() async {
     // RemoteDataSources
     getIt.registerLazySingleton(() => UserRemoteDataSource(dio: getIt()));
     getIt.registerLazySingleton(() => FilmRemoteDataSource(dio: getIt()));
+    getIt.registerLazySingleton(() => AiFilmRemoteDataSource(dio: getIt()));
 
     // Repositories
     getIt.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(userApiService: getIt(), userLocalStorage: getIt()));
     getIt.registerLazySingleton<FilmRepository>(() => FilmRepositoryImpl(filmRemoteDataSource: getIt(), filmLocalDataSource: getIt()));
     getIt.registerLazySingleton<CollectionRepository>(() => CollectionRepositoryImpl(collectionLocalDataSource: getIt()));
     getIt.registerLazySingleton<FilmCollectionRepository>(() => FilmCollectionRepositoryImpl(filmCollectionLinkLocalDataSource: getIt()));
+    getIt.registerLazySingleton<AiFilmRepository>(() => AiFilmRepositoryImpl(getIt()));
 
     // UseCases
     getIt.registerLazySingleton(() => UpdateUserApiKeyInfoUseCase(userRepository: getIt(), apiClient: getIt()));
@@ -219,12 +226,14 @@ Future<void> initializeDependencies() async {
       imageStorageService: getIt()
     ));
     getIt.registerLazySingleton(() => UseSharedApiKeyUseCase(userRepository: getIt(), apiClient: getIt()));
+    getIt.registerLazySingleton(() => GetAiFilmRecommendationsUseCase(getIt()));
 
     // Blocs
     getIt.registerFactory(() => AuthenticationBloc( 
       useSharedApiKeyUseCase: getIt()
     ));
     getIt.registerFactory(() => SearchFilmsBloc(displayFilmCollectionsUseCase: getIt()));
+    getIt.registerFactory(() => AiFilmsBloc(getIt()));
     getIt.registerFactory(() => SearchedFilmsBloc(searchFilterFilmsUseCase: getIt(), searchCollectionFilmsUseCase: getIt()));
     getIt.registerFactory(() => FilterFilmBloc());
     getIt.registerFactory(() => FilmInformationBloc(

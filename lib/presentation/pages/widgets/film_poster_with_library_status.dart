@@ -7,9 +7,17 @@ import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_post
 class FilmPosterWithLibraryStatus extends StatelessWidget {
   final FilmEntity film;
   final bool showRating;
- 
-  const FilmPosterWithLibraryStatus({super.key, required this.film, this.showRating = true});
- 
+  final double width;
+  final double height;
+
+  const FilmPosterWithLibraryStatus({
+    super.key,
+    required this.film,
+    this.showRating = true,
+    this.width = 100,
+    this.height = 140,
+  });
+
   @override
   Widget build(BuildContext context) {
     return BlocSelector<WatchSavedFilmsStatusCubit, SavedFilmsStatusState, FilmLibraryStatus>(
@@ -22,6 +30,8 @@ class FilmPosterWithLibraryStatus extends StatelessWidget {
           showSavedIcon: status.isSaved,
           showUserRating: status.isSaved,
           userRating: status.userRating,
+          width: width,
+          height: height,
         );
       },
     );

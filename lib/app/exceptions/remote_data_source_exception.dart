@@ -31,3 +31,9 @@ class TooManyRequestsPerSecond extends RemoteDataSourceException {
 class UnknownFailure extends RemoteDataSourceException{
   UnknownFailure() : super("Неизвестная ошибка. \nПопробуйте обновить страницу.");
 }
+
+/// Ошибка AI-сервиса подбора: текст сообщения выбирает источник данных,
+/// потому что у каждого статуса свой смысл для пользователя.
+class AiServiceFailure extends RemoteDataSourceException {
+  AiServiceFailure(super.message);
+}

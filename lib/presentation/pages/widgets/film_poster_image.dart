@@ -16,7 +16,9 @@ class FilmPosterImage extends StatelessWidget {
   final bool showSavedIcon;
   final bool showUserRating;
   final bool showRating;
-  
+  final double width;
+  final double height;
+
   const FilmPosterImage({
     super.key,
     this.networkImageUrl,
@@ -26,6 +28,8 @@ class FilmPosterImage extends StatelessWidget {
     this.showSavedIcon = false,
     this.showUserRating = false,
     this.showRating = true,
+    this.width = 100,
+    this.height = 140,
   });
  
   @override
@@ -61,19 +65,19 @@ class FilmPosterImage extends StatelessWidget {
       return Image.file(
           file,
           fit: BoxFit.cover,
-          width: 100,
-          height: 140,
+          width: width,
+          height: height,
           errorBuilder: (context, url, error) => const Icon(Icons.image_not_supported, color: AppColors.primaryScheme),
         );
     } else {
       return CachedNetworkImage(
         imageUrl: networkImageUrl ?? '',
         cacheManager: getIt<FilmImageCacheService>().instance,
-        memCacheWidth: 200,
-        memCacheHeight: 280,
+        memCacheWidth: (width * 2).round(),
+        memCacheHeight: (height * 2).round(),
         fit: BoxFit.cover,
-        width: 100,
-        height: 140,
+        width: width,
+        height: height,
         placeholder: (context, url) => Skeletonizer(
           enabled: true,
           effect: const ShimmerEffect(
@@ -83,8 +87,8 @@ class FilmPosterImage extends StatelessWidget {
           ),
           child: Container(
             color: AppColors.primaryThemeGrey,
-            width: 100,
-            height: 140,
+            width: width,
+            height: height,
           )
         ),
         errorWidget: (context, url, error) => Container(

@@ -4,6 +4,10 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_saved_films_status_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_image.dart';
 
+/// Постер фильма с бейджем «сохранён в библиотеке».
+///
+/// Требует `BlocProvider<WatchSavedFilmsStatusCubit>` выше по дереву:
+/// [build] подписывается на него через `BlocSelector` и без провайдера падает.
 class FilmPosterWithLibraryStatus extends StatelessWidget {
   final FilmEntity film;
   final bool showRating;

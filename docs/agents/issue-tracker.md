@@ -10,6 +10,15 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
+## The spec is a living document
+
+`spec.md` describes what the code does now, not what it was planned to do.
+
+- When the user overrides a spec point during grilling, rewrite that point in `spec.md` in the same change — do not leave the old text and rely on the conversation.
+- When the implementation has to diverge from the spec (missing API field, inherited widget behaviour, sandbox constraint), either change the code to match or change the spec and note why in the ticket.
+- A reviewer must be able to read `spec.md` alone and predict the screen. If a behaviour is decided but absent from the spec, the spec is wrong.
+- Ticket files keep the history: append a «Реализовано» (or «Отклонение») comment with the reason and the files touched.
+
 ## When a skill says "publish to the issue tracker"
 
 Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed).

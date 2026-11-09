@@ -20,6 +20,8 @@ Blocked by: 06, 07
 - [ ] После генерации проверить, что `lib/app/router/app_router.gr.dart` содержит `AiFilmsRoute` и `AiFilmsWrapperRoute`.
 - [ ] Прогнать `scripts/flutter_analyze.sh` (или `flutter analyze`) — новых `error •` нет.
 - [ ] Прогнать `flutter test` — все тесты из тикетов 01–07 зелёные.
+- [ ] Прогнать `sh scripts/check_routes_sync.sh` и `sh scripts/check_vocabulary.sh` — обе проверки зелёные (их же запускает CI).
+- [ ] Обновить `spec.md`, если реализация в чём-то разошлась с ним (см. `docs/agents/issue-tracker.md`, раздел про живой spec).
 - [ ] Ручная проверка по чек-листу спеки, раздел 9: пустой ввод, загрузка, успех, пустой ответ, `404`, `502`, обрыв сети, переключение вкладок, тап по карточке, фильм без `kinopoiskId`.
 
 ## Критерии готовности

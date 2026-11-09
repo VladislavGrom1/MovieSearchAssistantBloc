@@ -3,8 +3,8 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 
 /// Сырой ответ AI-сервиса по одному фильму.
 ///
-/// Поле `reason` сервиса — это описание сюжета с Кинопоиска, а не обоснование
-/// выбора, поэтому в домене оно называется `description`.
+/// Поле `reason` сервиса содержит русское описание фильма с Кинопоиска,
+/// поэтому в домене оно называется `description`.
 class AiFilmRecommendationModel {
   final String title;
   final int? year;

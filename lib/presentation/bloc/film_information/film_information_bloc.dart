@@ -58,12 +58,20 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   Future<void> _subscribe(int filmId) async {
     await _collectionIdsSubscription?.cancel();
     await _filmSubscription?.cancel();
- 
+    
+    if (isClosed) return;
+
     _collectionIdsSubscription = watchLinksByFilmUseCase(filmId).listen(
-      (ids) => add(UpdateFilmLinks(updatedCollectionIds: ids)),
+      (ids) {
+        if (isClosed) return;
+        add(UpdateFilmLinks(updatedCollectionIds: ids));
+      },
     );
     _filmSubscription = watchFilmUseCase(filmId).listen(
-      (film) => add(SavedFilmChanged(film)),
+      (film) {
+        if (isClosed) return;
+        add(SavedFilmChanged(film));
+      },
     );
   }
  

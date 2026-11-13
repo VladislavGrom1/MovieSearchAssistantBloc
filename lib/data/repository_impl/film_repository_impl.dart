@@ -87,6 +87,24 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
+  Future<List<FilmEntity>?> getSearchFilmsByKeyword(String keyword, int page) async {
+    try{
+      List<FilmBaseModel>? filmBaseModels = await filmRemoteDataSource.getSearchFilmsByKeyword(keyword, page);
+      if(filmBaseModels != null){
+        final searchFilmsWithUserData = await Future.wait(
+          filmBaseModels.map(initUserDataForFilmBaseModel)
+        );
+        return searchFilmsWithUserData.map((model) => FilmEntity.fromFilmBaseModel(model)).toList();
+      }
+      return null;
+    } on RemoteDataSourceException{
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  @override
   Future<FilmEntity?> getFilmInformation(int idFilm) async{
     try{
       FilmDetailModel? filmDetailModel = await filmRemoteDataSource.getFilmInformation(idFilm);

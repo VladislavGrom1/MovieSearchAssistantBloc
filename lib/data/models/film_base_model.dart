@@ -75,6 +75,21 @@ class FilmBaseModel {
     );
   }
 
+  factory FilmBaseModel.fromFilmSearchByKeywordResponseItems(FilmSearchResponseFilms film){
+    return FilmBaseModel(
+      kinopoiskId: film.filmId,
+      nameRu: film.nameRu,
+      nameOriginal: film.nameEn,
+      countries: film.countries?.map((country) => country.country).toList(),
+      genres: film.genres?.map((genre) => genre.genre).toList(),
+      ratingKinopoisk: num.tryParse((film.rating ?? '').replaceAll(',', '.')),
+      year: int.tryParse(film.year ?? ''),
+      type: film.type?.name,
+      posterUrl: film.posterUrl,
+      posterUrlPreview: film.posterUrlPreview
+    );
+  }
+
   factory FilmBaseModel.fromSimilarFilmResponseItems(SimilarFilmResponseItems film) {
     return FilmBaseModel(
       kinopoiskId: film.filmId,

@@ -44,6 +44,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_c
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_image_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/search_films_by_keyword_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/share_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_collection_use_case.dart';
@@ -141,16 +142,15 @@ Future<void> initializeDependencies() async {
 
     // UseCases
     getIt.registerLazySingleton(() => UpdateUserApiKeyInfoUseCase(userRepository: getIt(), apiClient: getIt()));
-    getIt.registerLazySingleton(() => GetCollectionsFilmsUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
-    getIt.registerLazySingleton(() => SearchFilterFilmsUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
-    getIt.registerLazySingleton(() => SearchCollectionFilmsUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
+    getIt.registerLazySingleton(() => GetCollectionsFilmsUseCase(filmRepository: getIt()));
+    getIt.registerLazySingleton(() => SearchFilterFilmsUseCase(filmRepository: getIt()));
+    getIt.registerLazySingleton(() => SearchFilmsByKeywordUseCase(filmRepository: getIt()));
+    getIt.registerLazySingleton(() => SearchCollectionFilmsUseCase(filmRepository: getIt()));
     getIt.registerLazySingleton(() => GetFilmInformationUseCase(
-      userRepository: getIt(), 
       filmRepository: getIt(), 
       filmCollectionRepository: getIt(), 
-      apiClient: getIt()
     ));
-    getIt.registerLazySingleton(() => GetFilmImagesUseCase(userRepository: getIt(), filmRepository: getIt(), apiClient: getIt()));
+    getIt.registerLazySingleton(() => GetFilmImagesUseCase(filmRepository: getIt()));
     getIt.registerLazySingleton(() => GetSavedFilmsUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
     getIt.registerLazySingleton(() => GetSimilarFilmsUseCase(filmRepository: getIt()));
     getIt.registerLazySingleton(() => GetSavedFilmUseCase(filmRepository: getIt(), filmCollectionRepository: getIt()));
@@ -234,7 +234,11 @@ Future<void> initializeDependencies() async {
     ));
     getIt.registerFactory(() => SearchFilmsBloc(displayFilmCollectionsUseCase: getIt()));
     getIt.registerFactory(() => AiFilmsBloc(getIt()));
-    getIt.registerFactory(() => SearchedFilmsBloc(searchFilterFilmsUseCase: getIt(), searchCollectionFilmsUseCase: getIt()));
+    getIt.registerFactory(() => SearchedFilmsBloc(
+      searchFilterFilmsUseCase: getIt(), 
+      searchCollectionFilmsUseCase: getIt(),
+      searchFilmsByKeywordUseCase: getIt()
+    ));
     getIt.registerFactory(() => FilterFilmBloc());
     getIt.registerFactory(() => FilmInformationBloc(
       getFilmInformationUseCase: getIt(),

@@ -106,7 +106,7 @@ class _$FilmSearchResponseFilms extends FilmSearchResponseFilms {
   @override
   final FilmSearchResponseFilmsTypeEnum? type;
   @override
-  final int? year;
+  final String? year;
   @override
   final String? description;
   @override
@@ -232,9 +232,9 @@ class FilmSearchResponseFilmsBuilder
   FilmSearchResponseFilmsTypeEnum? get type => _$this._type;
   set type(FilmSearchResponseFilmsTypeEnum? type) => _$this._type = type;
 
-  int? _year;
-  int? get year => _$this._year;
-  set year(int? year) => _$this._year = year;
+  String? _year;
+  String? get year => _$this._year;
+  set year(String? year) => _$this._year = year;
 
   String? _description;
   String? get description => _$this._description;

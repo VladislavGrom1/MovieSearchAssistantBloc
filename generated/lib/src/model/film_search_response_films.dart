@@ -44,7 +44,7 @@ abstract class FilmSearchResponseFilms
   // enum typeEnum {  FILM,  TV_SHOW,  VIDEO,  MINI_SERIES,  TV_SERIES,  UNKNOWN,  };
 
   @BuiltValueField(wireName: r'year')
-  int? get year;
+  String? get year;
 
   @BuiltValueField(wireName: r'description')
   String? get description;
@@ -132,7 +132,7 @@ class _$FilmSearchResponseFilmsSerializer
       yield r'year';
       yield serializers.serialize(
         object.year,
-        specifiedType: const FullType(int),
+        specifiedType: const FullType(String),
       );
     }
     if (object.description != null) {
@@ -247,8 +247,8 @@ class _$FilmSearchResponseFilmsSerializer
         case r'year':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(int),
-          ) as int;
+            specifiedType: const FullType(String),
+          ) as String;
           result.year = valueDes;
           break;
         case r'description':

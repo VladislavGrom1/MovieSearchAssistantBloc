@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **nameRu** | **String** |  | [optional] 
 **nameEn** | **String** |  | [optional] 
 **type** | **String** |  | [optional] 
-**year** | **int** |  | [optional] 
+**year** | **String** |  | [optional] 
 **description** | **String** |  | [optional] 
 **filmLength** | **String** |  | [optional] 
 **countries** | [**BuiltList&lt;Country&gt;**](Country.md) |  | [optional] 

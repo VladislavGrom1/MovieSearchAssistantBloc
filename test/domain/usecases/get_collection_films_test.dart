@@ -15,19 +15,13 @@ class MockFilmRepository extends Mock implements FilmRepository {}
 class MockDioApiClient extends Mock implements DioApiClient {}
 
 void main() {
-  late MockUserRepository userRepository;
   late MockFilmRepository filmRepository;
-  late MockDioApiClient apiClient;
   late GetCollectionsFilmsUseCase useCase;
 
   setUp(() {
-    userRepository = MockUserRepository();
     filmRepository = MockFilmRepository();
-    apiClient = MockDioApiClient();
     useCase = GetCollectionsFilmsUseCase(
-      userRepository: userRepository,
       filmRepository: filmRepository,
-      apiClient: apiClient,
     );
   });
 

@@ -4,6 +4,7 @@ import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exc
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_collection_films_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/search_films_by_keyword_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_filter_films_use_case.dart';
 
 part 'searched_films_event.dart';
@@ -11,6 +12,7 @@ part 'searched_films_state.dart';
 
 class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
   final SearchFilterFilmsUseCase searchFilterFilmsUseCase;
+  final SearchFilmsByKeywordUseCase searchFilmsByKeywordUseCase;
   final SearchCollectionFilmsUseCase searchCollectionFilmsUseCase;
 
   int currentPage = 1;
@@ -19,6 +21,7 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
 
   SearchedFilmsBloc({
     required this.searchFilterFilmsUseCase,
+    required this.searchFilmsByKeywordUseCase,
     required this.searchCollectionFilmsUseCase,
     }) : super(SearchedFilmsInitial()) {
     on<LoadSearchedFilms>(_onLoadSearchedFilms);
@@ -116,15 +119,43 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
         event.nameCollection!,
         page,
       ) ?? [];
-    } else {
+    }
+
+    final keyword = event.keyword?.trim() ?? '';
+    final countries = (event.countries?.isEmpty ?? true) ? null : event.countries;
+    final genres = (event.genres?.isEmpty ?? true) ? null : event.genres;
+    final hasFilters = countries != null ||
+        genres != null ||
+        event.yearFrom != null ||
+        event.yearTo != null;
+
+    if (!hasFilters && keyword.isNotEmpty) {
+      try {
+        final films = await searchFilmsByKeywordUseCase(keyword, page) ?? [];
+        if (films.isNotEmpty) {
+          return films;
+        }
+      } on RemoteDataSourceException {
+        // v2.1 не ответил (таймаут или ошибка прокси) — экран не должен
+        // оставаться без результатов, ниже сработает резервный поиск.
+      }
       return await searchFilterFilmsUseCase(
-        event.keyword,
-        event.countries,
-        event.genres,
-        event.yearFrom,
-        event.yearTo,
+        keyword,
+        null,
+        null,
+        null,
+        null,
         page,
       ) ?? [];
     }
+
+    return await searchFilterFilmsUseCase(
+      keyword.isEmpty ? null : keyword,
+      countries,
+      genres,
+      event.yearFrom,
+      event.yearTo,
+      page,
+    ) ?? [];
   }
 }

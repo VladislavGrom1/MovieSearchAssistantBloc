@@ -46,7 +46,8 @@ void main() {
       body: {
         'movies': [
           {
-            'title': "Ocean's Eleven",
+            'nameEn': "Ocean's Eleven",
+            'nameRu': null,
             'year': 2001,
             'reason': 'Ограбление казино.',
             'kinopoiskId': 526,
@@ -54,7 +55,8 @@ void main() {
             'rating': '8.1',
           },
           {
-            'title': 'Heat',
+            'nameEn': 'Heat',
+            'nameRu': null,
             'year': null,
             'reason': 'Погоня.',
             'kinopoiskId': null,
@@ -65,40 +67,70 @@ void main() {
       },
     );
 
-    final result = await buildDataSource(adapter).getRecommendations('ограбление');
+    final result = await buildDataSource(adapter).getRecommendations(
+      'ограбление',
+      false,
+      const [],
+      const [],
+    );
 
     expect(result, hasLength(2));
-    expect(result.first.title, "Ocean's Eleven");
+    expect(result.first.nameEn, "Ocean's Eleven");
     expect(result.first.description, 'Ограбление казино.');
     expect(adapter.lastRequest?.method, 'POST');
     expect(adapter.lastRequest?.uri.toString(), aiFilmsEndpoint);
-    expect(adapter.lastRequest?.data, {'query': 'ограбление'});
+    expect(adapter.lastRequest?.data, {
+      'query': 'ограбление',
+      'savedKinopoiskIds': <int>[],
+      'savedTitles': <String?>[],
+      'onlyNew': false,
+    });
+  });
+
+  test('передаёт режим «только новое», сохранённые id и названия', () async {
+    final adapter = _FakeAdapter(
+      statusCode: 200,
+      body: {'movies': <dynamic>[]},
+    );
+
+    await buildDataSource(adapter).getRecommendations(
+      'q',
+      true,
+      const [1, 2],
+      const ['Интерстеллар', null],
+    );
+
+    expect(adapter.lastRequest?.data, {
+      'query': 'q',
+      'savedKinopoiskIds': <int>[1, 2],
+      'savedTitles': <String?>['Интерстеллар', null],
+      'onlyNew': true,
+    });
   });
 
   test('пустой movies возвращает пустой список, а не null', () async {
     final adapter = _FakeAdapter(statusCode: 200, body: {'movies': <dynamic>[]});
 
-    final result = await buildDataSource(adapter).getRecommendations('что-нибудь');
+    final result = await buildDataSource(adapter).getRecommendations(
+      'что-нибудь',
+      false,
+      const [],
+      const [],
+    );
 
     expect(result, isEmpty);
   });
 
-  test('404 отдаёт сообщение про ненайденные фильмы', () async {
+  test('404 означает «ничего не нашлось» и отдаёт пустой список', () async {
     final adapter = _FakeAdapter(
       statusCode: 404,
       body: {'error': 'Фильмы не найдены на Кинопоиске.'},
     );
 
-    await expectLater(
-      buildDataSource(adapter).getRecommendations('q'),
-      throwsA(
-        isA<AiServiceFailure>().having(
-          (e) => e.message,
-          'message',
-          'Фильмы не найдены. Попробуйте описать иначе.',
-        ),
-      ),
-    );
+    final result = await buildDataSource(adapter)
+        .getRecommendations('q', false, const [], const []);
+
+    expect(result, isEmpty);
   });
 
   test('502 отдаёт сообщение про недоступную модель', () async {
@@ -108,7 +140,7 @@ void main() {
     );
 
     await expectLater(
-      buildDataSource(adapter).getRecommendations('q'),
+      buildDataSource(adapter).getRecommendations('q', false, const [], const []),
       throwsA(
         isA<AiServiceFailure>().having(
           (e) => e.message,
@@ -126,7 +158,7 @@ void main() {
     );
 
     await expectLater(
-      buildDataSource(adapter).getRecommendations('q'),
+      buildDataSource(adapter).getRecommendations('q', false, const [], const []),
       throwsA(
         isA<AiServiceFailure>().having(
           (e) => e.message,
@@ -144,7 +176,7 @@ void main() {
     );
 
     await expectLater(
-      buildDataSource(adapter).getRecommendations('q'),
+      buildDataSource(adapter).getRecommendations('q', false, const [], const []),
       throwsA(
         isA<AiServiceFailure>()
             .having((e) => e.message, 'message', 'Технические работы'),
@@ -156,7 +188,7 @@ void main() {
     final adapter = _FakeAdapter(statusCode: 503, body: {'ok': false});
 
     await expectLater(
-      buildDataSource(adapter).getRecommendations('q'),
+      buildDataSource(adapter).getRecommendations('q', false, const [], const []),
       throwsA(
         isA<AiServiceFailure>().having(
           (e) => e.message,

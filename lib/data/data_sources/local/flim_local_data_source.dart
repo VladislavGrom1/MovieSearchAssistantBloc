@@ -67,6 +67,22 @@ class FilmLocalDataSource{
     }
   }
 
+  Future<(List<int>, List<String?>)> getSavedIdsAndTitles() async {
+    if (!Hive.isBoxOpen(HiveStorageKeys.filmDetailModelBox)) {
+      return const (<int>[], <String?>[]);
+    }
+    try{
+      final storageBox = Hive.box<FilmDetailModel>(HiveStorageKeys.filmDetailModelBox);
+      List<int> savedKinopoiskIds = storageBox.keys.cast<int>().toList();
+      List<String?> savedTitles = storageBox.values.map((film) => film.filmBaseModel.nameOriginal).toList();
+      return (savedKinopoiskIds, savedTitles);
+    } on HiveError{
+      return const (<int>[], <String?>[]);
+    } catch(e){
+      rethrow;
+    }
+  }
+
   Future<bool> filmIsSaved(int idFilm) async {
     try{
       FilmDetailModel? filmFromLocalStorage = await getFilm(idFilm);

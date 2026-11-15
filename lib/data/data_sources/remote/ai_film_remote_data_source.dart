@@ -3,21 +3,28 @@ import 'package:movie_search_assistant_bloc/app/exceptions/exception_mapper.dart
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/data/models/ai_film_recommendation_model.dart';
 
-/// Абсолютный адрес AI-воркера. Отдельный от `baseUrl` кинопрокси;
-/// см. ADR-0002 про переиспользование общего `Dio`.
-const String aiFilmsEndpoint =
-    'https://ai-movie-assistant.vladislav-vaganov-dev.workers.dev/';
+const String aiFilmsEndpoint = 'https://ai-movie-assistant.vladislav-vaganov-dev.workers.dev/';
 
 class AiFilmRemoteDataSource {
   final Dio dio;
 
   AiFilmRemoteDataSource({required this.dio});
 
-  Future<List<AiFilmRecommendationModel>> getRecommendations(String query) async {
+  Future<List<AiFilmRecommendationModel>> getRecommendations(
+      String query,
+      bool onlyNew,
+      List<int> savedKinopoiskIds, 
+      List<String?> savedTitles
+    ) async {
     try {
       final response = await dio.post<Map<String, dynamic>>(
         aiFilmsEndpoint,
-        data: {'query': query},
+        data: {
+          'query': query,
+          'savedKinopoiskIds': savedKinopoiskIds,
+          'savedTitles': savedTitles,
+          'onlyNew': onlyNew,
+        },
       );
 
       final movies = response.data?['movies'] as List<dynamic>? ?? const [];
@@ -26,24 +33,22 @@ class AiFilmRemoteDataSource {
           .map(AiFilmRecommendationModel.fromJson)
           .toList();
     } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return const <AiFilmRecommendationModel>[];
+      }
       throw _mapError(e);
     }
   }
+
 
   RemoteDataSourceException _mapError(DioException e) {
     final statusCode = e.response?.statusCode;
 
     switch (statusCode) {
-      case 404:
-        return AiServiceFailure('Фильмы не найдены. Попробуйте описать иначе.');
-      case 502:
-        return AiServiceFailure('Модель не смогла ответить. Попробуйте позже.');
+      case 502: return AiServiceFailure('Модель не смогла ответить. Попробуйте позже.');
       case 400:
       case 405:
-      case 500:
-        return AiServiceFailure(
-          'Сервис подбора временно недоступен. Попробуйте позже.',
-        );
+      case 500: return AiServiceFailure('Сервис подбора временно недоступен. Попробуйте позже.');
     }
 
     final serverMessage = _serverErrorMessage(e);

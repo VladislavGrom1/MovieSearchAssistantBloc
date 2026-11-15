@@ -10,81 +10,63 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 
-import 'package:auto_route/auto_route.dart' as _i16;
-import 'package:collection/collection.dart' as _i18;
-import 'package:flutter/material.dart' as _i17;
-import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/ai_films/ai_films_wrapper_screen.dart'
-    as _i2;
+import 'package:auto_route/auto_route.dart' as _i15;
+import 'package:collection/collection.dart' as _i17;
+import 'package:flutter/material.dart' as _i16;
 import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/collections/collections_wrapper_screen.dart'
-    as _i4;
+    as _i3;
 import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/search_film/search_film_wrapper_screen.dart'
-    as _i12;
+    as _i11;
 import 'package:movie_search_assistant_bloc/app/router/navigation_tabs/user_profile/user_profile_wrapper_screen.dart'
-    as _i15;
-import 'package:movie_search_assistant_bloc/presentation/pages/ai_films_screen.dart'
+    as _i14;
+import 'package:movie_search_assistant_bloc/presentation/pages/ai_assistant_screen.dart'
     as _i1;
 import 'package:movie_search_assistant_bloc/presentation/pages/collection_films_screen.dart'
-    as _i3;
+    as _i2;
 import 'package:movie_search_assistant_bloc/presentation/pages/collections_screen.dart'
-    as _i5;
+    as _i4;
 import 'package:movie_search_assistant_bloc/presentation/pages/film_information_screen.dart'
-    as _i6;
+    as _i5;
 import 'package:movie_search_assistant_bloc/presentation/pages/filter_film_screen.dart'
-    as _i7;
+    as _i6;
 import 'package:movie_search_assistant_bloc/presentation/pages/filter_list_screen.dart'
-    as _i8;
+    as _i7;
 import 'package:movie_search_assistant_bloc/presentation/pages/home_screen.dart'
-    as _i9;
+    as _i8;
 import 'package:movie_search_assistant_bloc/presentation/pages/onboarding_screen.dart'
-    as _i10;
+    as _i9;
 import 'package:movie_search_assistant_bloc/presentation/pages/search_film_screen.dart'
-    as _i11;
+    as _i10;
 import 'package:movie_search_assistant_bloc/presentation/pages/searched_films_screen.dart'
-    as _i13;
+    as _i12;
 import 'package:movie_search_assistant_bloc/presentation/pages/user_profile_screen.dart'
-    as _i14;
+    as _i13;
 
 /// generated route for
-/// [_i1.AiFilmsScreen]
-class AiFilmsRoute extends _i16.PageRouteInfo<void> {
-  const AiFilmsRoute({List<_i16.PageRouteInfo>? children})
-      : super(AiFilmsRoute.name, initialChildren: children);
+/// [_i1.AiAssistantScreen]
+class AiAssistantRoute extends _i15.PageRouteInfo<void> {
+  const AiAssistantRoute({List<_i15.PageRouteInfo>? children})
+      : super(AiAssistantRoute.name, initialChildren: children);
 
-  static const String name = 'AiFilmsRoute';
+  static const String name = 'AiAssistantRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return const _i1.AiFilmsScreen();
+      return const _i1.AiAssistantScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i2.AiFilmsWrapperScreen]
-class AiFilmsWrapperRoute extends _i16.PageRouteInfo<void> {
-  const AiFilmsWrapperRoute({List<_i16.PageRouteInfo>? children})
-      : super(AiFilmsWrapperRoute.name, initialChildren: children);
-
-  static const String name = 'AiFilmsWrapperRoute';
-
-  static _i16.PageInfo page = _i16.PageInfo(
-    name,
-    builder: (data) {
-      return _i16.WrappedRoute(child: const _i2.AiFilmsWrapperScreen());
-    },
-  );
-}
-
-/// generated route for
-/// [_i3.CollectionFilmsScreen]
+/// [_i2.CollectionFilmsScreen]
 class CollectionFilmsRoute
-    extends _i16.PageRouteInfo<CollectionFilmsRouteArgs> {
+    extends _i15.PageRouteInfo<CollectionFilmsRouteArgs> {
   CollectionFilmsRoute({
-    _i17.Key? key,
+    _i16.Key? key,
     required String collectionId,
     required String collectionName,
-    List<_i16.PageRouteInfo>? children,
+    List<_i15.PageRouteInfo>? children,
   }) : super(
           CollectionFilmsRoute.name,
           args: CollectionFilmsRouteArgs(
@@ -101,7 +83,7 @@ class CollectionFilmsRoute
 
   static const String name = 'CollectionFilmsRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
@@ -111,7 +93,7 @@ class CollectionFilmsRoute
           collectionName: pathParams.getString('collectionName'),
         ),
       );
-      return _i3.CollectionFilmsScreen(
+      return _i2.CollectionFilmsScreen(
         key: args.key,
         collectionId: args.collectionId,
         collectionName: args.collectionName,
@@ -127,7 +109,7 @@ class CollectionFilmsRouteArgs {
     required this.collectionName,
   });
 
-  final _i17.Key? key;
+  final _i16.Key? key;
 
   final String collectionId;
 
@@ -153,46 +135,46 @@ class CollectionFilmsRouteArgs {
 }
 
 /// generated route for
-/// [_i4.CollectionWrapperScreen]
-class CollectionWrapperRoute extends _i16.PageRouteInfo<void> {
-  const CollectionWrapperRoute({List<_i16.PageRouteInfo>? children})
+/// [_i3.CollectionWrapperScreen]
+class CollectionWrapperRoute extends _i15.PageRouteInfo<void> {
+  const CollectionWrapperRoute({List<_i15.PageRouteInfo>? children})
       : super(CollectionWrapperRoute.name, initialChildren: children);
 
   static const String name = 'CollectionWrapperRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return _i16.WrappedRoute(child: const _i4.CollectionWrapperScreen());
+      return _i15.WrappedRoute(child: const _i3.CollectionWrapperScreen());
     },
   );
 }
 
 /// generated route for
-/// [_i5.CollectionsScreen]
-class CollectionsRoute extends _i16.PageRouteInfo<void> {
-  const CollectionsRoute({List<_i16.PageRouteInfo>? children})
+/// [_i4.CollectionsScreen]
+class CollectionsRoute extends _i15.PageRouteInfo<void> {
+  const CollectionsRoute({List<_i15.PageRouteInfo>? children})
       : super(CollectionsRoute.name, initialChildren: children);
 
   static const String name = 'CollectionsRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return const _i5.CollectionsScreen();
+      return const _i4.CollectionsScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i6.FilmInformationScreen]
+/// [_i5.FilmInformationScreen]
 class FilmInformationRoute
-    extends _i16.PageRouteInfo<FilmInformationRouteArgs> {
+    extends _i15.PageRouteInfo<FilmInformationRouteArgs> {
   FilmInformationRoute({
-    _i17.Key? key,
+    _i16.Key? key,
     required int filmId,
     required String filmName,
-    List<_i16.PageRouteInfo>? children,
+    List<_i15.PageRouteInfo>? children,
   }) : super(
           FilmInformationRoute.name,
           args: FilmInformationRouteArgs(
@@ -206,7 +188,7 @@ class FilmInformationRoute
 
   static const String name = 'FilmInformationRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
@@ -216,7 +198,7 @@ class FilmInformationRoute
           filmName: pathParams.getString('filmName'),
         ),
       );
-      return _i6.FilmInformationScreen(
+      return _i5.FilmInformationScreen(
         key: args.key,
         filmId: args.filmId,
         filmName: args.filmName,
@@ -232,7 +214,7 @@ class FilmInformationRouteArgs {
     required this.filmName,
   });
 
-  final _i17.Key? key;
+  final _i16.Key? key;
 
   final int filmId;
 
@@ -257,28 +239,28 @@ class FilmInformationRouteArgs {
 }
 
 /// generated route for
-/// [_i7.FilterFilmScreen]
-class FilterFilmRoute extends _i16.PageRouteInfo<void> {
-  const FilterFilmRoute({List<_i16.PageRouteInfo>? children})
+/// [_i6.FilterFilmScreen]
+class FilterFilmRoute extends _i15.PageRouteInfo<void> {
+  const FilterFilmRoute({List<_i15.PageRouteInfo>? children})
       : super(FilterFilmRoute.name, initialChildren: children);
 
   static const String name = 'FilterFilmRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return const _i7.FilterFilmScreen();
+      return const _i6.FilterFilmScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i8.FilterListScreen]
-class FilterListRoute extends _i16.PageRouteInfo<FilterListRouteArgs> {
+/// [_i7.FilterListScreen]
+class FilterListRoute extends _i15.PageRouteInfo<FilterListRouteArgs> {
   FilterListRoute({
-    _i17.Key? key,
+    _i16.Key? key,
     required String filterType,
-    List<_i16.PageRouteInfo>? children,
+    List<_i15.PageRouteInfo>? children,
   }) : super(
           FilterListRoute.name,
           args: FilterListRouteArgs(key: key, filterType: filterType),
@@ -288,7 +270,7 @@ class FilterListRoute extends _i16.PageRouteInfo<FilterListRouteArgs> {
 
   static const String name = 'FilterListRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
@@ -296,7 +278,7 @@ class FilterListRoute extends _i16.PageRouteInfo<FilterListRouteArgs> {
         orElse: () =>
             FilterListRouteArgs(filterType: pathParams.getString('filterType')),
       );
-      return _i8.FilterListScreen(key: args.key, filterType: args.filterType);
+      return _i7.FilterListScreen(key: args.key, filterType: args.filterType);
     },
   );
 }
@@ -304,7 +286,7 @@ class FilterListRoute extends _i16.PageRouteInfo<FilterListRouteArgs> {
 class FilterListRouteArgs {
   const FilterListRouteArgs({this.key, required this.filterType});
 
-  final _i17.Key? key;
+  final _i16.Key? key;
 
   final String filterType;
 
@@ -325,74 +307,74 @@ class FilterListRouteArgs {
 }
 
 /// generated route for
-/// [_i9.HomeScreen]
-class HomeRoute extends _i16.PageRouteInfo<void> {
-  const HomeRoute({List<_i16.PageRouteInfo>? children})
+/// [_i8.HomeScreen]
+class HomeRoute extends _i15.PageRouteInfo<void> {
+  const HomeRoute({List<_i15.PageRouteInfo>? children})
       : super(HomeRoute.name, initialChildren: children);
 
   static const String name = 'HomeRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return const _i9.HomeScreen();
+      return const _i8.HomeScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i10.OnboardingScreen]
-class OnboardingRoute extends _i16.PageRouteInfo<void> {
-  const OnboardingRoute({List<_i16.PageRouteInfo>? children})
+/// [_i9.OnboardingScreen]
+class OnboardingRoute extends _i15.PageRouteInfo<void> {
+  const OnboardingRoute({List<_i15.PageRouteInfo>? children})
       : super(OnboardingRoute.name, initialChildren: children);
 
   static const String name = 'OnboardingRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return const _i10.OnboardingScreen();
+      return const _i9.OnboardingScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i11.SearchFilmScreen]
-class SearchFilmRoute extends _i16.PageRouteInfo<void> {
-  const SearchFilmRoute({List<_i16.PageRouteInfo>? children})
+/// [_i10.SearchFilmScreen]
+class SearchFilmRoute extends _i15.PageRouteInfo<void> {
+  const SearchFilmRoute({List<_i15.PageRouteInfo>? children})
       : super(SearchFilmRoute.name, initialChildren: children);
 
   static const String name = 'SearchFilmRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return const _i11.SearchFilmScreen();
+      return const _i10.SearchFilmScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i12.SearchFilmWrapperScreen]
-class SearchFilmWrapperRoute extends _i16.PageRouteInfo<void> {
-  const SearchFilmWrapperRoute({List<_i16.PageRouteInfo>? children})
+/// [_i11.SearchFilmWrapperScreen]
+class SearchFilmWrapperRoute extends _i15.PageRouteInfo<void> {
+  const SearchFilmWrapperRoute({List<_i15.PageRouteInfo>? children})
       : super(SearchFilmWrapperRoute.name, initialChildren: children);
 
   static const String name = 'SearchFilmWrapperRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return _i16.WrappedRoute(child: const _i12.SearchFilmWrapperScreen());
+      return _i15.WrappedRoute(child: const _i11.SearchFilmWrapperScreen());
     },
   );
 }
 
 /// generated route for
-/// [_i13.SearchedFilmsScreen]
-class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
+/// [_i12.SearchedFilmsScreen]
+class SearchedFilmsRoute extends _i15.PageRouteInfo<SearchedFilmsRouteArgs> {
   SearchedFilmsRoute({
-    _i17.Key? key,
+    _i16.Key? key,
     String? nameCollection,
     String? keyword,
     List<int>? countries,
@@ -400,7 +382,7 @@ class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
     int? yearFrom,
     int? yearTo,
     required String appBarTitle,
-    List<_i16.PageRouteInfo>? children,
+    List<_i15.PageRouteInfo>? children,
   }) : super(
           SearchedFilmsRoute.name,
           args: SearchedFilmsRouteArgs(
@@ -418,11 +400,11 @@ class SearchedFilmsRoute extends _i16.PageRouteInfo<SearchedFilmsRouteArgs> {
 
   static const String name = 'SearchedFilmsRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<SearchedFilmsRouteArgs>();
-      return _i13.SearchedFilmsScreen(
+      return _i12.SearchedFilmsScreen(
         key: args.key,
         nameCollection: args.nameCollection,
         keyword: args.keyword,
@@ -448,7 +430,7 @@ class SearchedFilmsRouteArgs {
     required this.appBarTitle,
   });
 
-  final _i17.Key? key;
+  final _i16.Key? key;
 
   final String? nameCollection;
 
@@ -476,8 +458,8 @@ class SearchedFilmsRouteArgs {
     return key == other.key &&
         nameCollection == other.nameCollection &&
         keyword == other.keyword &&
-        const _i18.ListEquality<int>().equals(countries, other.countries) &&
-        const _i18.ListEquality<int>().equals(genres, other.genres) &&
+        const _i17.ListEquality<int>().equals(countries, other.countries) &&
+        const _i17.ListEquality<int>().equals(genres, other.genres) &&
         yearFrom == other.yearFrom &&
         yearTo == other.yearTo &&
         appBarTitle == other.appBarTitle;
@@ -488,41 +470,41 @@ class SearchedFilmsRouteArgs {
       key.hashCode ^
       nameCollection.hashCode ^
       keyword.hashCode ^
-      const _i18.ListEquality<int>().hash(countries) ^
-      const _i18.ListEquality<int>().hash(genres) ^
+      const _i17.ListEquality<int>().hash(countries) ^
+      const _i17.ListEquality<int>().hash(genres) ^
       yearFrom.hashCode ^
       yearTo.hashCode ^
       appBarTitle.hashCode;
 }
 
 /// generated route for
-/// [_i14.UserProfileScreen]
-class UserProfileRoute extends _i16.PageRouteInfo<void> {
-  const UserProfileRoute({List<_i16.PageRouteInfo>? children})
+/// [_i13.UserProfileScreen]
+class UserProfileRoute extends _i15.PageRouteInfo<void> {
+  const UserProfileRoute({List<_i15.PageRouteInfo>? children})
       : super(UserProfileRoute.name, initialChildren: children);
 
   static const String name = 'UserProfileRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return const _i14.UserProfileScreen();
+      return const _i13.UserProfileScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i15.UserProfileWrapperScreen]
-class UserProfileWrapperRoute extends _i16.PageRouteInfo<void> {
-  const UserProfileWrapperRoute({List<_i16.PageRouteInfo>? children})
+/// [_i14.UserProfileWrapperScreen]
+class UserProfileWrapperRoute extends _i15.PageRouteInfo<void> {
+  const UserProfileWrapperRoute({List<_i15.PageRouteInfo>? children})
       : super(UserProfileWrapperRoute.name, initialChildren: children);
 
   static const String name = 'UserProfileWrapperRoute';
 
-  static _i16.PageInfo page = _i16.PageInfo(
+  static _i15.PageInfo page = _i15.PageInfo(
     name,
     builder: (data) {
-      return _i16.WrappedRoute(child: const _i15.UserProfileWrapperScreen());
+      return _i15.WrappedRoute(child: const _i14.UserProfileWrapperScreen());
     },
   );
 }

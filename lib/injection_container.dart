@@ -72,7 +72,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_by_film_
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_links_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_saved_films_status_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_ai_film_recommendations_use_case.dart';
-import 'package:movie_search_assistant_bloc/presentation/bloc/ai_films/ai_films_bloc.dart';
+import 'package:movie_search_assistant_bloc/presentation/bloc/ai_assistant/ai_assistant_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/collection_films_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collection_films/selection_films_cubit/selection_films_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/collections/collections_bloc.dart';
@@ -226,14 +226,14 @@ Future<void> initializeDependencies() async {
       imageStorageService: getIt()
     ));
     getIt.registerLazySingleton(() => UseSharedApiKeyUseCase(userRepository: getIt(), apiClient: getIt()));
-    getIt.registerLazySingleton(() => GetAiFilmRecommendationsUseCase(getIt()));
+    getIt.registerLazySingleton(() => GetAiFilmRecommendationsUseCase(aiFilmRepository: getIt(), filmRepository: getIt()));
 
     // Blocs
     getIt.registerFactory(() => AuthenticationBloc( 
       useSharedApiKeyUseCase: getIt()
     ));
     getIt.registerFactory(() => SearchFilmsBloc(displayFilmCollectionsUseCase: getIt()));
-    getIt.registerFactory(() => AiFilmsBloc(getIt()));
+    getIt.registerFactory(() => AiAssistantBloc(getIt()));
     getIt.registerFactory(() => SearchedFilmsBloc(
       searchFilterFilmsUseCase: getIt(), 
       searchCollectionFilmsUseCase: getIt(),

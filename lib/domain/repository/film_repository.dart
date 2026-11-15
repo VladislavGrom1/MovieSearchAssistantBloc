@@ -16,6 +16,8 @@ abstract class FilmRepository {
 
   Future<List<FilmEntity>?> getSearchFilmsByKeyword(String keyword, int page);
 
+  Future<(List<int>, List<String?>)> getSavedIdsAndTitles();
+
   Future<FilmEntity?> getFilmInformation(int idFilm);
 
   Future<List<FilmEntity>> getSimilarFilms(int idFilm);

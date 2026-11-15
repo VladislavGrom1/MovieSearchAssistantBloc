@@ -105,6 +105,17 @@ class FilmRepositoryImpl implements FilmRepository{
   }
 
   @override
+  Future<(List<int>, List<String?>)> getSavedIdsAndTitles() async {
+    try{
+      return await filmLocalDataSource.getSavedIdsAndTitles();
+    } on LocalDataSourceException{
+      rethrow;
+    } catch(e){
+      rethrow;
+    }
+  }
+
+  @override
   Future<FilmEntity?> getFilmInformation(int idFilm) async{
     try{
       FilmDetailModel? filmDetailModel = await filmRemoteDataSource.getFilmInformation(idFilm);

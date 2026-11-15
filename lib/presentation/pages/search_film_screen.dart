@@ -95,6 +95,10 @@ class _SearchFilmContent extends StatelessWidget {
   void onFilterSubmitted(BuildContext context) {
     context.router.push(FilterFilmRoute());
   }
+
+  void onAiAssistantSubmitted(BuildContext context) {
+    context.router.push(AiAssistantRoute());
+  }
  
   @override
   Widget build(BuildContext context) {
@@ -104,6 +108,7 @@ class _SearchFilmContent extends StatelessWidget {
         CustomSearchBar(
             onSearchSubmitted: onSearchSubmitted,
             onFilterSubmitted: onFilterSubmitted,
+            onAiAssistantSubmitted: onAiAssistantSubmitted,
             useFilterButton: true,
             useRealTimeChange: false,
             textInputAction: TextInputAction.search,

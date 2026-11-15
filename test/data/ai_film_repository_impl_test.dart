@@ -16,17 +16,23 @@ void main() {
   });
 
   test('маппит модели в сущности и пробрасывает описание', () async {
-    when(() => dataSource.getRecommendations('комедия')).thenAnswer(
+    when(() => dataSource.getRecommendations('комедия', false, const [], const []))
+        .thenAnswer(
       (_) async => const [
         AiFilmRecommendationModel(
-          title: 'The Grand Budapest Hotel',
+          nameEn: 'The Grand Budapest Hotel',
+          nameRu: null,
+          year: null,
           description: 'История консьержа.',
           kinopoiskId: 7,
+          posterUrl: null,
+          rating: null,
         ),
       ],
     );
 
-    final result = await repository.getRecommendations('комедия');
+    final result =
+        await repository.getRecommendations('комедия', false, const [], const []);
 
     expect(result, hasLength(1));
     expect(result.first.film.nameOriginal, 'The Grand Budapest Hotel');
@@ -35,10 +41,35 @@ void main() {
   });
 
   test('пустой список моделей даёт пустой список сущностей', () async {
-    when(() => dataSource.getRecommendations(any())).thenAnswer((_) async => []);
+    when(() => dataSource.getRecommendations(any(), any(), any(), any()))
+        .thenAnswer((_) async => []);
 
-    final result = await repository.getRecommendations('что угодно');
+    final result =
+        await repository.getRecommendations('что угодно', false, const [], const []);
 
     expect(result, isEmpty);
+  });
+
+  test('пробрасывает режим, сохранённые id и названия в источник', () async {
+    when(() => dataSource.getRecommendations(any(), any(), any(), any()))
+        .thenAnswer((_) async => const []);
+
+    await repository.getRecommendations(
+      'q',
+      true,
+      const [1, 2],
+      const ['Интерстеллар', null],
+    );
+
+    final arguments = verify(
+      () => dataSource.getRecommendations(
+        captureAny(),
+        captureAny(),
+        captureAny(),
+        captureAny(),
+      ),
+    ).captured;
+
+    expect(arguments, ['q', true, [1, 2], ['Интерстеллар', null]]);
   });
 }

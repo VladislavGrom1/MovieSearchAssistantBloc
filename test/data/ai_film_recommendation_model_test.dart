@@ -4,7 +4,8 @@ import 'package:movie_search_assistant_bloc/data/models/ai_film_recommendation_m
 void main() {
   test('парсит полный ответ сервиса', () {
     final model = AiFilmRecommendationModel.fromJson(const {
-      'title': "Ocean's Eleven",
+      'nameEn': "Ocean's Eleven",
+      'nameRu': null,
       'year': 2001,
       'reason': 'Дэнни Оушен собирает команду из одиннадцати профессионалов.',
       'kinopoiskId': 526,
@@ -12,7 +13,7 @@ void main() {
       'rating': '8.1',
     });
 
-    expect(model.title, "Ocean's Eleven");
+    expect(model.nameEn, "Ocean's Eleven");
     expect(model.year, 2001);
     expect(
       model.description,
@@ -25,7 +26,8 @@ void main() {
 
   test('переживает null во всех необязательных полях', () {
     final model = AiFilmRecommendationModel.fromJson(const {
-      'title': 'Unknown',
+      'nameEn': 'Unknown',
+      'nameRu': null,
       'year': null,
       'reason': 'Нет описания',
       'kinopoiskId': null,
@@ -46,7 +48,7 @@ void main() {
   test('пустые/отсутствующие строки превращаются в пустую строку', () {
     final model = AiFilmRecommendationModel.fromJson(const {});
 
-    expect(model.title, '');
+    expect(model.nameEn, '');
     expect(model.description, '');
     expect(model.toEntity().film.nameOriginal, '');
   });
@@ -54,7 +56,8 @@ void main() {
   test('постер попадает и в posterUrl, и в posterUrlPreview', () {
     const url = 'https://example.com/poster.jpg';
     final entity = AiFilmRecommendationModel.fromJson(const {
-      'title': 'X',
+      'nameEn': 'X',
+      'nameRu': null,
       'reason': 'Y',
       'posterUrl': url,
     }).toEntity();
@@ -65,17 +68,20 @@ void main() {
 
   test('целый рейтинг приводится к int, дробный остаётся num', () {
     final whole = AiFilmRecommendationModel.fromJson(const {
-      'title': 'A',
+      'nameEn': 'A',
+      'nameRu': null,
       'reason': 'B',
       'rating': '8.0',
     }).toEntity();
     final fractional = AiFilmRecommendationModel.fromJson(const {
-      'title': 'A',
+      'nameEn': 'A',
+      'nameRu': null,
       'reason': 'B',
       'rating': '7.9',
     }).toEntity();
     final commaSeparated = AiFilmRecommendationModel.fromJson(const {
-      'title': 'A',
+      'nameEn': 'A',
+      'nameRu': null,
       'reason': 'B',
       'rating': '7,9',
     }).toEntity();
@@ -94,5 +100,66 @@ void main() {
     }).toEntity();
 
     expect(entity.film.ratingKinopoisk, isNull);
+  });
+
+  test('парсит жанры из массива объектов', () {
+    final entity = AiFilmRecommendationModel.fromJson(const {
+      'nameEn': 'A',
+      'reason': 'B',
+      'genres': [
+        {'genre': 'комедия'},
+        {'genre': 'драма'},
+      ],
+    }).toEntity();
+
+    expect(entity.film.genres, <String>['комедия', 'драма']);
+  });
+
+  test('парсит жанры из массива строк и поля name', () {
+    final strings = AiFilmRecommendationModel.fromJson(const {
+      'nameEn': 'A',
+      'reason': 'B',
+      'genres': ['криминал', 'триллер'],
+    }).toEntity();
+    final names = AiFilmRecommendationModel.fromJson(const {
+      'nameEn': 'A',
+      'reason': 'B',
+      'genres': [
+        {'name': 'боевик'},
+      ],
+    }).toEntity();
+
+    expect(strings.film.genres, <String>['криминал', 'триллер']);
+    expect(names.film.genres, <String>['боевик']);
+  });
+
+  test('пропускает пустые жанры и отдаёт null, если жанров нет', () {
+    final withEmpty = AiFilmRecommendationModel.fromJson(const {
+      'nameEn': 'A',
+      'reason': 'B',
+      'genres': [
+        {'genre': '  '},
+        {'genre': ''},
+        {'genre': 'комедия'},
+        '  ',
+      ],
+    });
+    final withoutGenres =
+        AiFilmRecommendationModel.fromJson(const {'nameEn': 'A', 'reason': 'B'});
+
+    expect(withEmpty.genres, <String>['комедия']);
+    expect(withEmpty.toEntity().film.genres, <String>['комедия']);
+    expect(withoutGenres.genres, isEmpty);
+    expect(withoutGenres.toEntity().film.genres, isNull);
+  });
+
+  test('переживает genres неверного типа', () {
+    final entity = AiFilmRecommendationModel.fromJson(const {
+      'nameEn': 'A',
+      'reason': 'B',
+      'genres': 'комедия',
+    }).toEntity();
+
+    expect(entity.film.genres, isNull);
   });
 }

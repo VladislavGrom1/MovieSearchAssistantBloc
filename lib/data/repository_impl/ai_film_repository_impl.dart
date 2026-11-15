@@ -8,8 +8,9 @@ class AiFilmRepositoryImpl implements AiFilmRepository {
   AiFilmRepositoryImpl(this.aiFilmRemoteDataSource);
 
   @override
-  Future<List<AiFilmRecommendation>> getRecommendations(String query) async {
-    final models = await aiFilmRemoteDataSource.getRecommendations(query);
+  Future<List<AiFilmRecommendation>> getRecommendations(String query, bool onlyNew, List<int> kinopoiskIds, List<String?> savedTitles) async {
+    final models = await aiFilmRemoteDataSource.getRecommendations(query, onlyNew, kinopoiskIds, savedTitles);
     return models.map((model) => model.toEntity()).toList();
   }
+  
 }

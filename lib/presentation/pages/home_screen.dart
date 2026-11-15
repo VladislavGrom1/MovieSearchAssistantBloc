@@ -21,7 +21,6 @@ class HomeScreen extends StatelessWidget {
       ),
       routes: [
           SearchFilmWrapperRoute(),
-          AiFilmsWrapperRoute(),
           CollectionsRoute(),
           UserProfileRoute()
         ],
@@ -56,11 +55,6 @@ class HomeScreen extends StatelessWidget {
                     BottomNavigationBarItem(
                       icon: Icon(Icons.search),
                       label: "Поиск",
-                      backgroundColor: AppColors.primaryThemeBlack
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.auto_awesome),
-                      label: "AI-подбор",
                       backgroundColor: AppColors.primaryThemeBlack
                     ),
                     BottomNavigationBarItem(

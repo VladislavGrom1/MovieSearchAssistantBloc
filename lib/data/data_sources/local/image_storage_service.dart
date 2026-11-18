@@ -179,6 +179,56 @@ class ImageStorageService {
     }
   }
 
+  /// Скачивает постер фильма в папку сессии AI-Ассистента.
+  ///
+  /// Возвращает относительный путь `'<sessionId>/<filmId>/poster.jpg'` или
+  /// `null`, если постер скачать не удалось: тогда карточка показывает
+  /// плейсхолдер и повторно постер не докачивается.
+  Future<String?> saveSessionPoster({
+    required int sessionId,
+    required int? filmId,
+    required String? posterUrl,
+  }) async {
+    if (posterUrl == null || filmId == null) return null;
+
+    try {
+      final dir = await _getEntityDir('sessions', '$sessionId/$filmId');
+      final filePath = '${dir.path}/poster.jpg';
+
+      final result = await _downloadAndSaveImage(posterUrl, filePath, true);
+
+      return result != null ? '$sessionId/$filmId/poster.jpg' : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> deleteSessionImages(int sessionId) async {
+    try {
+      final baseDir = await getApplicationDocumentsDirectory();
+      final sessionDir = Directory('${baseDir.path}/sessions/$sessionId');
+
+      if (await sessionDir.exists()) {
+        await sessionDir.delete(recursive: true);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAllSessionImages() async {
+    try {
+      final baseDir = await getApplicationDocumentsDirectory();
+      final sessionsDir = Directory('${baseDir.path}/sessions');
+
+      if (await sessionsDir.exists()) {
+        await sessionsDir.delete(recursive: true);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String> getFullImagePath(
     String relativePath, {
     String category = 'films',

@@ -50,7 +50,11 @@ class AiFilmResultCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FilmPosterWithLibraryStatus(film: film),
+            FilmPosterWithLibraryStatus(
+              film: film,
+              localImagePath: film.localPosterImagePath,
+              localImageCategory: 'sessions',
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(

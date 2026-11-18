@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
+import 'package:movie_search_assistant_bloc/app/util/constants/retry_loading.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collection_use_case.dart';
@@ -76,7 +77,15 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   }
  
   Future<void> _getFilmInformation(GetFilmInformation event, Emitter emit) async {
+    final currentState = state;
+
+    // Повтор после ошибки: снова показываем полноэкранную загрузку, но держим
+    // её минимум `retryLoadingMinDuration`, чтобы спиннер не мелькал на
+    // быстром ответе.
+    final isRetry = currentState is FilmFailure;
     emit(FilmLoading());
+
+    final Future<void> loadingDelay = retryLoadingDelay(isRetry: isRetry);
     try {
       FilmEntity? savedFilm;
       List<String>? collectionIds; 
@@ -92,6 +101,8 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
       }
  
       if (film == null) {
+        await loadingDelay;
+        if (isClosed) return;
         emit(FilmFailure(message: "Не удалось получить информацию о фильме"));
         return;
       }
@@ -102,6 +113,8 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
         filmImages = await getFilmImagesUseCase.call(event.idFilm);
       }
  
+      await loadingDelay;
+      if (isClosed) return;
       emit(FilmLoaded(
         film: film,
         filmImages: filmImages,
@@ -111,10 +124,16 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
  
       await _subscribe(event.idFilm);
     } on RemoteDataSourceException catch (e) {
+      await loadingDelay;
+      if (isClosed) return;
       emit(FilmFailure(message: e.message));
     } on LocalDataSourceException catch (e) {
+      await loadingDelay;
+      if (isClosed) return;
       emit(FilmFailure(message: e.message));
     } catch (e) {
+      await loadingDelay;
+      if (isClosed) return;
       emit(FilmFailure(message: "Неизвестная ошибка"));
     }
   }

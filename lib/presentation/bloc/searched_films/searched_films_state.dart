@@ -40,8 +40,10 @@ final class SearchedFilmsLoadedSuccessful extends SearchedFilmsState{
 
 final class SearchedFilmsLoadedFailure extends SearchedFilmsState{
   final String message;
-  
-  const SearchedFilmsLoadedFailure({required this.message});
+
+  const SearchedFilmsLoadedFailure({
+    required this.message,
+  });
 
   @override
   List<Object?> get props => [message];

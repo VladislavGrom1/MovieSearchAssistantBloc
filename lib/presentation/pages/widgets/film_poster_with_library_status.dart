@@ -7,6 +7,8 @@ import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_post
 
 class FilmPosterWithLibraryStatus extends StatelessWidget {
   final FilmEntity film;
+  final String? localImagePath;
+  final String localImageCategory;
   final bool showRating;
   final double width;
   final double height;
@@ -14,6 +16,8 @@ class FilmPosterWithLibraryStatus extends StatelessWidget {
   const FilmPosterWithLibraryStatus({
     super.key,
     required this.film,
+    this.localImagePath,
+    this.localImageCategory = 'films',
     this.showRating = true,
     this.width = 100,
     this.height = 140,
@@ -26,6 +30,8 @@ class FilmPosterWithLibraryStatus extends StatelessWidget {
       builder: (context, status) {
         return FilmPosterImage(
           networkImageUrl: film.posterUrlPreview,
+          localImagePath: localImagePath,
+          localImageCategory: localImageCategory,
           kinopoiskRating: film.ratingKinopoisk,
           showRating: showRating,
           showSavedIcon: status.isSaved,

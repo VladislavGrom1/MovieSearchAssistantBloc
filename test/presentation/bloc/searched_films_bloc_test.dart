@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
+import 'package:movie_search_assistant_bloc/app/util/constants/retry_loading.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_collection_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_films_by_keyword_use_case.dart';
@@ -191,6 +194,55 @@ void main() {
       verify(() => filterUseCase.call('matrix', null, null, 1999, null, 1))
           .called(1);
       verifyNever(() => keywordUseCase.call(any(), any()));
+    },
+  );
+
+  test(
+    'повтор снова показывает загрузку и держит её минимум 400 мс',
+    () async {
+      final retryResult = Completer<List<FilmEntity>>();
+      var calls = 0;
+
+      when(() => filterUseCase.call(null, null, null, null, null, 1))
+          .thenAnswer((_) {
+        calls++;
+        if (calls == 1) {
+          throw NetworkFailure();
+        }
+        return retryResult.future;
+      });
+
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      final failed = bloc.stream
+          .firstWhere((state) => state is SearchedFilmsLoadedFailure);
+      bloc.add(const LoadSearchedFilms());
+      await failed;
+
+      final stopwatch = Stopwatch()..start();
+      final loaded = bloc.stream
+          .firstWhere((state) => state is SearchedFilmsLoadedSuccessful);
+      bloc.add(RefreshFilmsPage());
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        bloc.state,
+        isA<SearchedFilmsLoading>(),
+        reason: 'на повторе снова виден индикатор загрузки',
+      );
+
+      retryResult.complete([film]);
+      final loadedState = await loaded as SearchedFilmsLoadedSuccessful;
+      stopwatch.stop();
+
+      expect(loadedState.searchedFilms, [film]);
+      expect(calls, 2);
+      expect(
+        stopwatch.elapsed,
+        greaterThanOrEqualTo(retryLoadingMinDuration),
+        reason: 'загрузка на повторе держится минимум 400 мс и не мелькает',
+      );
     },
   );
 }

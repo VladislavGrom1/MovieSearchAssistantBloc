@@ -119,7 +119,13 @@ class _FilmInformationView extends StatelessWidget {
                         ),
                         Expanded(
                           child: Center(
-                            child: ErrorMessageWidget(message: state.message),
+                            child: ErrorMessageWidget(
+                              message: state.message,
+                              onRetry: () {
+                                final filmInformationBloc = context.read<FilmInformationBloc>();
+                                filmInformationBloc.add(GetFilmInformation(idFilm: filmId));
+                              }
+                            ),
                           ),
                         ),
                       ],

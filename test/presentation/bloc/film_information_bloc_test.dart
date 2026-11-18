@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
+import 'package:movie_search_assistant_bloc/app/util/constants/retry_loading.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_images_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collection_use_case.dart';
@@ -190,4 +192,63 @@ void main() {
       'Обновлённое название',
     );
   });
+
+  test(
+    'повтор снова показывает загрузку и держит её минимум 400 мс',
+    () async {
+      const film = FilmEntity(kinopoiskId: 1);
+      final retryResult = Completer<(FilmEntity?, List<String>)>();
+      final collectionIds = StreamController<List<String>>.broadcast();
+      final watchedFilm = StreamController<FilmEntity?>.broadcast();
+      var calls = 0;
+
+      when(() => getSavedFilmUseCase.call(any()))
+          .thenAnswer((_) async => (null, <String>[]));
+      when(() => getFilmInformationUseCase.call(any())).thenAnswer((_) {
+        calls++;
+        if (calls == 1) {
+          throw NetworkFailure();
+        }
+        return retryResult.future;
+      });
+      when(() => getFilmImagesUseCase.call(any()))
+          .thenAnswer((_) async => null);
+      when(() => watchLinksByFilmUseCase.call(any()))
+          .thenAnswer((_) => collectionIds.stream);
+      when(() => watchFilmUseCase.call(any()))
+          .thenAnswer((_) => watchedFilm.stream);
+
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+      addTearDown(collectionIds.close);
+      addTearDown(watchedFilm.close);
+
+      final failed = bloc.stream.firstWhere((state) => state is FilmFailure);
+      bloc.add(const GetFilmInformation(idFilm: 1));
+      await failed;
+
+      final stopwatch = Stopwatch()..start();
+      final loaded = bloc.stream.firstWhere((state) => state is FilmLoaded);
+      bloc.add(const GetFilmInformation(idFilm: 1));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        bloc.state,
+        isA<FilmLoading>(),
+        reason: 'на повторе снова виден полноэкранный индикатор загрузки',
+      );
+
+      retryResult.complete((film, <String>[]));
+      final loadedState = await loaded as FilmLoaded;
+      stopwatch.stop();
+
+      expect(loadedState.film.kinopoiskId, 1);
+      expect(calls, 2);
+      expect(
+        stopwatch.elapsed,
+        greaterThanOrEqualTo(retryLoadingMinDuration),
+        reason: 'загрузка на повторе держится минимум 400 мс и не мелькает',
+      );
+    },
+  );
 }

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
+import 'package:movie_search_assistant_bloc/app/util/constants/retry_loading.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_collection_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_films_by_keyword_use_case.dart';
@@ -30,14 +31,23 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
   }
 
   Future<void> _onLoadSearchedFilms(LoadSearchedFilms event, Emitter emit) async {
+    final currentState = state;
+
+    // Повтор после ошибки: снова показываем загрузку, но держим её минимум
+    // `retryLoadingMinDuration`, чтобы спиннер не мелькал на быстром ответе.
+    final isRetry = currentState is SearchedFilmsLoadedFailure;
     emit(SearchedFilmsLoading());
 
+    final Future<void> loadingDelay = retryLoadingDelay(isRetry: isRetry);
     currentPage = 1;
     hasReachedMax = false;
     _lastQuery = event;
 
     try {
       final films = await _fetchFilms(event, page: currentPage);
+
+      await loadingDelay;
+      if (isClosed) return;
 
       if (films.isEmpty) {
         emit(SearchedFilmsLoadedFailure(message: "Фильмы по запросу не найдены"));
@@ -50,10 +60,16 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
       }
 
     } on RemoteDataSourceException catch (e) {
+      await loadingDelay;
+      if (isClosed) return;
       emit(SearchedFilmsLoadedFailure(message: e.message));
     } on LocalDataSourceException catch (e) {
+      await loadingDelay;
+      if (isClosed) return;
       emit(SearchedFilmsLoadedFailure(message: e.message));
     } catch (e) {
+      await loadingDelay;
+      if (isClosed) return;
       emit(SearchedFilmsLoadedFailure(message: "Неизвестная ошибка"));
     }
   }

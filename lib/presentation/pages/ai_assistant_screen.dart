@@ -11,6 +11,7 @@ import 'package:movie_search_assistant_bloc/presentation/bloc/ai_assistant/ai_as
 import 'package:movie_search_assistant_bloc/presentation/bloc/ai_assistant/ai_assistant_state.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_saved_films_status_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/ai_film_result_card.dart';
+import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/soft_gradient_card.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/tap_scale.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -64,6 +65,7 @@ class _AiAssistantViewState extends State<_AiAssistantView> {
   void initState() {
     super.initState();
     _queryController.addListener(_onQueryChanged);
+    context.read<AiAssistantBloc>().add(const AiAssistantHistoryRequested());
   }
 
   @override
@@ -94,8 +96,8 @@ class _AiAssistantViewState extends State<_AiAssistantView> {
     }
 
     context.read<AiAssistantBloc>().add(
-      AiAssistantRequested(query, onlyNew: _onlyNew),
-    );
+          AiAssistantRequested(query, onlyNew: _onlyNew),
+        );
     _queryController.clear();
     _queryFocusNode.unfocus();
   }
@@ -116,6 +118,44 @@ class _AiAssistantViewState extends State<_AiAssistantView> {
 
   void _expand(int searchId) {
     context.read<AiAssistantBloc>().add(AiAssistantSearchExpanded(searchId));
+  }
+
+  void _deleteSession(int sessionId) {
+    context.read<AiAssistantBloc>().add(
+          AiAssistantSessionDeleteRequested(sessionId),
+        );
+  }
+
+  Future<void> _confirmDeleteSession(int sessionId) async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => ConfirmAlertDialog(
+        titleText: 'Удалить сессию?',
+        content: Text(
+          'Запрос и рекомендации исчезнут из истории.',
+          style: CustomTextStyles.m3Body(color: AppColors.textGrey),
+        ),
+        actionText: 'Удалить',
+        actionFunc: () => _deleteSession(sessionId),
+      ),
+    );
+  }
+
+  Future<void> _confirmClearSessions() async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => ConfirmAlertDialog(
+        titleText: 'Очистить все сессии?',
+        content: Text(
+          'Все сохранённые запросы и рекомендации будут удалены.',
+          style: CustomTextStyles.m3Body(color: AppColors.textGrey),
+        ),
+        actionText: 'Очистить',
+        actionFunc: () => context
+            .read<AiAssistantBloc>()
+            .add(const AiAssistantSessionsClearRequested()),
+      ),
+    );
   }
 
   void _scrollToBottom() {
@@ -144,6 +184,13 @@ class _AiAssistantViewState extends State<_AiAssistantView> {
       return true;
     }
 
+    // Старт повтора: ошибка сменяется загрузкой, но список не дёргаем —
+    // иначе экран «прыгает» в момент нажатия «Повторить».
+    if (previous.expanded is AiFilmSearchFailure &&
+        current.expanded is AiFilmSearchLoading) {
+      return false;
+    }
+
     return previous.searches.length != current.searches.length ||
         previous.expandedSearchId != current.expandedSearchId ||
         previous.expanded?.runtimeType != current.expanded?.runtimeType;
@@ -151,26 +198,39 @@ class _AiAssistantViewState extends State<_AiAssistantView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryThemeBlack,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'AI-Ассистент',
-          style: CustomTextStyles.m3ActionText(color: AppColors.textGrey),
-        ),
-      ),
-      body: SafeArea(
-        child: BlocConsumer<AiAssistantBloc, AiAssistantState>(
-          listenWhen: _shouldScrollToBottom,
-          listener: (context, state) => _scrollToBottom(),
-          builder: (context, state) {
-            return Column(
+    return BlocConsumer<AiAssistantBloc, AiAssistantState>(
+      listenWhen: _shouldScrollToBottom,
+      listener: (context, state) => _scrollToBottom(),
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: AppColors.primaryThemeBlack,
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text(
+              'AI-Ассистент',
+              style: CustomTextStyles.m3ActionText(color: AppColors.textGrey),
+            ),
+            actions: [
+              if (state is AiAssistantFeed && state.searches.isNotEmpty)
+                IconButton(
+                  onPressed: _confirmClearSessions,
+                  tooltip: 'Очистить все сессии',
+                  icon: const Icon(Icons.delete_sweep_outlined),
+                ),
+            ],
+          ),
+          body: SafeArea(
+            child: Column(
               children: [
                 Expanded(
                   child: switch (state) {
                     AiAssistantInitial() => _EmptyState(
                         onQueryTap: _fillQuery,
+                      ),
+                    AiAssistantHistoryLoading() => const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryScheme,
+                        ),
                       ),
                     AiAssistantFeed(
                       :final searches,
@@ -182,6 +242,7 @@ class _AiAssistantViewState extends State<_AiAssistantView> {
                         scrollController: _feedScrollController,
                         onExpand: _expand,
                         onRetry: _retry,
+                        onDelete: _confirmDeleteSession,
                       ),
                   },
                 ),
@@ -196,10 +257,10 @@ class _AiAssistantViewState extends State<_AiAssistantView> {
                   onToggleOnlyNew: _toggleOnlyNew,
                 ),
               ],
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -257,7 +318,8 @@ class _StartQueryPill extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Text(
             text,
-            style: CustomTextStyles.m3ActionText(color: AppColors.cardAccentText),
+            style:
+                CustomTextStyles.m3ActionText(color: AppColors.cardAccentText),
           ),
         ),
       ),
@@ -271,6 +333,7 @@ class _Feed extends StatelessWidget {
   final ScrollController scrollController;
   final ValueChanged<int> onExpand;
   final ValueChanged<int> onRetry;
+  final ValueChanged<int> onDelete;
 
   const _Feed({
     required this.searches,
@@ -278,6 +341,7 @@ class _Feed extends StatelessWidget {
     required this.scrollController,
     required this.onExpand,
     required this.onRetry,
+    required this.onDelete,
   });
 
   @override
@@ -294,10 +358,15 @@ class _Feed extends StatelessWidget {
           return _ExpandedSearch(
             search: search,
             onRetry: () => onRetry(search.id),
+            onDelete: () => onDelete(search.id),
           );
         }
 
-        return _SearchPill(search: search, onTap: () => onExpand(search.id));
+        return _SearchPill(
+          search: search,
+          onTap: () => onExpand(search.id),
+          onDelete: () => onDelete(search.id),
+        );
       },
     );
   }
@@ -306,8 +375,13 @@ class _Feed extends StatelessWidget {
 class _SearchPill extends StatelessWidget {
   final AiFilmSearchState search;
   final VoidCallback onTap;
+  final VoidCallback onDelete;
 
-  const _SearchPill({required this.search, required this.onTap});
+  const _SearchPill({
+    required this.search,
+    required this.onTap,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -319,7 +393,7 @@ class _SearchPill extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 52,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.only(left: 16, right: 4),
         decoration: BoxDecoration(
           color: AppColors.primaryThemeGrey,
           borderRadius: BorderRadius.circular(16),
@@ -342,6 +416,7 @@ class _SearchPill extends StatelessWidget {
               trailing,
               style: CustomTextStyles.m3Body(color: AppColors.textDarkGrey),
             ),
+            _SessionMenu(onDelete: onDelete),
           ],
         ),
       ),
@@ -349,32 +424,81 @@ class _SearchPill extends StatelessWidget {
   }
 }
 
+class _SessionMenu extends StatelessWidget {
+  final VoidCallback onDelete;
+
+  const _SessionMenu({required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      padding: EdgeInsets.zero,
+      tooltip: 'Действия с сессией',
+      icon: const Icon(
+        Icons.more_vert,
+        size: 18,
+        color: AppColors.textDarkGrey,
+      ),
+      onSelected: (value) {
+        if (value == 'delete') {
+          onDelete();
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem<String>(
+          value: 'delete',
+          child: Text('Удалить сессию', style: CustomTextStyles.m3Body()),
+        ),
+      ],
+    );
+  }
+}
+
 class _ExpandedSearch extends StatelessWidget {
   final AiFilmSearchState search;
   final VoidCallback onRetry;
+  final VoidCallback onDelete;
 
-  const _ExpandedSearch({required this.search, required this.onRetry});
+  const _ExpandedSearch({
+    required this.search,
+    required this.onRetry,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              DataFormatter.formatRelativeDayTime(search.createdAt),
-              textAlign: TextAlign.center,
-              style: CustomTextStyles.m3FilmTitle(
-                color: AppColors.textDarkGrey,
+        SizedBox(
+          height: 32,
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      DataFormatter.formatRelativeDayTime(search.createdAt),
+                      textAlign: TextAlign.center,
+                      style: CustomTextStyles.m3FilmTitle(
+                        color: AppColors.textDarkGrey,
+                      ),
+                    ),
+                    if (search.onlyNew) ...[
+                      const SizedBox(width: 8),
+                      const _OnlyNewBadge(),
+                    ],
+                  ],
+                ),
               ),
-            ),
-            if (search.onlyNew) ...[
-              const SizedBox(width: 8),
-              const _OnlyNewBadge(),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _SessionMenu(onDelete: onDelete),
+              ),
             ],
-          ],
+          ),
         ),
         const SizedBox(height: 10),
         _UserBubble(text: search.query),
@@ -428,11 +552,76 @@ class _SearchAnswer extends StatelessWidget {
       AiFilmSearchEmpty() => const _PlainAnswer(
           text: 'По вашему запросу не удалось подобрать подходящие фильмы. Попробуйте изменить запрос.',
         ),
-      AiFilmSearchFailure(:final message) => _FailureAnswer(
+      AiFilmSearchFailure(:final message) => _SearchFailureWidget(
           message: message,
           onRetry: onRetry,
         ),
     };
+  }
+}
+
+class _SearchFailureWidget extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _SearchFailureWidget({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          Image.asset(
+            width: 350,
+            "assets/icons/errorIcon.png",
+            fit: BoxFit.cover,
+          ),
+          Text(
+            "Что-то пошло не так",
+            style: CustomTextStyles.m3Title(),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            message,
+            style: CustomTextStyles.m3Body(),
+            textAlign: TextAlign.center,
+            softWrap: true,
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              width: double.infinity,
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: AppColors.primaryScheme,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: onRetry,
+                  child: Center(
+                    child: Text(
+                      "Повторить",
+                      style: CustomTextStyles.m3Content(
+                        color: Colors.white,
+                      ).copyWith(
+                        letterSpacing: 0.3,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -503,41 +692,6 @@ class _PlainAnswer extends StatelessWidget {
     return Text(
       text,
       style: CustomTextStyles.m3Body(color: AppColors.textGrey),
-    );
-  }
-}
-
-class _FailureAnswer extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _FailureAnswer({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          message,
-          style: CustomTextStyles.m3Body(color: AppColors.textGrey),
-        ),
-        TextButton(
-          onPressed: onRetry,
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.zero,
-            minimumSize: const Size(0, 36),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            foregroundColor: AppColors.primaryScheme,
-          ),
-          child: Text(
-            'Повторить',
-            style: CustomTextStyles.m3ActionText(
-              color: AppColors.primaryScheme,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -703,14 +857,13 @@ class _OnlyNewToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color foreground = enabled
-        ? AppColors.textWhite
-        : AppColors.textDarkGrey;
+    final Color foreground =
+        enabled ? AppColors.textWhite : AppColors.textDarkGrey;
 
     return Semantics(
       toggled: enabled,
       button: true,
-      label: 'Только новое',
+      label: 'Не рекомендовать сохранённые фильмы',
       child: Tooltip(
         message: 'Не рекомендовать фильмы, которые уже есть в библиотеке',
         child: TapScale(
@@ -743,7 +896,7 @@ class _OnlyNewToggle extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Только новое',
+                  'Не рекомендовать сохранённые фильмы',
                   style: CustomTextStyles.m3FilmTitle(color: foreground),
                 ),
               ],

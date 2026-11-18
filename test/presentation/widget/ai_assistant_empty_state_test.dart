@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/ai_film_recommendation.dart';
+import 'package:movie_search_assistant_bloc/domain/entities/ai_session.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/clear_ai_sessions_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/delete_ai_session_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_ai_film_recommendations_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_ai_sessions_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/save_ai_session_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/watch_saved_films_status_use_case.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/ai_assistant/ai_assistant_bloc.dart';
@@ -15,20 +20,59 @@ class MockGetAiFilmRecommendationsUseCase extends Mock
 class MockWatchSavedFilmsStatusUseCase extends Mock
     implements WatchSavedFilmsStatusUseCase {}
 
+class MockGetAiSessionsUseCase extends Mock implements GetAiSessionsUseCase {}
+
+class MockSaveAiSessionUseCase extends Mock implements SaveAiSessionUseCase {}
+
+class MockDeleteAiSessionUseCase extends Mock implements DeleteAiSessionUseCase {}
+
+class MockClearAiSessionsUseCase extends Mock implements ClearAiSessionsUseCase {}
+
 void main() {
   late MockGetAiFilmRecommendationsUseCase useCase;
+  late MockGetAiSessionsUseCase getSessionsUseCase;
+  late MockSaveAiSessionUseCase saveAiSessionUseCase;
+  late MockDeleteAiSessionUseCase deleteAiSessionUseCase;
+  late MockClearAiSessionsUseCase clearAiSessionsUseCase;
   late MockWatchSavedFilmsStatusUseCase watchSavedFilmsStatusUseCase;
+
+  final DateTime now = DateTime(2026, 11, 14, 15, 30);
 
   setUp(() async {
     await getIt.reset();
 
     useCase = MockGetAiFilmRecommendationsUseCase();
+    getSessionsUseCase = MockGetAiSessionsUseCase();
+    saveAiSessionUseCase = MockSaveAiSessionUseCase();
+    deleteAiSessionUseCase = MockDeleteAiSessionUseCase();
+    clearAiSessionsUseCase = MockClearAiSessionsUseCase();
     watchSavedFilmsStatusUseCase = MockWatchSavedFilmsStatusUseCase();
 
+    registerFallbackValue(
+      AiSession(
+        id: 0,
+        createdAt: now,
+        updatedAt: now,
+        turns: const <AiSessionTurn>[],
+      ),
+    );
+
+    when(() => getSessionsUseCase()).thenAnswer((_) async => const <AiSession>[]);
+    when(() => saveAiSessionUseCase(any())).thenAnswer((_) async {});
+    when(() => deleteAiSessionUseCase(any())).thenAnswer((_) async {});
+    when(() => clearAiSessionsUseCase()).thenAnswer((_) async {});
     when(() => watchSavedFilmsStatusUseCase())
         .thenAnswer((_) => const Stream<Map<int, int?>>.empty());
 
-    getIt.registerFactory(() => AiAssistantBloc(useCase));
+    getIt.registerFactory(
+      () => AiAssistantBloc(
+        getAiFilmRecommendationsUseCase: useCase,
+        getAiSessionsUseCase: getSessionsUseCase,
+        saveAiSessionUseCase: saveAiSessionUseCase,
+        deleteAiSessionUseCase: deleteAiSessionUseCase,
+        clearAiSessionsUseCase: clearAiSessionsUseCase,
+      ),
+    );
     getIt.registerFactory(
       () => WatchSavedFilmsStatusCubit(watchSavedFilmsStatusUseCase),
     );
@@ -40,6 +84,7 @@ void main() {
 
   testWidgets('shows the empty state without recent queries', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: AiAssistantScreen()));
+    await tester.pump();
 
     expect(find.text('AI-Ассистент'), findsOneWidget);
     expect(find.text('Что хочется посмотреть?'), findsOneWidget);
@@ -59,6 +104,7 @@ void main() {
   testWidgets('fills the composer when a start query is tapped',
       (tester) async {
     await tester.pumpWidget(const MaterialApp(home: AiAssistantScreen()));
+    await tester.pump();
 
     await tester.tap(find.text('Аниме про путешествия'));
     await tester.pump();
@@ -73,6 +119,7 @@ void main() {
 
   testWidgets('does not submit an empty query', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: AiAssistantScreen()));
+    await tester.pump();
 
     await tester.tap(find.byIcon(Icons.arrow_upward));
     await tester.pump();
@@ -86,6 +133,7 @@ void main() {
         .thenAnswer((_) async => const <AiFilmRecommendation>[]);
 
     await tester.pumpWidget(const MaterialApp(home: AiAssistantScreen()));
+    await tester.pump();
 
     expect(find.byKey(const Key('aiOnlyNewToggle')), findsOneWidget);
     expect(find.byIcon(Icons.check_circle_outline), findsNothing);
@@ -106,6 +154,7 @@ void main() {
         .thenAnswer((_) async => const <AiFilmRecommendation>[]);
 
     await tester.pumpWidget(const MaterialApp(home: AiAssistantScreen()));
+    await tester.pump();
 
     await tester.tap(find.byKey(const Key('aiOnlyNewToggle')));
     await tester.pump(const Duration(milliseconds: 200));

@@ -7,6 +7,11 @@ sealed class AiAssistantEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Экран AI-Ассистента открылся: пора поднять сохранённые сессии из Hive.
+final class AiAssistantHistoryRequested extends AiAssistantEvent {
+  const AiAssistantHistoryRequested();
+}
+
 /// Пользователь отправил запрос в поле ввода.
 ///
 /// [onlyNew] — положение переключателя «Только новое» на момент отправки;
@@ -39,4 +44,19 @@ final class AiAssistantSearchExpanded extends AiAssistantEvent {
 
   @override
   List<Object?> get props => [searchId];
+}
+
+/// Пользователь удалил одну сессию через меню карточки.
+final class AiAssistantSessionDeleteRequested extends AiAssistantEvent {
+  final int sessionId;
+
+  const AiAssistantSessionDeleteRequested(this.sessionId);
+
+  @override
+  List<Object?> get props => [sessionId];
+}
+
+/// Пользователь очистил все сессии AI-Ассистента.
+final class AiAssistantSessionsClearRequested extends AiAssistantEvent {
+  const AiAssistantSessionsClearRequested();
 }

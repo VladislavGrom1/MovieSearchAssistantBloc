@@ -14,6 +14,7 @@ import 'package:movie_search_assistant_bloc/app/file_service/ios_export_destinat
 import 'package:movie_search_assistant_bloc/app/file_service/zip_service.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_cubit.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/network_service.dart';
+import 'package:movie_search_assistant_bloc/data/data_sources/local/ai_session_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/collection_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/film_collection_link_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/flim_local_data_source.dart';
@@ -23,20 +24,25 @@ import 'package:movie_search_assistant_bloc/data/data_sources/local/user_local_d
 import 'package:movie_search_assistant_bloc/data/data_sources/remote/ai_film_remote_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/remote/film_remote_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/remote/user_remote_data_source.dart';
+import 'package:movie_search_assistant_bloc/data/repository_impl/ai_session_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/ai_film_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/collection_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/film_collection_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/film_repository_impl.dart';
 import 'package:movie_search_assistant_bloc/data/repository_impl/user_repository_impl.dart';
+import 'package:movie_search_assistant_bloc/domain/repository/ai_session_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/ai_film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/collection_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_collection_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/add_film_to_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/clear_ai_sessions_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_cache_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/clear_library_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/delete_ai_session_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_ai_sessions_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_app_info_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_cache_size_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_similar_films_use_case.dart';
@@ -44,6 +50,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_c
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/open_url_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/remove_image_collection_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/save_ai_session_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/search_films_by_keyword_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/share_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/update_user_api_key_info_use_case.dart';
@@ -100,6 +107,7 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(() => FilmLocalDataSource());
     getIt.registerLazySingleton(() => CollectionLocalDataSource());
     getIt.registerLazySingleton(() => FilmCollectionLinkLocalDataSource());
+    getIt.registerLazySingleton(() => AiSessionLocalDataSource());
     getIt.registerLazySingleton(() => ImageStorageService());
     
     // API Client
@@ -139,6 +147,10 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton<CollectionRepository>(() => CollectionRepositoryImpl(collectionLocalDataSource: getIt()));
     getIt.registerLazySingleton<FilmCollectionRepository>(() => FilmCollectionRepositoryImpl(filmCollectionLinkLocalDataSource: getIt()));
     getIt.registerLazySingleton<AiFilmRepository>(() => AiFilmRepositoryImpl(getIt()));
+    getIt.registerLazySingleton<AiSessionRepository>(() => AiSessionRepositoryImpl(
+      aiSessionLocalDataSource: getIt(),
+      imageStorageService: getIt(),
+    ));
 
     // UseCases
     getIt.registerLazySingleton(() => UpdateUserApiKeyInfoUseCase(userRepository: getIt(), apiClient: getIt()));
@@ -227,13 +239,23 @@ Future<void> initializeDependencies() async {
     ));
     getIt.registerLazySingleton(() => UseSharedApiKeyUseCase(userRepository: getIt(), apiClient: getIt()));
     getIt.registerLazySingleton(() => GetAiFilmRecommendationsUseCase(aiFilmRepository: getIt(), filmRepository: getIt()));
+    getIt.registerLazySingleton(() => GetAiSessionsUseCase(aiSessionRepository: getIt()));
+    getIt.registerLazySingleton(() => SaveAiSessionUseCase(aiSessionRepository: getIt()));
+    getIt.registerLazySingleton(() => DeleteAiSessionUseCase(aiSessionRepository: getIt()));
+    getIt.registerLazySingleton(() => ClearAiSessionsUseCase(aiSessionRepository: getIt()));
 
     // Blocs
     getIt.registerFactory(() => AuthenticationBloc( 
       useSharedApiKeyUseCase: getIt()
     ));
     getIt.registerFactory(() => SearchFilmsBloc(displayFilmCollectionsUseCase: getIt()));
-    getIt.registerFactory(() => AiAssistantBloc(getIt()));
+    getIt.registerFactory(() => AiAssistantBloc(
+      getAiFilmRecommendationsUseCase: getIt(),
+      getAiSessionsUseCase: getIt(),
+      saveAiSessionUseCase: getIt(),
+      deleteAiSessionUseCase: getIt(),
+      clearAiSessionsUseCase: getIt(),
+    ));
     getIt.registerFactory(() => SearchedFilmsBloc(
       searchFilterFilmsUseCase: getIt(), 
       searchCollectionFilmsUseCase: getIt(),

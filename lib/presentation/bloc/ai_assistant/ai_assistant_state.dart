@@ -15,6 +15,11 @@ final class AiAssistantInitial extends AiAssistantState {
   const AiAssistantInitial();
 }
 
+/// Экран открылся и поднимает сохранённые сессии из Hive.
+final class AiAssistantHistoryLoading extends AiAssistantState {
+  const AiAssistantHistoryLoading();
+}
+
 /// Лента AI-поисков: развёрнут ровно один, остальные свёрнуты в строки.
 final class AiAssistantFeed extends AiAssistantState {
   final List<AiFilmSearchState> searches;

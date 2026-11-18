@@ -11,6 +11,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 class FilmPosterImage extends StatelessWidget {
   final String? networkImageUrl;
   final String? localImagePath;
+  final String localImageCategory;
   final num? kinopoiskRating;
   final num? userRating;
   final bool showSavedIcon;
@@ -23,6 +24,7 @@ class FilmPosterImage extends StatelessWidget {
     super.key,
     this.networkImageUrl,
     this.localImagePath,
+    this.localImageCategory = 'films',
     this.kinopoiskRating,
     this.userRating,
     this.showSavedIcon = false,
@@ -60,7 +62,10 @@ class FilmPosterImage extends StatelessWidget {
  
   Widget _buildImage() {
     if (localImagePath != null && localImagePath!.isNotEmpty) {
-      final fullPath = ImagePathResolver.resolve(localImagePath!);
+      final fullPath = ImagePathResolver.resolve(
+        localImagePath!,
+        category: localImageCategory,
+      );
       final file = File(fullPath);
       return Image.file(
           file,

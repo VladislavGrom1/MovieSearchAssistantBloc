@@ -140,7 +140,7 @@ class _UserProfileContent extends StatelessWidget {
       children: [
         const SizedBox(height: 20),
         Text("Текущий план", style: CustomTextStyles.m3Title()),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         _PlanOptionCard(
           icon: Icons.public_rounded,
           title: "Стандартный",

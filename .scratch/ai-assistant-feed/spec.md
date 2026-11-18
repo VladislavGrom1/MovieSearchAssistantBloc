@@ -13,7 +13,7 @@ Status: implemented
 
 Экран открывается пушем с вкладки поиска (`CustomSearchBar`, иконка `auto_awesome`, `lib/app/router/navigation_tabs/search_film/search_film_routes.dart:12`), а не вкладкой.
 
-Лента не персистится: блок остаётся `registerFactory` (`lib/injection_container.dart`), умирает вместе с `pop`, и новый визит начинается с пустого состояния. Это зафиксированное ограничение, а не недоработка; персистентность — следующая итерация (см. §3).
+Лента персистится с итерации сессий: блок остаётся `registerFactory` (`lib/injection_container.dart`), но при входе экран запрашивает сохранённые сессии из Hive и восстанавливает ленту (`.scratch/ai-sessions/spec.md`, [ADR-0007](../../docs/adr/0007-ai-sessions-storage.md)). Пустое состояние показывается только когда сохранённых сессий нет.
 
 ## 2. Пользовательский сценарий
 
@@ -42,8 +42,8 @@ Status: implemented
 
 **Не входит:**
 
-- сохранение ленты между перезаходами и между запусками: блок остаётся `registerFactory`, никакого `lazySingleton`, `AutomaticKeepAliveClientMixin`, `IndexedStack` или `PageStorageKey`;
-- Hive-хранилище поисков, а значит и секция «Недавние запросы»;
+- сохранение ленты между перезаходами вынесено в отдельную итерацию `.scratch/ai-sessions/spec.md`; блок остаётся `registerFactory`, никакого `lazySingleton`, `AutomaticKeepAliveClientMixin`, `IndexedStack` или `PageStorageKey`;
+- секция «Недавние запросы» и Hive-хранилище поисков как отдельный механизм — вместо него лента сессий из `aiSessionModelBox`;
 - чипы «Уточнить: Новее · Короче · Без жестокости» из макета — не реализованы вовсе (ни виджета, ни ряда);
 - кнопка отмены запроса;
 - оффлайн-кэш и повторная отправка при восстановлении сети;
@@ -169,11 +169,11 @@ Scaffold(backgroundColor: primaryThemeBlack)
   - `AiFilmSearchLoading` — `Row`: `CircularProgressIndicator(strokeWidth: 2, primaryScheme, 16×16)` + «Подбираю фильмы под ваш запрос...» (`m3Body(textGrey)`); ниже `SizedBox(12)` и пять скелетонов карточек;
   - `AiFilmSearchLoaded` — «Нашёл N фильмов.» через `formatFilmWordDeclension`, дальше каждая карточка с отступом 12;
   - `AiFilmSearchEmpty` — «По вашему запросу не удалось подобрать подходящие фильмы. Попробуйте изменить запрос.» (`m3Body(textGrey)`), без кнопки;
-  - `AiFilmSearchFailure` — `message` как есть (`m3Body(textGrey)`), ниже `TextButton` «Повторить» (`m3ActionText(color: primaryScheme)`, padding 0, минимальная высота 36, `shrinkWrap`) → `AiAssistantRetryRequested(id)`. Своих снэкбаров об ошибке нет: о потере сети уже сообщает глобальный `NetworkListener` (`lib/app/network_service/network_listener.dart:17-26`).
+  - `AiFilmSearchFailure` — локальный `_SearchFailureWidget(message:, onRetry:)` (общий `ErrorMessageWidget` здесь не используется: он оборачивает содержимое в `SingleChildScrollView`, а ошибка живёт внутри скроллящейся ленты): картинка `assets/icons/errorIcon.png` шириной 350, заголовок «Что-то пошло не так», `message` как есть (`m3Body(textGrey)`), ниже кнопка «Повторить» (`Container` высотой 48, radius 14, `primaryScheme`, `InkWell`) → `AiAssistantRetryRequested(id)`. Своих снэкбаров об ошибке нет: о потере сети уже сообщает глобальный `NetworkListener` (`lib/app/network_service/network_listener.dart:17-26`).
 
 **Скелетон** — 5 карточек внутри `Skeletonizer(key: Key('aiSkeletonResults'), ShimmerEffect(baseColor: primaryThemeBlack, highlightColor: primaryThemeGrey, 4s))`: `Container(padding 8, primaryThemeGrey, рамка white@0.12, radius 16)` → `Row`: `Bone(100×140)`, `SizedBox(12)`, колонка из шести `Bone`: 160×16, 110×12, 70×12, две полосы на всю ширину по 12, 120×12.
 
-**Автоскролл.** Срабатывает, когда состояние впервые становится `AiAssistantFeed`, меняется число поисков, меняется `expandedSearchId` или тип ответа развёрнутого поиска (loading → loaded). После кадра вызывается `animateTo(minScrollExtent)` 250 мс, `Curves.easeOut`, то есть скролл к началу списка. Поскольку новые поиски добавляются в конец, развёрнутый поиск при этом остаётся ниже видимой области — известное расхождение с ожидаемым поведением («показать активный поиск»), зафиксировано здесь, но не исправлено.
+**Автоскролл.** Срабатывает, когда состояние впервые становится `AiAssistantFeed`, меняется число поисков, меняется `expandedSearchId` или тип ответа развёрнутого поиска (loading → loaded). После кадра вызывается `animateTo(minScrollExtent)` 250 мс, `Curves.easeOut`, то есть скролл к началу списка. Переход `failure` → `loading` при повторе тип меняет, но автоскролл на этом переходе намеренно подавлен (`_shouldScrollToBottom` возвращает `false`), чтобы список не дёргался при тапе «Повторить». Поскольку новые поиски добавляются в конец, развёрнутый поиск при этом остаётся ниже видимой области — известное расхождение с ожидаемым поведением («показать активный поиск»), зафиксировано здесь, но не исправлено.
 
 ### 5.5 Карточка результата
 
@@ -196,7 +196,8 @@ Scaffold(backgroundColor: primaryThemeBlack)
 ### 5.6 Ошибки и пустой результат
 
 - Ошибка не удаляет поиск из ленты: он остаётся, в пилюле помечается «ошибка», в развёрнутом виде — текст ошибки и «Повторить».
-- «Повторить» переводит этот поиск в `loading` (скелетоны перерисовываются) и повторяет запрос с тем же `query` и тем же `onlyNew`; другие поиски не трогаются. Для не-`failure` поиска и для неизвестного id событие игнорируется.
+- «Повторить» переводит этот поиск в `loading` — снова видны спиннер, «Подбираю фильмы под ваш запрос...» и скелетоны — и повторяет запрос с тем же `query` и тем же `onlyNew`; другие поиски не трогаются, автоскролл при переходе в `loading` не срабатывает. Чтобы на быстром ответе загрузка не мелькала на один-два кадра, она держится минимум `retryLoadingMinDuration` = 400 мс (общая константа `lib/app/util/constants/retry_loading.dart`, помощник `retryLoadingDelay(isRetry:)`): результат эмитится только после этой паузы. Повторный тап во время загрузки, повтор для не-`failure` поиска и для неизвестного id игнорируются.
+- На остальных экранах с общим `ErrorMessageWidget` и «Повторить» — `FilmInformationScreen` (`FilmFailure`), `SearchFilmScreen` (`CollectionsFilmsLoadedFailure`), `SearchedFilmsScreen` (`SearchedFilmsLoadedFailure`) — «Повторить» работает так же: экран ошибки заменяется своим состоянием загрузки (`FilmLoading` / `SearchFilmsLoading` / `SearchedFilmsLoading`, полноэкранный `CircularProgressIndicator`), и загрузка держится минимум `retryLoadingMinDuration` = 400 мс, чтобы не мелькать на быстром ответе. Флага `isRetrying` в этих состояниях нет.
 - «Повторить» доступно только у развёрнутого поиска (остальные свёрнуты).
 - Пустой результат «Повторить» не показывает.
 - Автоматического повтора при восстановлении сети нет.
@@ -238,7 +239,7 @@ Scaffold(backgroundColor: primaryThemeBlack)
   - `AiAssistantFeed { List<AiFilmSearchState> searches, int? expandedSearchId }`, `AiFilmSearchState? get expanded` (если id не найден — самый свежий поиск), `copyWith`;
   - `sealed AiFilmSearchState { AiFilmSearch search }` с геттерами `id`/`query`/`onlyNew`/`createdAt` → `AiFilmSearchLoading`, `AiFilmSearchLoaded(films)` (+`filmCount`), `AiFilmSearchEmpty`, `AiFilmSearchFailure(message)`.
 - `ai_assistant_event.dart` — `AiAssistantRequested(String query, {bool onlyNew})`, `AiAssistantRetryRequested(int searchId)`, `AiAssistantSearchExpanded(int searchId)`.
-- `ai_assistant_bloc.dart` — аккумуляция ленты (`maxSearches = 20`, старые вытесняются через `sublist`), загрузка/повтор, разворачивание, `unknownErrorMessage = 'Неизвестная ошибка. Попробуйте ещё раз.'`, защита `_isClosed` от эмита после `close()`. Поздний ответ пишется в свой элемент по `id`; токена запроса нет.
+- `ai_assistant_bloc.dart` — аккумуляция ленты (`maxSearches = 20`, старые вытесняются через `sublist`), загрузка/повтор, разворачивание, `unknownErrorMessage = 'Неизвестная ошибка. Попробуйте ещё раз.'`, минимальная длительность загрузки при повторе — общая константа `retryLoadingMinDuration = Duration(milliseconds: 400)` из `lib/app/util/constants/retry_loading.dart`, защита `_isClosed` от эмита после `close()`. Поздний ответ пишется в свой элемент по `id`; токена запроса нет.
 
 **Экран:**
 
@@ -251,9 +252,11 @@ Scaffold(backgroundColor: primaryThemeBlack)
 
 ## 7. Тесты
 
-- `test/presentation/bloc/ai_assistant_bloc_test.dart`: пустой запрос игнорируется; запрос добавляет `AiFilmSearchLoading` и делает поиск развёрнутым (`onlyNew` попадает в запись, по умолчанию `false`); режим «Только новое» доходит до use case; успех → `AiFilmSearchLoaded` с фильмами; пустой ответ → `AiFilmSearchEmpty`; `AiServiceFailure` → текст сервиса; `NetworkFailure` → текст сети; повтор у упавшего поиска → `AiFilmSearchLoading`, затем `AiFilmSearchLoaded`, другие поиски не меняются, режим берётся из поиска; разворачивание старого поиска; лимит 20 (21-й вытесняет первый); ответ после `close()` — без ошибок.
+- `test/presentation/bloc/ai_assistant_bloc_test.dart`: пустой запрос игнорируется; запрос добавляет `AiFilmSearchLoading` и делает поиск развёрнутым (`onlyNew` попадает в запись, по умолчанию `false`); режим «Только новое» доходит до use case; успех → `AiFilmSearchLoaded` с фильмами; пустой ответ → `AiFilmSearchEmpty`; `AiServiceFailure` → текст сервиса; `NetworkFailure` → текст сети; повтор у упавшего поиска → `AiFilmSearchLoading`, затем `AiFilmSearchLoaded` (или снова `failure` с тем же сообщением), другие поиски не меняются, режим берётся из поиска, между `loading` и результатом проходит минимум `retryLoadingMinDuration`; повтор во время загрузки игнорируется; разворачивание старого поиска; лимит 20 (21-й вытесняет первый); ответ после `close()` — без ошибок.
 - `test/presentation/widget/ai_assistant_empty_state_test.dart`: пустая лента показывает «Что хочется посмотреть?», «С чего начать», подсказки, «0/200», неактивную кнопку отправки; тап по подсказке подставляет текст; пустой запрос не отправляется; переключатель «Только новое» выключен по умолчанию, тап включает его и отправка уходит с `onlyNew: true`, у развёрнутого поиска появляется бейдж.
-- `test/presentation/widget/ai_assistant_loading_skeleton_test.dart`: при `loading` есть строка «Подбираю фильмы под ваш запрос...» и скелетоны; после ответа — «Нашёл 1 фильм.», мета «2001 · Криминал, комедия», текст описания; ошибка сети инлайн с «Повторить»; композер после отправки пуст.
+- `test/presentation/widget/ai_assistant_loading_skeleton_test.dart`: при `loading` есть строка «Подбираю фильмы под ваш запрос...» и скелетоны; после ответа — «Нашёл 1 фильм.», мета «2001 · Криминал, комедия», текст описания; ошибка сети инлайн с «Повторить»; во время повтора на экране снова загрузка — скелетоны, строка «Подбираю фильмы...» и один спиннер, ошибки и кнопки «Повторить» нет; загрузка держится минимум `retryLoadingMinDuration` и после успеха сменяется фильмами, после повторной ошибки — снова ошибкой с доступной «Повторить»; композер после отправки пуст.
+- `test/presentation/bloc/film_information_bloc_test.dart`, `test/presentation/bloc/searched_films_bloc_test.dart`, `test/presentation/bloc/search_films_bloc_test.dart`: повтор упавшей загрузки снова эмитит состояние загрузки (`FilmLoading` / `SearchedFilmsLoading` / `SearchFilmsLoading`), а результат приходит не раньше `retryLoadingMinDuration` (замер `Stopwatch`), затем успешный ответ даёт загруженное состояние.
+- `test/presentation/widget/error_message_widget_test.dart`: сообщение и «Повторить» рендерятся; тап по кнопке вызывает `onRetry`; высота кнопки 48; без `onRetry` кнопки нет.
 - `test/data/ai_film_recommendation_model_test.dart`: `genres` как массив объектов, как массив строк, отсутствие поля, пустой массив, неверный тип.
 - `test/data/ai_film_remote_data_source_test.dart`: тело POST (`query`, `savedKinopoiskIds`, `savedTitles`, `onlyNew`) при выключенном и включённом режиме; 404 → пустой список; 502/500/503 — тексты из §4.
 - `test/data/ai_film_repository_impl_test.dart`: маппинг моделей в сущности, проброс `onlyNew`, id и названий в источник.
@@ -262,7 +265,7 @@ Scaffold(backgroundColor: primaryThemeBlack)
 
 ## 8. Кодогенерация
 
-Не требуется при правках UI. Роуты и Hive-адаптеры не меняются; `auto_route_generator` и `hive_generator` остаются закомментированными в `pubspec.yaml:56-58`.
+Не требуется при правках UI. Роуты не меняются; `auto_route_generator` остаётся закомментированным в `pubspec.yaml:56-58`. Hive-адаптеры сессий (typeId 5–7, итерация `.scratch/ai-sessions/spec.md`) написаны вручную в стиле генератора, `hive_generator` по-прежнему не подключён.
 
 ## 9. Критерии приёмки
 
@@ -272,8 +275,9 @@ Scaffold(backgroundColor: primaryThemeBlack)
 - [x] Во время загрузки — спиннер, «Подбираю фильмы под ваш запрос...», пять скелетонов; по завершении — «Нашёл N фильмов.» и карточки.
 - [x] Карточка горизонтальная: постер 100×140 слева, справа название (и оригинальное), «год · жанры», описание до двух строк; тап открывает экран фильма.
 - [x] Ошибка отображается инлайн с «Повторить», поиск остаётся в ленте и помечен в пилюле.
+- [x] Во время повтора на экране видна загрузка: спиннер, «Подбираю фильмы под ваш запрос...» и скелетоны; она держится минимум 400 мс и не мелькает на быстром ответе. На `FilmInformationScreen`, `SearchFilmScreen` и `SearchedFilmsScreen` повтор так же показывает загрузку и держит её минимум 400 мс.
 - [x] Пустой ответ (включая 404) даёт текст «По вашему запросу не удалось подобрать подходящие фильмы. Попробуйте изменить запрос.» без «Повторить».
 - [x] Переключатель «Только новое» есть в композере, по умолчанию выключен, уходит в запрос и помечает развёрнутый поиск бейджем.
-- [x] Блок остаётся `registerFactory`: перезаход начинается с пустого состояния (ожидаемое поведение, а не баг).
+- [x] Блок остаётся `registerFactory`; при входе лента восстанавливается из сохранённых сессий (`.scratch/ai-sessions/spec.md`), пустое состояние — только когда сессий нет.
 - [x] `scripts/agent-flutter.ps1 analyze lib test` и `test` зелёные; `scripts/check_routes_sync.sh`, `scripts/check_vocabulary.sh` проходят.
 - [x] `GLOSSARY.md` и ADR-0005/ADR-0006 обновлены.

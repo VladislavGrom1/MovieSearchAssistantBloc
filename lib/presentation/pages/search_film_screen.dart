@@ -65,7 +65,12 @@ class _SearchFilmView extends StatelessWidget {
                         }
  
                         if (state is CollectionsFilmsLoadedFailure) {
-                          return Center(child: ErrorMessageWidget(message: state.message));
+                          return Center(child: ErrorMessageWidget(
+                            message: state.message,
+                            onRetry: () {
+                              searchFilmBloc.add(DisplayFilmCollections());
+                            }
+                          ));
                         }
  
                         if (state is CollectionsFilmsLoadedSuccessful) {

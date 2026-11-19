@@ -4,12 +4,25 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/search_films/cubit/watch_saved_films_status_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/film_poster_image.dart';
 
+
 class FilmPosterWithLibraryStatus extends StatelessWidget {
   final FilmEntity film;
+  final String? localImagePath;
+  final String localImageCategory;
   final bool showRating;
- 
-  const FilmPosterWithLibraryStatus({super.key, required this.film, this.showRating = true});
- 
+  final double width;
+  final double height;
+
+  const FilmPosterWithLibraryStatus({
+    super.key,
+    required this.film,
+    this.localImagePath,
+    this.localImageCategory = 'films',
+    this.showRating = true,
+    this.width = 100,
+    this.height = 140,
+  });
+
   @override
   Widget build(BuildContext context) {
     return BlocSelector<WatchSavedFilmsStatusCubit, SavedFilmsStatusState, FilmLibraryStatus>(
@@ -17,11 +30,15 @@ class FilmPosterWithLibraryStatus extends StatelessWidget {
       builder: (context, status) {
         return FilmPosterImage(
           networkImageUrl: film.posterUrlPreview,
+          localImagePath: localImagePath,
+          localImageCategory: localImageCategory,
           kinopoiskRating: film.ratingKinopoisk,
           showRating: showRating,
           showSavedIcon: status.isSaved,
           showUserRating: status.isSaved,
           userRating: status.userRating,
+          width: width,
+          height: height,
         );
       },
     );

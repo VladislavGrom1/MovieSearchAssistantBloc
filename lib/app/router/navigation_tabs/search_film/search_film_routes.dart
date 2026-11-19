@@ -9,6 +9,7 @@ abstract class SearchFilmRoutes {
         page: SearchFilmRoute.page, 
         initial: true, 
       ),
+      AutoRoute(page: AiAssistantRoute.page),
       AutoRoute(page: FilterFilmRoute.page),
       AutoRoute(page: FilterListRoute.page),
       AutoRoute(page: SearchedFilmsRoute.page),

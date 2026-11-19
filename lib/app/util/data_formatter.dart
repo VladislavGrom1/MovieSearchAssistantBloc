@@ -98,5 +98,105 @@ class DataFormatter {
     
     return '$day.$month.$year $hour:$minute';
   }
+
+  /// День относительно сегодняшнего: «Сегодня», «Вчера», «13.11» или «13.11.2025».
+  static String formatRelativeDay(DateTime dateTime, {DateTime? now}) {
+    final DateTime reference = now ?? DateTime.now();
+    final DateTime day = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    final DateTime today = DateTime(reference.year, reference.month, reference.day);
+    final int daysDifference = today.difference(day).inDays;
+
+    if (daysDifference == 0) {
+      return 'Сегодня';
+    }
+
+    if (daysDifference == 1) {
+      return 'Вчера';
+    }
+
+    final String dayPart = dateTime.day.toString().padLeft(2, '0');
+    final String monthPart = dateTime.month.toString().padLeft(2, '0');
+
+    if (dateTime.year == reference.year) {
+      return '$dayPart.$monthPart';
+    }
+
+    return '$dayPart.$monthPart.${dateTime.year}';
+  }
+
+  /// «Сегодня, 15:38» — день по [formatRelativeDay] плюс время.
+  static String formatRelativeDayTime(DateTime dateTime, {DateTime? now}) {
+    final String dayPart = formatRelativeDay(dateTime, now: now);
+    final String hourPart = dateTime.hour.toString().padLeft(2, '0');
+    final String minutePart = dateTime.minute.toString().padLeft(2, '0');
+
+    return '$dayPart, $hourPart:$minutePart';
+  }
+
+  /// «2001 · Криминал, комедия» — год и не больше [genreLimit] жанров.
+  static String formatYearWithGenres(
+    int? year,
+    List<String>? genres, {
+    int genreLimit = 2,
+  }) {
+    final List<String> parts = [];
+
+    if (year != null) {
+      parts.add(year.toString());
+    }
+
+    final String genresPart = _formatGenresPart(genres, genreLimit);
+
+    if (genresPart.isNotEmpty) {
+      parts.add(genresPart);
+    }
+
+    return parts.isEmpty ? '-' : parts.join(' · ');
+  }
+
+  /// «0 Б», «640 КБ», «12.4 МБ» — десятичные единицы (1 КБ = 1000 Б), как в
+  /// настройках телефона. `null` — размер ещё неизвестен.
+  static String formatBytes(int? bytes) {
+    if (bytes == null) return 'неизвестно';
+    if (bytes <= 0) return '0 Б';
+    if (bytes < 1000) return '$bytes Б';
+
+    final kilobytes = bytes / 1000;
+    if (kilobytes < 999.95) return '${_formatFraction(kilobytes)} КБ';
+
+    final megabytes = kilobytes / 1000;
+    if (megabytes < 999.95) return '${_formatFraction(megabytes)} МБ';
+
+    return '${_formatFraction(megabytes / 1000)} ГБ';
+  }
+
+  static String _formatFraction(double value) {
+    // Округляем до десятых, чтобы 0.99995 не превращалось в «1.0».
+    final rounded = (value * 10).round() / 10;
+    return rounded == rounded.truncateToDouble()
+        ? rounded.toStringAsFixed(0)
+        : rounded.toStringAsFixed(1);
+  }
+
+  static String _formatGenresPart(List<String>? genres, int genreLimit) {
+    if (genres == null || genres.isEmpty || genreLimit <= 0) {
+      return '';
+    }
+
+    final List<String> cleanedGenres = genres
+        .map((genre) => genre.trim())
+        .where((genre) => genre.isNotEmpty)
+        .take(genreLimit)
+        .toList();
+
+    if (cleanedGenres.isEmpty) {
+      return '';
+    }
+
+    final String joinedGenres = cleanedGenres.join(', ');
+    final String firstLetter = joinedGenres.substring(0, 1).toUpperCase();
+
+    return '$firstLetter${joinedGenres.substring(1)}';
+  }
   
 }

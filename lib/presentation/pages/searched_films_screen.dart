@@ -123,7 +123,12 @@ class _SearchedFilmViewState extends State<_SearchedFilmView> {
                   }
               
                   if (state is SearchedFilmsLoadedFailure) {
-                    return Center(child: ErrorMessageWidget(message: state.message));
+                    return Center(child: ErrorMessageWidget(
+                      message: state.message,
+                      onRetry: () {
+                        context.read<SearchedFilmsBloc>().add(RefreshFilmsPage());
+                      }
+                    ));
                   }
               
                   if (state is SearchedFilmsLoadedSuccessful) {

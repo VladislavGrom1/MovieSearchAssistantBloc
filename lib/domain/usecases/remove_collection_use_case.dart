@@ -25,6 +25,8 @@ class RemoveCollectionUseCase {
 
       await filmCollectionRepository.removeAllLinksByCollectionId(collectionId);
       await collectionRepository.removeCollection(collectionId);
+      // Обложка коллекции — файл на диске, без этого она остаётся сиротой.
+      await imageStorageService.deleteCollectionImage(collectionId);
       
       final filmIdsToDelete = filmIdsIncludedInCollection.where((filmId) {
         return !allFilmCollectionLinks.any((link) =>

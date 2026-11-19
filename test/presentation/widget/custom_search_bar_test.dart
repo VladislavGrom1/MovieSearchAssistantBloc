@@ -8,6 +8,15 @@ Widget _wrap(Widget child) {
   );
 }
 
+/// Иконки бара не удаляются из дерева, а прячутся через [AnimatedOpacity],
+/// поэтому видимость проверяется по целевому значению opacity.
+double _iconOpacity(WidgetTester tester, IconData icon) {
+  final finder = find
+      .ancestor(of: find.byIcon(icon), matching: find.byType(AnimatedOpacity))
+      .first;
+  return tester.widget<AnimatedOpacity>(finder).opacity;
+}
+
 void main() {
   group('CustomSearchBar', () {
     testWidgets('shows the search icon and hides the back icon initially', (tester) async {
@@ -19,8 +28,8 @@ void main() {
         ),
       ));
 
-      expect(find.byKey(const ValueKey('search_icon')), findsOneWidget);
-      expect(find.byKey(const ValueKey('back')), findsNothing);
+      expect(_iconOpacity(tester, Icons.search), 1);
+      expect(_iconOpacity(tester, Icons.arrow_back), 0);
     });
 
     testWidgets('shows the back icon and hides the search icon once focused', (tester) async {
@@ -35,8 +44,8 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('back')), findsOneWidget);
-      expect(find.byKey(const ValueKey('search_icon')), findsNothing);
+      expect(_iconOpacity(tester, Icons.arrow_back), 1);
+      expect(_iconOpacity(tester, Icons.search), 0);
     });
 
     testWidgets('calls onSearchSubmitted with the typed keyword when submitted', (tester) async {
@@ -123,7 +132,25 @@ void main() {
         ),
       ));
 
-      expect(find.byKey(const ValueKey('filter')), findsOneWidget);
+      expect(_iconOpacity(tester, Icons.filter_alt_outlined), 1);
+      expect(_iconOpacity(tester, Icons.clear), 0);
+    });
+
+    testWidgets('hides filter and shows clear icon once focused', (tester) async {
+      await tester.pumpWidget(_wrap(
+        CustomSearchBar(
+          onSearchSubmitted: (_, __) {},
+          onFilterSubmitted: (_) {},
+          useFilterButton: true,
+          useRealTimeChange: false,
+        ),
+      ));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      expect(_iconOpacity(tester, Icons.filter_alt_outlined), 0);
+      expect(_iconOpacity(tester, Icons.clear), 1);
     });
 
     testWidgets('tapping the filter icon invokes onFilterSubmitted', (tester) async {
@@ -138,7 +165,7 @@ void main() {
         ),
       ));
 
-      await tester.tap(find.byKey(const ValueKey('filter')));
+      await tester.tap(find.byIcon(Icons.filter_alt_outlined));
       await tester.pumpAndSettle();
 
       expect(filterTapped, isTrue);
@@ -157,8 +184,8 @@ void main() {
       ));
 
       await tester.enterText(find.byType(TextField), 'Dune');
-      await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('clear')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.clear));
       await tester.pumpAndSettle();
 
       expect(clearCalled, isTrue);

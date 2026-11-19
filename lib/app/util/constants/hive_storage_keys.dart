@@ -8,4 +8,5 @@ class HiveStorageKeys {
 
   static const String filmCollectionLinkBox = 'filmToCollectionLinkBox';
 
+  static const String aiSessionModelBox = 'aiSessionModelBox';
 }

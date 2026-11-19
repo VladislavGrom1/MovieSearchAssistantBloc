@@ -42,6 +42,7 @@ void main() {
         .thenAnswer((_) async {});
     when(() => collectionRepository.removeCollection(any())).thenAnswer((_) async {});
     when(() => imageStorageService.deleteFilmImages(any())).thenAnswer((_) async {});
+    when(() => imageStorageService.deleteCollectionImage(any())).thenAnswer((_) async {});
     when(() => filmRepository.removeFilmFromLocalDataSource(any())).thenAnswer((_) async {});
   });
 
@@ -52,6 +53,14 @@ void main() {
 
     verify(() => filmCollectionRepository.removeAllLinksByCollectionId(collectionIdToRemove)).called(1);
     verify(() => collectionRepository.removeCollection(collectionIdToRemove)).called(1);
+  });
+
+  test('deletes the collection cover file', () async {
+    when(() => filmCollectionRepository.getAllFilmCollectionLinks()).thenAnswer((_) async => []);
+
+    await useCase.call(collectionIdToRemove);
+
+    verify(() => imageStorageService.deleteCollectionImage(collectionIdToRemove)).called(1);
   });
 
   test('deletes films that only belonged to the removed collection', () async {

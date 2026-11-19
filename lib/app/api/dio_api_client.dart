@@ -11,8 +11,8 @@ class DioApiClient {
   DioApiClient._internal() {
     _dio = Dio(BaseOptions(
       baseUrl: "https://kinopoisk-proxy.vladislav-vaganov-dev.workers.dev/",
-      connectTimeout: Duration(seconds: 10),
-      receiveTimeout: Duration(seconds: 10),
+      connectTimeout: Duration(seconds: 20),
+      receiveTimeout: Duration(seconds: 20),
     ));
     
     _dio.interceptors.add(InterceptorsWrapper(

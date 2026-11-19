@@ -22,7 +22,7 @@ class AppRouter extends RootStackRouter{
       ]
     ),
     AutoRoute(
-      page: UserAuthenticationRoute.page, 
+      page: OnboardingRoute.page, 
       path: '/authentication',
     ),
   ];

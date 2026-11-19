@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/util/constants/hive_storage_keys.dart';
+import 'package:movie_search_assistant_bloc/data/models/ai_session_model.dart';
 import 'package:movie_search_assistant_bloc/data/models/collection_model.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_base_model.dart';
 import 'package:movie_search_assistant_bloc/data/models/film_collection_link.dart';
@@ -17,11 +18,15 @@ class HiveInit {
       Hive.registerAdapter(FilmDetailModelAdapter());
       Hive.registerAdapter(CollectionModelAdapter());
       Hive.registerAdapter(FilmCollectionLinkAdapter());
+      Hive.registerAdapter(AiSessionModelAdapter());
+      Hive.registerAdapter(AiSessionTurnModelAdapter());
+      Hive.registerAdapter(AiFilmSnapshotModelAdapter());
 
       await Hive.openBox<UserModel>(HiveStorageKeys.userModelBox);
       await Hive.openBox<FilmDetailModel>(HiveStorageKeys.filmDetailModelBox);
       await Hive.openBox<CollectionModel>(HiveStorageKeys.collectionModelBox);
       await Hive.openBox<FilmCollectionLink>(HiveStorageKeys.filmCollectionLinkBox);
+      await Hive.openBox<AiSessionModel>(HiveStorageKeys.aiSessionModelBox);
        
     } catch (e) {
       throw LocalDataSourceException(message: 'Hive initialization failed: $e');

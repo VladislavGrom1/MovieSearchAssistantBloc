@@ -1,9 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:movie_search_assistant_bloc/app/navigation/active_tab_controller.dart';
 import 'package:movie_search_assistant_bloc/app/router/app_router.gr.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
+import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/confirm_alert_dialog.dart';
 
 @RoutePage()
@@ -42,12 +44,17 @@ class HomeScreen extends StatelessWidget {
               ),
               child: BottomNavigationBar(
                   enableFeedback: false,
-                  type: BottomNavigationBarType.shifting,
+                  type: BottomNavigationBarType.fixed,
                   backgroundColor: AppColors.primaryThemeBlack,
                   selectedItemColor: AppColors.primaryScheme,
                   unselectedItemColor: AppColors.primaryThemeGrey,
+                  showSelectedLabels: false,
+                  showUnselectedLabels: false,
                   currentIndex: tabsRouter.activeIndex,
-                  onTap: tabsRouter.setActiveIndex,
+                  onTap: (index) {
+                    tabsRouter.setActiveIndex(index);
+                    getIt<ActiveTabController>().select(index);
+                  },
                   selectedLabelStyle: CustomTextStyles.m3ActionText().copyWith(height: 1.2),
                   items: const [
                     BottomNavigationBarItem(

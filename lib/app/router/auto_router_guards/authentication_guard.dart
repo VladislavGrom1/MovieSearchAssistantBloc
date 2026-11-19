@@ -16,16 +16,16 @@ class AuthenticationGuard extends AutoRouteGuard{
         resolver.next(true);
       } else{
         resolver.redirectUntil(
-          UserAuthenticationRoute(),
+          OnboardingRoute(),
         );
       }
     } on LocalDataSourceException {
       resolver.redirectUntil(
-        UserAuthenticationRoute(),
+        OnboardingRoute(),
       );
     } catch(e){
       resolver.redirectUntil(
-        UserAuthenticationRoute(),
+        OnboardingRoute(),
       );
     }
     

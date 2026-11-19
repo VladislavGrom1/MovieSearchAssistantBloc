@@ -1,16 +1,12 @@
-import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 import 'package:movie_search_assistant_bloc/domain/repository/film_repository.dart';
-import 'package:movie_search_assistant_bloc/domain/repository/user_repository.dart';
 
 class SearchFilterFilmsUseCase {
-  final UserRepository userRepository;
   final FilmRepository filmRepository;
-  final DioApiClient apiClient;
 
-  SearchFilterFilmsUseCase({required this.userRepository, required this.filmRepository, required this.apiClient});
+  SearchFilterFilmsUseCase({required this.filmRepository});
 
   Future<List<FilmEntity>?>? call(String? keyword, List<int>? countries, List<int>? genres, int? yearFrom, int? yearTo, int page) async{
     List<FilmEntity>? filterFilms = [];

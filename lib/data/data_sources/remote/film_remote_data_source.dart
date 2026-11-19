@@ -58,6 +58,28 @@ class FilmRemoteDataSource {
     }
   }
 
+  Future<List<FilmBaseModel>?> getSearchFilmsByKeyword(String keyword, int page) async{
+    FilmsApi filmsApi = FilmsApi(dio, standardSerializers);
+    List<FilmBaseModel> searchFilms = [];
+    try{
+      Response<FilmSearchResponse?> response = await filmsApi.apiV21FilmsSearchByKeywordGet(
+        keyword: keyword,
+        page: page
+      );
+      if(response.data != null && response.data!.films.isNotEmpty){
+        for(var film in response.data!.films){
+          searchFilms.add(FilmBaseModel.fromFilmSearchByKeywordResponseItems(film));
+        }
+        return searchFilms;
+      }
+      return null;
+    } on DioException catch(e){
+      throw ExceptionMapper.mapDioException(e);
+    } catch(e){
+      rethrow;
+    }
+  }
+
   Future<FilmDetailModel?> getFilmInformation(int idFilm) async{
     FilmsApi filmsApi = FilmsApi(dio, standardSerializers);
     try{

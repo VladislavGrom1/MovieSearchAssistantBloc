@@ -103,6 +103,32 @@ void main() {
     });
   });
 
+  group('formatBytes', () {
+    test('неизвестный размер не притворяется нулём', () {
+      expect(DataFormatter.formatBytes(null), 'неизвестно');
+    });
+
+    test('пусто и мелочь считаются в байтах', () {
+      expect(DataFormatter.formatBytes(0), '0 Б');
+      expect(DataFormatter.formatBytes(-1), '0 Б');
+      expect(DataFormatter.formatBytes(999), '999 Б');
+    });
+
+    test('дальше идут десятичные КБ, МБ и ГБ', () {
+      expect(DataFormatter.formatBytes(1000), '1 КБ');
+      expect(DataFormatter.formatBytes(1234), '1.2 КБ');
+      expect(DataFormatter.formatBytes(640000), '640 КБ');
+      expect(DataFormatter.formatBytes(1000000), '1 МБ');
+      expect(DataFormatter.formatBytes(12400000), '12.4 МБ');
+      expect(DataFormatter.formatBytes(1500000000), '1.5 ГБ');
+    });
+
+    test('переход к следующей единице не показывает «1.0»', () {
+      expect(DataFormatter.formatBytes(999950), '1 МБ');
+      expect(DataFormatter.formatBytes(999999999), '1 ГБ');
+    });
+  });
+
   group('formatFilmWordDeclension', () {
     test('склоняет слово «фильм»', () {
       expect(DataFormatter.formatFilmWordDeclension(1), '1 фильм');

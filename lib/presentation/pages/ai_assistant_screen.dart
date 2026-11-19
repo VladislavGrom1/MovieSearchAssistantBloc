@@ -207,7 +207,7 @@ class _AiAssistantViewState extends State<_AiAssistantView> {
           appBar: AppBar(
             centerTitle: true,
             title: Text(
-              'AI-Ассистент',
+              'AI Ассистент',
               style: CustomTextStyles.m3ActionText(color: AppColors.textGrey),
             ),
             actions: [
@@ -431,24 +431,22 @@ class _SessionMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      padding: EdgeInsets.zero,
-      tooltip: 'Действия с сессией',
+    return PopupMenuButton(
+      color: AppColors.primaryThemeGrey,
       icon: const Icon(
         Icons.more_vert,
         size: 18,
         color: AppColors.textDarkGrey,
       ),
+      enableFeedback: false,
       onSelected: (value) {
-        if (value == 'delete') {
-          onDelete();
-        }
+        if (value == "delete") onDelete();
       },
       itemBuilder: (context) => [
         PopupMenuItem<String>(
           value: 'delete',
           child: Text('Удалить сессию', style: CustomTextStyles.m3Body()),
-        ),
+        )
       ],
     );
   }
@@ -550,7 +548,8 @@ class _SearchAnswer extends StatelessWidget {
       AiFilmSearchLoading() => const _LoadingAnswer(),
       AiFilmSearchLoaded(:final films) => _LoadedAnswer(films: films),
       AiFilmSearchEmpty() => const _PlainAnswer(
-          text: 'По вашему запросу не удалось подобрать подходящие фильмы. Попробуйте изменить запрос.',
+          text:
+              'По вашему запросу не удалось подобрать подходящие фильмы. Попробуйте изменить запрос.',
         ),
       AiFilmSearchFailure(:final message) => _SearchFailureWidget(
           message: message,
@@ -766,7 +765,7 @@ class _SkeletonCard extends StatelessWidget {
   }
 }
 
-class _Composer extends StatelessWidget {
+class _Composer extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final bool canSubmit;
@@ -788,40 +787,94 @@ class _Composer extends StatelessWidget {
   });
 
   @override
+  State<_Composer> createState() => _ComposerState();
+}
+
+class _ComposerState extends State<_Composer> {
+  static const Duration _animDuration = Duration(milliseconds: 220);
+
+  bool _hasFocus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_onFocusChange);
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    final bool hasFocus = widget.focusNode.hasFocus;
+
+    if (hasFocus == _hasFocus) {
+      return;
+    }
+
+    setState(() => _hasFocus = hasFocus);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: _animDuration,
+      curve: Curves.easeOut,
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 8),
       decoration: BoxDecoration(
         color: AppColors.primaryThemeGrey,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        border: Border.all(
+          color: _hasFocus
+              ? AppColors.primaryScheme
+              : Colors.white.withValues(alpha: 0.12),
+          width: _hasFocus ? 1.4 : 1,
+        ),
+        boxShadow: _hasFocus
+            ? [
+                BoxShadow(
+                  color: AppColors.primaryScheme.withValues(alpha: 0.35),
+                  blurRadius: 14,
+                  spreadRadius: 1,
+                ),
+              ]
+            : [],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _OnlyNewToggle(enabled: onlyNew, onTap: onToggleOnlyNew),
+          TextFieldTapRegion(
+            child: _OnlyNewToggle(
+              enabled: widget.onlyNew,
+              onTap: widget.onToggleOnlyNew,
+            ),
+          ),
           const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
+                  controller: widget.controller,
+                  focusNode: widget.focusNode,
                   minLines: 1,
                   maxLines: 3,
-                  maxLength: maxLength,
+                  maxLength: widget.maxLength,
                   keyboardType: TextInputType.multiline,
                   textInputAction: TextInputAction.go,
                   textCapitalization: TextCapitalization.sentences,
                   cursorColor: AppColors.primaryScheme,
+                  onTapOutside: (event) => widget.focusNode.unfocus(),
+                  onSubmitted: (_) => widget.onSubmit(),
                   style: CustomTextStyles.m3Content(
                     color: AppColors.textWhite,
                   ),
                   decoration: InputDecoration(
-                    hintText: hint,
+                    hintText: widget.hint,
                     hintStyle: CustomTextStyles.m3Content(
                       color: AppColors.textDarkGrey,
                     ).copyWith(fontWeight: FontWeight.w400),
@@ -835,7 +888,12 @@ class _Composer extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _SendButton(enabled: canSubmit, onPressed: onSubmit),
+              TextFieldTapRegion(
+                child: _SendButton(
+                  enabled: widget.canSubmit,
+                  onPressed: widget.onSubmit,
+                ),
+              ),
             ],
           ),
         ],
@@ -844,11 +902,6 @@ class _Composer extends StatelessWidget {
   }
 }
 
-/// Переключатель режима «Только новое» над полем ввода.
-///
-/// Показывает, уйдёт ли в следующий запрос фильтр по сохранённой библиотеке.
-/// Включённое состояние — акцентная заливка и галочка; выключенное — фон
-/// композера и лёгкая рамка, чтобы не отвлекать от ввода.
 class _OnlyNewToggle extends StatelessWidget {
   final bool enabled;
   final VoidCallback onTap;
@@ -895,9 +948,13 @@ class _OnlyNewToggle extends StatelessWidget {
                   color: foreground,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  'Не рекомендовать сохранённые фильмы',
-                  style: CustomTextStyles.m3FilmTitle(color: foreground),
+                Flexible(
+                  child: Text(
+                    'Не рекомендовать сохранённые фильмы',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: CustomTextStyles.m3FilmTitle(color: foreground),
+                  ),
                 ),
               ],
             ),
@@ -931,7 +988,7 @@ class _OnlyNewBadge extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            'Только новое',
+            'Без сохранённых фильмов',
             style: CustomTextStyles.m3FilmTitle(
               color: AppColors.cardAccentText,
             ),

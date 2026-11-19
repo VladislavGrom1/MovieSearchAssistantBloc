@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/error_message_widget.dart';
 
+import '../../helpers/ai_assistant_test_harness.dart';
+
 void main() {
   Widget buildSubject({VoidCallback? onRetry}) {
     return MaterialApp(
@@ -12,13 +14,6 @@ void main() {
         ),
       ),
     );
-  }
-
-  void usePhoneViewport(WidgetTester tester) {
-    tester.view.physicalSize = const Size(430, 932);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
   }
 
   testWidgets('показывает сообщение и кнопку «Повторить»', (tester) async {

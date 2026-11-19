@@ -154,6 +154,30 @@ class DataFormatter {
     return parts.isEmpty ? '-' : parts.join(' · ');
   }
 
+  /// «0 Б», «640 КБ», «12.4 МБ» — десятичные единицы (1 КБ = 1000 Б), как в
+  /// настройках телефона. `null` — размер ещё неизвестен.
+  static String formatBytes(int? bytes) {
+    if (bytes == null) return 'неизвестно';
+    if (bytes <= 0) return '0 Б';
+    if (bytes < 1000) return '$bytes Б';
+
+    final kilobytes = bytes / 1000;
+    if (kilobytes < 999.95) return '${_formatFraction(kilobytes)} КБ';
+
+    final megabytes = kilobytes / 1000;
+    if (megabytes < 999.95) return '${_formatFraction(megabytes)} МБ';
+
+    return '${_formatFraction(megabytes / 1000)} ГБ';
+  }
+
+  static String _formatFraction(double value) {
+    // Округляем до десятых, чтобы 0.99995 не превращалось в «1.0».
+    final rounded = (value * 10).round() / 10;
+    return rounded == rounded.truncateToDouble()
+        ? rounded.toStringAsFixed(0)
+        : rounded.toStringAsFixed(1);
+  }
+
   static String _formatGenresPart(List<String>? genres, int genreLimit) {
     if (genres == null || genres.isEmpty || genreLimit <= 0) {
       return '';

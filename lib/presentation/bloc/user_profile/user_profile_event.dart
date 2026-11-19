@@ -28,7 +28,9 @@ class ImportLibrary extends UserProfileEvent{}
 
 class ImportOldLibrary extends UserProfileEvent{}
 
-class GetCacheSize extends UserProfileEvent{}
+/// Пересчитать размеры кэша и библиотеки: пользователь вернулся на экран
+/// профиля или данные на диске изменились.
+class RefreshStorageUsage extends UserProfileEvent{}
 
 class ClearCacheDirectory extends UserProfileEvent{}
 
@@ -37,5 +39,3 @@ class ClearLibrary extends UserProfileEvent{}
 class LaunchApiKeyUrl extends UserProfileEvent{}
 
 class GetAppInfo extends UserProfileEvent{}
-
-class UpdateCacheSize extends UserProfileEvent{}

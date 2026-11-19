@@ -19,8 +19,6 @@ class SearchFilmsBloc extends Bloc<SearchFilmsEvent, SearchFilmsState> {
   Future<void> _displayFilmCollections(SearchFilmsEvent event, Emitter emit) async{
     final currentState = state;
 
-    // Повтор после ошибки: снова показываем загрузку, но держим её минимум
-    // `retryLoadingMinDuration`, чтобы спиннер не мелькал на быстром ответе.
     final isRetry = currentState is CollectionsFilmsLoadedFailure;
     emit(SearchFilmsLoading());
 

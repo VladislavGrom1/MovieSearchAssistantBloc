@@ -9,9 +9,16 @@ import 'package:path_provider/path_provider.dart';
 class ImageStorageService {
   final Dio _dio = Dio();
 
+  /// Каталог, в котором лежат изображения библиотеки. Вынесен в поле, чтобы
+  /// тесты могли работать с временным каталогом без плагина path_provider.
+  final Future<Directory> Function() _documentsRoot;
+
+  ImageStorageService({Future<Directory> Function()? documentsRoot})
+      : _documentsRoot = documentsRoot ?? getApplicationDocumentsDirectory;
+
   Future<Directory> _getEntityDir(String category, String entityId) async {
     try {
-      final baseDir = await getApplicationDocumentsDirectory();
+      final baseDir = await _documentsRoot();
       final entityDir = Directory('${baseDir.path}/$category/$entityId');
 
       if (!await entityDir.exists()) {
@@ -205,7 +212,7 @@ class ImageStorageService {
 
   Future<void> deleteSessionImages(int sessionId) async {
     try {
-      final baseDir = await getApplicationDocumentsDirectory();
+      final baseDir = await _documentsRoot();
       final sessionDir = Directory('${baseDir.path}/sessions/$sessionId');
 
       if (await sessionDir.exists()) {
@@ -218,7 +225,7 @@ class ImageStorageService {
 
   Future<void> deleteAllSessionImages() async {
     try {
-      final baseDir = await getApplicationDocumentsDirectory();
+      final baseDir = await _documentsRoot();
       final sessionsDir = Directory('${baseDir.path}/sessions');
 
       if (await sessionsDir.exists()) {
@@ -233,7 +240,7 @@ class ImageStorageService {
     String relativePath, {
     String category = 'films',
   }) async {
-    final baseDir = await getApplicationDocumentsDirectory();
+    final baseDir = await _documentsRoot();
     return "${baseDir.path}/$category/$relativePath";
   }
 
@@ -250,7 +257,7 @@ class ImageStorageService {
 
   Future<void> deleteAllFilmImages() async {
     try {
-      final baseDir = await getApplicationDocumentsDirectory();
+      final baseDir = await _documentsRoot();
       final filmsDir = Directory('${baseDir.path}/films');
 
       if (await filmsDir.exists()) {
@@ -263,7 +270,7 @@ class ImageStorageService {
 
   Future<void> deleteAllCollectionImages() async {
     try {
-      final baseDir = await getApplicationDocumentsDirectory();
+      final baseDir = await _documentsRoot();
       final filmsDir = Directory('${baseDir.path}/collections');
 
       if (await filmsDir.exists()) {
@@ -274,8 +281,32 @@ class ImageStorageService {
     }
   }
 
+  /// Сколько байт занимает библиотека: постеры и скриншоты фильмов плюс
+  /// обложки коллекций. Считается по диску, поэтому осиротевшие файлы тоже
+  /// попадают в цифру. Постеры AI-сессий сюда не входят: это не библиотека.
+  Future<int> getLibrarySizeInBytes() async {
+    final baseDir = await _documentsRoot();
+    int totalSize = 0;
+
+    for (final category in const ['films', 'collections']) {
+      final categoryDir = Directory('${baseDir.path}/$category');
+      if (!await categoryDir.exists()) continue;
+
+      await for (final entity in categoryDir.list(
+        recursive: true,
+        followLinks: false,
+      )) {
+        if (entity is File) {
+          totalSize += await entity.length();
+        }
+      }
+    }
+
+    return totalSize;
+  }
+
   Future<void> copyAllImagesTo(String destinationPath) async {
-    final baseDir = await getApplicationDocumentsDirectory();
+    final baseDir = await _documentsRoot();
     final rootDir = Directory(baseDir.path);
 
     for (final category in ['films', 'collections']) {

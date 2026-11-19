@@ -1,66 +1,146 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
+import 'package:movie_search_assistant_bloc/app/network_service/connectivity_events.dart';
+import 'package:movie_search_assistant_bloc/app/network_service/network_probe.dart';
 
-class NetworkService {
-  static const Duration _checkInterval = Duration(seconds: 3);
-  static const Duration _lookupTimeout = Duration(seconds: 2);
- 
-  final Connectivity _connectivity;
-  final List<String> _hosts;
- 
-  NetworkService(this._connectivity, {String? apiHost})
-      : _hosts = [
-          'google.com',
-          'yandex.ru',
-        ];
- 
-  Stream<bool> get onStatusChange {
-    late final StreamController<bool> controller;
-    StreamSubscription<dynamic>? connectivitySubscription;
-    Timer? timer;
-    bool? last;
-    var checking = false;
- 
-    Future<void> check() async {
-      if (checking) return;
-      checking = true;
-      final isConnected = await hasConnection();
-      checking = false;
- 
-      if (controller.isClosed) return;
-      if (isConnected != last) {
-        last = isConnected;
-        controller.add(isConnected);
-      }
-    }
- 
-    controller = StreamController<bool>(
-      onListen: () {
-        check();
-        connectivitySubscription =
-            _connectivity.onConnectivityChanged.listen((_) => check());
-        timer = Timer.periodic(_checkInterval, (_) => check());
-      },
-      onCancel: () {
-        timer?.cancel();
-        connectivitySubscription?.cancel();
-      },
+/// Источник статуса связи: то, на что подписан `NetworkCubit`.
+abstract interface class NetworkStatusSource {
+  /// `true` — связь есть, `false` — нет. Дубликаты не приходят.
+  Stream<bool> get onStatusChange;
+
+  /// Перепроверить связь прямо сейчас.
+  Future<void> refresh();
+}
+
+/// Отвечает на один вопрос: доходят ли запросы до нашего API.
+///
+/// Событие плагина транспорта — мгновенный повод перепроверить; пока связь
+/// есть, никакого поллинга нет. Пока связи нет, работает редкий ретрай: не
+/// каждый запрос обновляет транспорт (VPN, captive portal, «сеть есть, а
+/// интернета нет»), поэтому ждать только события плагина нельзя.
+class NetworkService implements NetworkStatusSource {
+  NetworkService({
+    required ConnectivityEvents connectivity,
+    required NetworkProbe probe,
+    this.retryInterval = const Duration(seconds: 15),
+  })  : _connectivity = connectivity,
+        _probe = probe {
+    _subscription = _connectivity.onChanged.listen(
+      _onTransportChanged,
+      onError: _onTransportError,
     );
- 
-    return controller.stream;
+    _bootstrap();
   }
- 
-  Future<bool> hasConnection() async {
-    for (final host in _hosts) {
-      try {
-        final result =
-            await InternetAddress.lookup(host).timeout(_lookupTimeout);
-        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) return true;
-      } catch (_) {
+
+  final ConnectivityEvents _connectivity;
+  final NetworkProbe _probe;
+
+  /// Как часто перепроверять связь, пока она не восстановилась.
+  final Duration retryInterval;
+
+  final StreamController<bool> _controller = StreamController<bool>.broadcast();
+  StreamSubscription<List<ConnectivityResult>>? _subscription;
+  Timer? _retryTimer;
+  bool? _last;
+  bool _checking = false;
+  int _generation = 0;
+  bool _disposed = false;
+
+  @override
+  Stream<bool> get onStatusChange => _controller.stream;
+
+  @override
+  Future<void> refresh() {
+    // Вызывающий знает больше нас (например, приложение вернулось из фона):
+    // результат уже идущей пробы устарел.
+    _generation++;
+    return _check();
+  }
+
+  /// Первый ответ проверки: если транспорт сразу говорит «сети нет», проба
+  /// не нужна — на старте офлайн это экономит секунды ожидания таймаута.
+  Future<void> _bootstrap() async {
+    try {
+      final results = await _connectivity.check();
+      if (!_hasTransport(results)) {
+        _publish(false);
+        return;
       }
+    } catch (error, stackTrace) {
+      _log('не удалось прочитать состояние транспорта: $error', stackTrace);
     }
-    return false;
+    await _check();
+  }
+
+  void _onTransportChanged(List<ConnectivityResult> results) {
+    if (_disposed) return;
+    // Любое событие делает результаты уже запущенных проб устаревшими.
+    _generation++;
+    if (!_hasTransport(results)) {
+      _publish(false);
+      return;
+    }
+    _check();
+  }
+
+  void _onTransportError(Object error, StackTrace stackTrace) {
+    _log('поток транспорта оборвался: $error', stackTrace);
+  }
+
+  bool _hasTransport(List<ConnectivityResult> results) =>
+      results.any((result) => result != ConnectivityResult.none);
+
+  Future<void> _check() async {
+    if (_disposed || _checking) return;
+    _checking = true;
+    try {
+      // Пока проверка идёт, может прийти событие транспорта. Тогда результат
+      // устарел: не публикуем его, а проверяем заново. Если связь меняется
+      // быстрее, чем мы успеваем проверять, публикуем последний ответ, а не
+      // оставляем статус неизвестным навсегда.
+      bool? latest;
+      for (var attempt = 0; attempt < 3; attempt++) {
+        final generation = _generation;
+        latest = await _probe.isReachable();
+        if (_disposed) return;
+        if (generation == _generation) break;
+      }
+      if (latest != null) _publish(latest);
+    } finally {
+      _checking = false;
+    }
+  }
+
+  void _publish(bool reachable) {
+    if (_disposed) return;
+    _syncRetryTimer(reachable);
+    if (_last == reachable) return;
+    _last = reachable;
+    _controller.add(reachable);
+  }
+
+  void _syncRetryTimer(bool reachable) {
+    if (reachable) {
+      _retryTimer?.cancel();
+      _retryTimer = null;
+      return;
+    }
+    _retryTimer ??= Timer.periodic(retryInterval, (_) => _check());
+  }
+
+  Future<void> dispose() async {
+    if (_disposed) return;
+    _disposed = true;
+    _retryTimer?.cancel();
+    _retryTimer = null;
+    await _subscription?.cancel();
+    await _controller.close();
+  }
+
+  void _log(String message, StackTrace? stackTrace) {
+    if (!kDebugMode) return;
+    debugPrint('[NetworkService] $message${stackTrace == null ? '' : '\n$stackTrace'}');
   }
 }

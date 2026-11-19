@@ -13,34 +13,38 @@ final class UserProfileLoading extends UserProfileState {}
 
 final class UserProfileLoaded extends UserProfileState{
   final UserEntity? userEntity;
-  final double? cacheSizeMB;
+
+  /// Размер кэша сетевых постеров в байтах; `null` — ещё не посчитан.
+  final int? cacheBytes;
+
+  /// Размер библиотеки фильмов в байтах; `null` — ещё не посчитан.
+  final int? libraryBytes;
+
   final Map<String, String>? appInfo;
 
-  const UserProfileLoaded({this.userEntity, this.cacheSizeMB, this.appInfo});
+  const UserProfileLoaded({
+    this.userEntity,
+    this.cacheBytes,
+    this.libraryBytes,
+    this.appInfo,
+  });
 
   UserProfileLoaded copyWith({
     UserEntity? userEntity,
-    double? cacheSizeMB,
+    int? cacheBytes,
+    int? libraryBytes,
     Map<String, String>? appInfo
   }) {
     return UserProfileLoaded(
       userEntity: userEntity ?? this.userEntity,
-      cacheSizeMB: cacheSizeMB ?? this.cacheSizeMB,
+      cacheBytes: cacheBytes ?? this.cacheBytes,
+      libraryBytes: libraryBytes ?? this.libraryBytes,
       appInfo: appInfo ?? this.appInfo
     );
   }
 
   @override
-  List<Object?> get props => [userEntity, cacheSizeMB, appInfo];
-}
-
-final class CacheSizeLoaded extends UserProfileState{
-  final double sizeMB;
-
-  const CacheSizeLoaded({required this.sizeMB});
-
-  @override
-  List<Object> get props => [sizeMB];
+  List<Object?> get props => [userEntity, cacheBytes, libraryBytes, appInfo];
 }
 
 final class UserProfileActionFailure extends UserProfileState{

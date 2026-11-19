@@ -7,43 +7,22 @@ import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_ex
 import 'package:movie_search_assistant_bloc/domain/entities/ai_film_recommendation.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/ai_film_search.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/ai_session.dart';
-import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/clear_ai_sessions_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/delete_ai_session_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/get_ai_film_recommendations_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/get_ai_sessions_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/save_ai_session_use_case.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/ai_assistant/ai_assistant_bloc.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/ai_assistant/ai_assistant_event.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/ai_assistant/ai_assistant_state.dart';
 
-class MockGetAiFilmRecommendationsUseCase extends Mock
-    implements GetAiFilmRecommendationsUseCase {}
-
-class MockGetAiSessionsUseCase extends Mock implements GetAiSessionsUseCase {}
-
-class MockSaveAiSessionUseCase extends Mock implements SaveAiSessionUseCase {}
-
-class MockDeleteAiSessionUseCase extends Mock implements DeleteAiSessionUseCase {}
-
-class MockClearAiSessionsUseCase extends Mock implements ClearAiSessionsUseCase {}
+import '../../helpers/ai_assistant_test_harness.dart';
 
 void main() {
-  late MockGetAiFilmRecommendationsUseCase useCase;
-  late MockGetAiSessionsUseCase getSessionsUseCase;
-  late MockSaveAiSessionUseCase saveAiSessionUseCase;
-  late MockDeleteAiSessionUseCase deleteAiSessionUseCase;
-  late MockClearAiSessionsUseCase clearAiSessionsUseCase;
+  late AiAssistantHarness harness;
   late List<AiFilmRecommendation> films;
-
-  final DateTime createdAt = DateTime(2026, 11, 14, 15, 30);
 
   AiFilmSearch search(int id, String query, {bool onlyNew = false}) {
     return AiFilmSearch(
       id: id,
       query: query,
       onlyNew: onlyNew,
-      createdAt: createdAt,
+      createdAt: harness.now,
     );
   }
 
@@ -51,48 +30,11 @@ void main() {
     return AiFilmSearchLoaded(search(id, query), films);
   }
 
-  AiAssistantBloc buildBloc() {
-    return AiAssistantBloc(
-      getAiFilmRecommendationsUseCase: useCase,
-      getAiSessionsUseCase: getSessionsUseCase,
-      saveAiSessionUseCase: saveAiSessionUseCase,
-      deleteAiSessionUseCase: deleteAiSessionUseCase,
-      clearAiSessionsUseCase: clearAiSessionsUseCase,
-    );
-  }
+  AiAssistantBloc buildBloc() => harness.buildBloc();
 
   setUp(() {
-    useCase = MockGetAiFilmRecommendationsUseCase();
-    getSessionsUseCase = MockGetAiSessionsUseCase();
-    saveAiSessionUseCase = MockSaveAiSessionUseCase();
-    deleteAiSessionUseCase = MockDeleteAiSessionUseCase();
-    clearAiSessionsUseCase = MockClearAiSessionsUseCase();
-
-    films = <AiFilmRecommendation>[
-      const AiFilmRecommendation(
-        film: FilmEntity(
-          kinopoiskId: 472,
-          nameRu: 'Одиннадцать друзей Оушена',
-          year: 2001,
-          genres: <String>['криминал', 'комедия'],
-        ),
-        description: 'Команда мастеров готовит ограбление трёх казино.',
-      ),
-    ];
-
-    registerFallbackValue(
-      AiSession(
-        id: 0,
-        createdAt: createdAt,
-        updatedAt: createdAt,
-        turns: const <AiSessionTurn>[],
-      ),
-    );
-
-    when(() => getSessionsUseCase()).thenAnswer((_) async => const <AiSession>[]);
-    when(() => saveAiSessionUseCase(any())).thenAnswer((_) async {});
-    when(() => deleteAiSessionUseCase(any())).thenAnswer((_) async {});
-    when(() => clearAiSessionsUseCase()).thenAnswer((_) async {});
+    harness = AiAssistantHarness();
+    films = harness.films;
   });
 
   test('initial state has no searches', () async {
@@ -106,7 +48,7 @@ void main() {
   blocTest<AiAssistantBloc, AiAssistantState>(
     'adds a search, expands it and loads films',
     build: () {
-      when(() => useCase('комедия', false)).thenAnswer((_) async => films);
+      when(() => harness.recommendations('комедия', false)).thenAnswer((_) async => films);
       return buildBloc();
     },
     act: (bloc) => bloc.add(const AiAssistantRequested('комедия')),
@@ -147,8 +89,8 @@ void main() {
           ),
     ],
     verify: (_) {
-      verify(() => useCase('комедия', false)).called(1);
-      final session = verify(() => saveAiSessionUseCase(captureAny()))
+      verify(() => harness.recommendations('комедия', false)).called(1);
+      final session = verify(() => harness.saveSession(captureAny()))
           .captured
           .single as AiSession;
       expect(session.turns.single.search.query, 'комедия');
@@ -160,7 +102,7 @@ void main() {
   blocTest<AiAssistantBloc, AiAssistantState>(
     'passes the only-new mode to the use case',
     build: () {
-      when(() => useCase('комедия', true)).thenAnswer((_) async => films);
+      when(() => harness.recommendations('комедия', true)).thenAnswer((_) async => films);
       return buildBloc();
     },
     act: (bloc) =>
@@ -175,7 +117,7 @@ void main() {
         isA<AiFilmSearchLoaded>(),
       ),
     ],
-    verify: (_) => verify(() => useCase('комедия', true)).called(1),
+    verify: (_) => verify(() => harness.recommendations('комедия', true)).called(1),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
@@ -187,7 +129,7 @@ void main() {
       expandedSearchId: 0,
     ),
     build: () {
-      when(() => useCase('триллер', true)).thenAnswer((_) async => films);
+      when(() => harness.recommendations('триллер', true)).thenAnswer((_) async => films);
       return buildBloc();
     },
     act: (bloc) => bloc.add(const AiAssistantRetryRequested(0)),
@@ -206,13 +148,13 @@ void main() {
         isA<AiFilmSearchLoaded>(),
       ),
     ],
-    verify: (_) => verify(() => useCase('триллер', true)).called(1),
+    verify: (_) => verify(() => harness.recommendations('триллер', true)).called(1),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
     'trims the query before sending',
     build: () {
-      when(() => useCase('триллер', false)).thenAnswer((_) async => films);
+      when(() => harness.recommendations('триллер', false)).thenAnswer((_) async => films);
       return buildBloc();
     },
     act: (bloc) => bloc.add(const AiAssistantRequested('  триллер  ')),
@@ -224,7 +166,7 @@ void main() {
       ),
       isA<AiAssistantFeed>(),
     ],
-    verify: (_) => verify(() => useCase('триллер', false)).called(1),
+    verify: (_) => verify(() => harness.recommendations('триллер', false)).called(1),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
@@ -232,13 +174,13 @@ void main() {
     build: buildBloc,
     act: (bloc) => bloc.add(const AiAssistantRequested('   ')),
     expect: () => <AiAssistantState>[],
-    verify: (_) => verifyNever(() => useCase(any(), any())),
+    verify: (_) => verifyNever(() => harness.recommendations(any(), any())),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
     'marks the search as empty when nothing was found',
     build: () {
-      when(() => useCase(any(), any()))
+      when(() => harness.recommendations(any(), any()))
           .thenAnswer((_) async => const <AiFilmRecommendation>[]);
       return buildBloc();
     },
@@ -256,7 +198,7 @@ void main() {
       ),
     ],
     verify: (_) {
-      final session = verify(() => saveAiSessionUseCase(captureAny()))
+      final session = verify(() => harness.saveSession(captureAny()))
           .captured
           .single as AiSession;
       expect(session.turns.single.status, AiSessionTurnStatus.empty);
@@ -267,7 +209,7 @@ void main() {
   blocTest<AiAssistantBloc, AiAssistantState>(
     'keeps the service error message on failure',
     build: () {
-      when(() => useCase(any(), any())).thenThrow(
+      when(() => harness.recommendations(any(), any())).thenThrow(
         AiServiceFailure('Модель не смогла ответить. Попробуйте позже.'),
       );
       return buildBloc();
@@ -289,13 +231,13 @@ void main() {
         ),
       ),
     ],
-    verify: (_) => verifyNever(() => saveAiSessionUseCase(any())),
+    verify: (_) => verifyNever(() => harness.saveSession(any())),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
     'shows the network message when connection is lost',
     build: () {
-      when(() => useCase(any(), any())).thenThrow(NetworkFailure());
+      when(() => harness.recommendations(any(), any())).thenThrow(NetworkFailure());
       return buildBloc();
     },
     act: (bloc) => bloc.add(const AiAssistantRequested('комедия')),
@@ -322,7 +264,7 @@ void main() {
       expandedSearchId: 0,
     ),
     build: () {
-      when(() => useCase('триллер', false)).thenAnswer((_) async => films);
+      when(() => harness.recommendations('триллер', false)).thenAnswer((_) async => films);
       return buildBloc();
     },
     act: (bloc) => bloc.add(const AiAssistantRetryRequested(0)),
@@ -344,7 +286,7 @@ void main() {
         ),
       ),
     ],
-    verify: (_) => verify(() => saveAiSessionUseCase(any())).called(1),
+    verify: (_) => verify(() => harness.saveSession(any())).called(1),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
@@ -356,7 +298,7 @@ void main() {
       expandedSearchId: 0,
     ),
     build: () {
-      when(() => useCase(any(), any())).thenThrow(NetworkFailure());
+      when(() => harness.recommendations(any(), any())).thenThrow(NetworkFailure());
       return buildBloc();
     },
     act: (bloc) => bloc.add(const AiAssistantRetryRequested(0)),
@@ -378,7 +320,7 @@ void main() {
         ),
       ),
     ],
-    verify: (_) => verifyNever(() => saveAiSessionUseCase(any())),
+    verify: (_) => verifyNever(() => harness.saveSession(any())),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
@@ -392,7 +334,7 @@ void main() {
     build: buildBloc,
     act: (bloc) => bloc.add(const AiAssistantRetryRequested(0)),
     expect: () => <AiAssistantState>[],
-    verify: (_) => verifyNever(() => useCase(any(), any())),
+    verify: (_) => verifyNever(() => harness.recommendations(any(), any())),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
@@ -408,7 +350,7 @@ void main() {
         ..add(const AiAssistantRetryRequested(1));
     },
     expect: () => <AiAssistantState>[],
-    verify: (_) => verifyNever(() => useCase(any(), any())),
+    verify: (_) => verifyNever(() => harness.recommendations(any(), any())),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
@@ -444,7 +386,7 @@ void main() {
       expandedSearchId: 100 + AiAssistantBloc.maxSearches - 1,
     ),
     build: () {
-      when(() => useCase(any(), any())).thenAnswer((_) async => films);
+      when(() => harness.recommendations(any(), any())).thenAnswer((_) async => films);
       return buildBloc();
     },
     act: (bloc) => bloc.add(const AiAssistantRequested('новый')),
@@ -477,7 +419,7 @@ void main() {
   blocTest<AiAssistantBloc, AiAssistantState>(
     'restores saved sessions when the screen opens',
     build: () {
-      when(() => getSessionsUseCase()).thenAnswer(
+      when(() => harness.sessions()).thenAnswer(
         (_) async => <AiSession>[
           AiSession(
             id: 7,
@@ -541,7 +483,7 @@ void main() {
           .having((state) => state.searches.single.id, 'id', 1)
           .having((state) => state.expandedSearchId, 'expandedSearchId', 1),
     ],
-    verify: (_) => verify(() => deleteAiSessionUseCase(2)).called(1),
+    verify: (_) => verify(() => harness.deleteSession(2)).called(1),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
@@ -553,7 +495,7 @@ void main() {
     build: buildBloc,
     act: (bloc) => bloc.add(const AiAssistantSessionDeleteRequested(2)),
     expect: () => [isA<AiAssistantInitial>()],
-    verify: (_) => verify(() => deleteAiSessionUseCase(2)).called(1),
+    verify: (_) => verify(() => harness.deleteSession(2)).called(1),
   );
 
   blocTest<AiAssistantBloc, AiAssistantState>(
@@ -568,13 +510,13 @@ void main() {
     build: buildBloc,
     act: (bloc) => bloc.add(const AiAssistantSessionsClearRequested()),
     expect: () => [isA<AiAssistantInitial>()],
-    verify: (_) => verify(() => clearAiSessionsUseCase()).called(1),
+    verify: (_) => verify(() => harness.clearSessions()).called(1),
   );
 
   test('ignores a response that came after close', () async {
     final completer = Completer<List<AiFilmRecommendation>>();
 
-    when(() => useCase(any(), any())).thenAnswer((_) => completer.future);
+    when(() => harness.recommendations(any(), any())).thenAnswer((_) => completer.future);
 
     final bloc = buildBloc();
 

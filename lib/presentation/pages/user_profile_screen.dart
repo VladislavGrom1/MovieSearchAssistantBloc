@@ -4,8 +4,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_search_assistant_bloc/app/navigation/active_tab_controller.dart';
 import 'package:movie_search_assistant_bloc/app/theme/app_colors.dart';
 import 'package:movie_search_assistant_bloc/app/theme/custom_text_styles.dart';
+import 'package:movie_search_assistant_bloc/app/util/data_formatter.dart';
 import 'package:movie_search_assistant_bloc/domain/entities/user_entity.dart';
 import 'package:movie_search_assistant_bloc/injection_container.dart';
 import 'package:movie_search_assistant_bloc/presentation/bloc/user_profile/user_profile_bloc.dart';
@@ -26,8 +28,51 @@ class UserProfileScreen extends StatelessWidget {
   }
 }
 
-class _UserProfileView extends StatelessWidget {
+class _UserProfileView extends StatefulWidget {
   const _UserProfileView();
+
+  @override
+  State<_UserProfileView> createState() => _UserProfileViewState();
+}
+
+class _UserProfileViewState extends State<_UserProfileView>
+    with WidgetsBindingObserver {
+  final ActiveTabController? _activeTabController =
+      getIt.isRegistered<ActiveTabController>()
+          ? getIt<ActiveTabController>()
+          : null;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _activeTabController?.index.addListener(_handleTabChanged);
+  }
+
+  @override
+  void dispose() {
+    _activeTabController?.index.removeListener(_handleTabChanged);
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// Пока профиль открыт, файлы на диске могут измениться (фон, импорт,
+  /// другой экран) — при возврате цифры пересчитываются.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || !mounted) return;
+    context.read<UserProfileBloc>().add(RefreshStorageUsage());
+  }
+
+  /// Вкладки живут постоянно: вернувшись на «Профиль» после сохранения
+  /// фильма в ленте, мы не создаём экран заново. Пересчитываем размеры,
+  /// когда вкладку показали.
+  void _handleTabChanged() {
+    if (_activeTabController?.index.value != AppTabs.profile || !mounted) {
+      return;
+    }
+    context.read<UserProfileBloc>().add(RefreshStorageUsage());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +135,8 @@ class _UserProfileView extends StatelessWidget {
                     Expanded(
                       child: _UserProfileContent(
                         userEntity: state.userEntity,
-                        cacheSizeMB: state.cacheSizeMB,
+                        cacheBytes: state.cacheBytes,
+                        libraryBytes: state.libraryBytes,
                       ),
                     ),
                   ],
@@ -107,11 +153,13 @@ class _UserProfileView extends StatelessWidget {
 
 class _UserProfileContent extends StatelessWidget {
   final UserEntity? userEntity;
-  final double? cacheSizeMB;
+  final int? cacheBytes;
+  final int? libraryBytes;
 
   const _UserProfileContent({
     required this.userEntity,
-    required this.cacheSizeMB,
+    required this.cacheBytes,
+    required this.libraryBytes,
   });
 
   bool get _hasOwnApiKey => (userEntity?.apiKey ?? "").isNotEmpty;
@@ -202,23 +250,14 @@ class _UserProfileContent extends StatelessWidget {
         const SizedBox(height: 20),
         Text("Память", style: CustomTextStyles.m3Title()),
         const SizedBox(height: 10),
-        Card(
-          color: AppColors.primaryThemeGrey,
-          child: Container(
-            height: 44,
-            padding: EdgeInsets.only(left: 20),
-            alignment: Alignment.centerLeft,
-            child: Text.rich(
-              TextSpan(
-                style: CustomTextStyles.m3Content(),
-                children: [
-                  TextSpan(text: "Размер кэша: "),
-                  TextSpan(text: "${cacheSizeMB?.toStringAsFixed(1)} МБ", style: CustomTextStyles.m3Content(color: AppColors.primaryScheme)),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-              ),
-          ),
+        _StorageSizeCard(
+          label: "Размер кэша",
+          value: DataFormatter.formatBytes(cacheBytes),
+        ),
+        const SizedBox(height: 8),
+        _StorageSizeCard(
+          label: "Библиотека фильмов",
+          value: DataFormatter.formatBytes(libraryBytes),
         ),
         const SizedBox(height: 20),
         Text("Настройки", style: CustomTextStyles.m3Title()),
@@ -762,6 +801,39 @@ class _ApiKeyHint extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Строка «подпись: значение» в разделе «Память».
+class _StorageSizeCard extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _StorageSizeCard({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: AppColors.primaryThemeGrey,
+      child: Container(
+        height: 44,
+        padding: const EdgeInsets.only(left: 20),
+        alignment: Alignment.centerLeft,
+        child: Text.rich(
+          TextSpan(
+            style: CustomTextStyles.m3Content(),
+            children: [
+              TextSpan(text: "$label: "),
+              TextSpan(
+                text: value,
+                style: CustomTextStyles.m3Content(color: AppColors.primaryScheme),
+              ),
+            ],
+          ),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

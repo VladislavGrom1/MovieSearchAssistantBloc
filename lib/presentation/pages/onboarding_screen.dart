@@ -209,6 +209,12 @@ class _CarouselWidgetState extends State<CarouselWidget> {
           decoration: pageDecoration
         ),
         PageViewModel(
+          titleWidget: _GradientTitle(text: "AI Ассистент"),
+          body: "Опишите, что хотите посмотреть и AI Ассистент подберёт фильмы под ваш запрос и настроение.",
+          image: const _OnboardingIcon(icon: Icons.auto_awesome),
+          decoration: pageDecoration
+        ),
+        PageViewModel(
           titleWidget: _GradientTitle(text: "Создавайте свои коллекции"),
           body: "Сохраняйте понравившиеся фильмы в коллекции, делитесь своей библиотекой с друзьями или переносите её на другое устройство.",
           image: const _OnboardingIcon(icon: Icons.collections_bookmark),
@@ -235,6 +241,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
         size: Size(10.0, 10.0),
         color: AppColors.primaryScheme,
         activeSize: Size(22.0, 10.0),
+        spacing: EdgeInsets.symmetric(horizontal: 2.0),
         activeShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(25.0)),
         ),

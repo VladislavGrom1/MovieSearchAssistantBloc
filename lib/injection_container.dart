@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:movie_search_assistant_bloc/app/api/dio_api_client.dart';
@@ -12,8 +10,8 @@ import 'package:movie_search_assistant_bloc/app/file_service/export_destination_
 import 'package:movie_search_assistant_bloc/app/file_service/file_service.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/ios_export_destination_service.dart';
 import 'package:movie_search_assistant_bloc/app/file_service/zip_service.dart';
-import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_cubit.dart';
-import 'package:movie_search_assistant_bloc/app/network_service/network_service.dart';
+import 'package:movie_search_assistant_bloc/app/navigation/active_tab_controller.dart';
+import 'package:movie_search_assistant_bloc/app/network_service/network_module.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/ai_session_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/collection_local_data_source.dart';
 import 'package:movie_search_assistant_bloc/data/data_sources/local/film_collection_link_local_data_source.dart';
@@ -44,7 +42,7 @@ import 'package:movie_search_assistant_bloc/domain/usecases/delete_ai_session_us
 import 'package:movie_search_assistant_bloc/domain/usecases/export_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_ai_sessions_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_app_info_use_case.dart';
-import 'package:movie_search_assistant_bloc/domain/usecases/get_cache_size_use_case.dart';
+import 'package:movie_search_assistant_bloc/domain/usecases/get_storage_usage_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/get_similar_films_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_library_use_case.dart';
 import 'package:movie_search_assistant_bloc/domain/usecases/import_old_library_use_case.dart';
@@ -102,6 +100,11 @@ Future<void> initializeDependencies() async {
 
     await HiveInit.init();
 
+    final cacheRoot = Directory(
+      '${(await getTemporaryDirectory()).path}/${FilmImageCacheService.key}',
+    );
+    final supportRoot = await getApplicationSupportDirectory();
+
     // LocalDataSources
     getIt.registerLazySingleton(() => UserLocalDataSource());
     getIt.registerLazySingleton(() => FilmLocalDataSource());
@@ -115,14 +118,15 @@ Future<void> initializeDependencies() async {
     getIt.registerSingleton(getIt<DioApiClient>().dio);
 
     // Services
-    getIt.registerLazySingleton(() => Connectivity());
-    getIt.registerLazySingleton(() => NetworkService(
-      getIt(),
-      apiHost: Uri.parse(getIt<Dio>().options.baseUrl).host,
-    ));
+    registerNetworkModule(getIt);
+    getIt.registerLazySingleton(() => ActiveTabController());
     getIt.registerLazySingleton(() => FileService());
     getIt.registerLazySingleton(() => ZipService());
-    getIt.registerLazySingleton(() => FilmImageCacheService());
+    getIt.registerLazySingleton(
+      () => FilmImageCacheService(cacheRoot: cacheRoot, supportRoot: supportRoot),
+    );
+    // Кэш приводится к текущей раскладке до первого обращения к нему.
+    await getIt<FilmImageCacheService>().init();
     if(Platform.isAndroid){
       await MediaStore.ensureInitialized();
       MediaStore.appFolder = "MovieSearchAssistant";
@@ -218,7 +222,10 @@ Future<void> initializeDependencies() async {
       filmCollectionRepository: getIt(),
       imageStorageService: getIt()
     ));
-    getIt.registerLazySingleton(() => GetCacheSizeUseCase(filmImageCacheService: getIt()));
+    getIt.registerLazySingleton(() => GetStorageUsageUseCase(
+      filmImageCacheService: getIt(),
+      imageStorageService: getIt(),
+    ));
     getIt.registerLazySingleton(() => ClearCacheUseCase(filmImageCacheService: getIt()));
     getIt.registerLazySingleton(() => OpenUrlUseCase());
     getIt.registerLazySingleton(() => GetAppInfoUseCase());
@@ -296,7 +303,7 @@ Future<void> initializeDependencies() async {
       importOldLibraryUseCase: getIt(),
       exportLibraryUseCase: getIt(),
       clearLibraryUseCase: getIt(),
-      getCacheSizeUseCase: getIt(),
+      getStorageUsageUseCase: getIt(),
       clearCacheUseCase: getIt(),
       openUrlUseCase: getIt(),
       getAppInfoUseCase: getIt(),
@@ -309,5 +316,4 @@ Future<void> initializeDependencies() async {
     getIt.registerFactory(() => WatchFilmCollectionLinksCubit(getIt()));
     getIt.registerFactory(() => WatchSavedFilmsStatusCubit(getIt()));
     getIt.registerFactory(() => SimilarFilmsCubit(getSimilarFilmsUseCase: getIt()));
-    getIt.registerLazySingleton(() => NetworkCubit(getIt()));
 }

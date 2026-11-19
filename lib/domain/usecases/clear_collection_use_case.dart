@@ -21,6 +21,7 @@ class ClearCollectionUseCase {
       final filmIdsIncludedInCollection = allFilmCollectionLinks.where((link) => link.collectionId == collectionId).map((link) => link.filmId).toList();
 
       await filmCollectionRepository.removeAllLinksByCollectionId(collectionId);
+      await imageStorageService.deleteCollectionImage(collectionId);
 
       final filmIdsToDelete = filmIdsIncludedInCollection.where((filmId) {
         return !allFilmCollectionLinks.any((link) =>

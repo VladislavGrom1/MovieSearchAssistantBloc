@@ -16,13 +16,15 @@
      а потом читается.
 
   Скрипт обходит второе ограничение и печатает вывод, но не может обойти
-  первое: вызывать его всё равно нужно с danger-full-access.
+  первое: запускать его нужно из сессии с полным доступом к файловой
+  системе (в DSH это `danger-full-access`). В режиме `workspace-write`
+  Flutter зависает на lock-файле SDK.
 
 .EXAMPLE
-  pwsh -File scripts/agent-flutter.ps1 analyze lib test
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/agent-flutter.ps1 analyze lib test
 
 .EXAMPLE
-  pwsh -File scripts/agent-flutter.ps1 test test/presentation/bloc/ai_films_bloc_test.dart
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/agent-flutter.ps1 test test/presentation/bloc/ai_films_bloc_test.dart
 #>
 [CmdletBinding()]
 param(

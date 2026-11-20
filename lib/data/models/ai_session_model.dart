@@ -6,10 +6,6 @@ import 'package:movie_search_assistant_bloc/domain/entities/film_entity.dart';
 
 part 'ai_session_model.g.dart';
 
-/// Сессия AI-Ассистента в Hive.
-///
-/// Всё структурированное хранится в Hive (как и библиотека фильмов); на диске
-/// лежат только постеры — пути к ним записаны в [AiFilmSnapshotModel].
 @HiveType(typeId: 5)
 class AiSessionModel {
   static const int currentSchemaVersion = 1;
@@ -47,7 +43,6 @@ class AiSessionModel {
   }
 }
 
-/// Один ход сессии в Hive.
 @HiveType(typeId: 6)
 class AiSessionTurnModel {
   @HiveField(0)
@@ -62,7 +57,6 @@ class AiSessionTurnModel {
   @HiveField(3)
   final DateTime createdAt;
 
-  /// `loaded` или `empty`; ошибки в историю не попадают.
   @HiveField(4)
   final String status;
 
@@ -94,18 +88,11 @@ class AiSessionTurnModel {
   }
 }
 
-/// Статусы хода, как они лежат в Hive.
 class AiSessionTurnModelStatus {
   static const String loaded = 'loaded';
   static const String empty = 'empty';
 }
 
-/// Компактный снимок фильма для карточки в истории.
-///
-/// Полное `FilmEntity` не храним: для карточки нужны только название, год,
-/// жанры, рейтинг, описание и путь к постеру. `posterUrl` не сохраняется —
-/// если постер не скачался, карточка показывает плейсхолдер и ничего не
-/// докачивает при повторном открытии.
 @HiveType(typeId: 7)
 class AiFilmSnapshotModel {
   @HiveField(0)

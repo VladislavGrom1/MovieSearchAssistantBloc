@@ -39,7 +39,6 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
     on<AiAssistantSessionsClearRequested>(_onSessionsClearRequested);
   }
 
-  /// Поднимает сохранённые сессии из Hive при открытии экрана.
   Future<void> _onHistoryRequested(
     AiAssistantHistoryRequested event,
     Emitter<AiAssistantState> emit,
@@ -218,9 +217,6 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
     Duration minimumLoadingDuration = Duration.zero,
     bool persist = false,
   }) async {
-    // Держим загрузку на экране минимум `minimumLoadingDuration`, чтобы при
-    // быстром ответе скелетоны не мелькали. Таймер стартует вместе с запросом,
-    // то есть сразу после эмита `AiFilmSearchLoading`.
     final Future<void> minimumLoadingDelay =
         minimumLoadingDuration == Duration.zero
             ? Future<void>.value()
@@ -261,8 +257,6 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
     }
   }
 
-  /// Сохраняет успешный поиск в историю. Ошибка сохранения не мешает показать
-  /// результаты: сессия просто не попадёт в историю.
   Future<void> _persistIfNeeded(
     AiFilmSearch search,
     List<AiFilmRecommendation> films,
@@ -290,7 +284,6 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
         ),
       );
     } catch (_) {
-      // История — вспомогательная функция: без неё экран работает как раньше.
     }
   }
 
@@ -343,11 +336,6 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
     );
   }
 
-  /// id сессии — секунды от epoch.
-  ///
-  /// Hive принимает int-ключи только в диапазоне `0…0xFFFFFFFF`, а миллисекунды
-  /// в него не помещаются; секунды помещаются до 2106 года. Две сессии в одну
-  /// секунду разводим инкрементом.
   int _newSessionId(List<AiFilmSearchState> searches) {
     var id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 

@@ -48,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                   backgroundColor: AppColors.primaryThemeBlack,
                   selectedItemColor: AppColors.primaryScheme,
                   unselectedItemColor: AppColors.primaryThemeGrey,
-                  showSelectedLabels: false,
+                  showSelectedLabels: true,
                   showUnselectedLabels: false,
                   currentIndex: tabsRouter.activeIndex,
                   onTap: (index) {

@@ -3,11 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_cubit.dart';
 import 'package:movie_search_assistant_bloc/presentation/pages/widgets/custom_snack_bar.dart';
 
-/// Снекбары о потере и восстановлении связи.
-///
-/// Первый ответ проверки показывается, только если связи нет: иначе при каждом
-/// запуске приложения всплывало бы «соединение установлено». Новый снекбар
-/// заменяет предыдущий, а не встаёт за ним в очередь.
 class NetworkListener extends StatefulWidget {
   final Widget child;
 
@@ -34,8 +29,6 @@ class _NetworkListenerState extends State<NetworkListener>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed || !mounted) return;
-    // В фоне поток транспорта мог ничего не прислать: связь менялась, пока
-    // приложение спало.
     context.read<NetworkCubit>().refresh();
   }
 

@@ -5,21 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/connectivity_events.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/network_probe.dart';
 
-/// Источник статуса связи: то, на что подписан `NetworkCubit`.
 abstract interface class NetworkStatusSource {
-  /// `true` — связь есть, `false` — нет. Дубликаты не приходят.
   Stream<bool> get onStatusChange;
 
-  /// Перепроверить связь прямо сейчас.
   Future<void> refresh();
 }
 
-/// Отвечает на один вопрос: доходят ли запросы до нашего API.
-///
-/// Событие плагина транспорта — мгновенный повод перепроверить; пока связь
-/// есть, никакого поллинга нет. Пока связи нет, работает редкий ретрай: не
-/// каждый запрос обновляет транспорт (VPN, captive portal, «сеть есть, а
-/// интернета нет»), поэтому ждать только события плагина нельзя.
 class NetworkService implements NetworkStatusSource {
   NetworkService({
     required ConnectivityEvents connectivity,
@@ -37,7 +28,6 @@ class NetworkService implements NetworkStatusSource {
   final ConnectivityEvents _connectivity;
   final NetworkProbe _probe;
 
-  /// Как часто перепроверять связь, пока она не восстановилась.
   final Duration retryInterval;
 
   final StreamController<bool> _controller = StreamController<bool>.broadcast();
@@ -53,14 +43,10 @@ class NetworkService implements NetworkStatusSource {
 
   @override
   Future<void> refresh() {
-    // Вызывающий знает больше нас (например, приложение вернулось из фона):
-    // результат уже идущей пробы устарел.
     _generation++;
     return _check();
   }
 
-  /// Первый ответ проверки: если транспорт сразу говорит «сети нет», проба
-  /// не нужна — на старте офлайн это экономит секунды ожидания таймаута.
   Future<void> _bootstrap() async {
     try {
       final results = await _connectivity.check();
@@ -76,7 +62,6 @@ class NetworkService implements NetworkStatusSource {
 
   void _onTransportChanged(List<ConnectivityResult> results) {
     if (_disposed) return;
-    // Любое событие делает результаты уже запущенных проб устаревшими.
     _generation++;
     if (!_hasTransport(results)) {
       _publish(false);
@@ -96,10 +81,6 @@ class NetworkService implements NetworkStatusSource {
     if (_disposed || _checking) return;
     _checking = true;
     try {
-      // Пока проверка идёт, может прийти событие транспорта. Тогда результат
-      // устарел: не публикуем его, а проверяем заново. Если связь меняется
-      // быстрее, чем мы успеваем проверять, публикуем последний ответ, а не
-      // оставляем статус неизвестным навсегда.
       bool? latest;
       for (var attempt = 0; attempt < 3; attempt++) {
         final generation = _generation;

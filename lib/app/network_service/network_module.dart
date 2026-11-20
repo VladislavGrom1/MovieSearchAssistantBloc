@@ -6,18 +6,6 @@ import 'package:movie_search_assistant_bloc/app/network_service/cubit/internet_c
 import 'package:movie_search_assistant_bloc/app/network_service/network_probe.dart';
 import 'package:movie_search_assistant_bloc/app/network_service/network_service.dart';
 
-/// Регистрирует сетевой модуль целиком: транспорт, пробу, сервис статуса
-/// и кубит, который их потребляет.
-///
-/// Регистрация вынесена из `initializeDependencies` отдельной функцией,
-/// потому что `initializeDependencies` требует платформенных плагинов (Hive,
-/// path_provider, MediaStore) и не собирается в тесте. Здесь весь граф
-/// поднимается на пустом [GetIt], поэтому несовпадение типов регистрации
-/// ловится тестом, а не падением при старте приложения.
-///
-/// Типы везде указаны явно: `getIt()` без типа выводит его из контекста
-/// вызова, и при смене типа параметра конструктора регистрация молча
-/// начинает искать другой тип.
 void registerNetworkModule(GetIt getIt) {
   getIt.registerLazySingleton<Connectivity>(() => Connectivity());
   getIt.registerLazySingleton<ConnectivityEvents>(

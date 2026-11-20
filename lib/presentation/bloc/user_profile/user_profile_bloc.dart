@@ -63,9 +63,6 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<ShareLibrary>(_shareLibrary);
   }
 
-  /// Пересчитывает размеры кэша и библиотеки. Размеры — вспомогательная
-  /// информация: если диск не прочитался, экран профиля не падает и не
-  /// показывает снекбар об ошибке, а оставляет прежние цифры.
   Future<void> _refreshStorageUsage(RefreshStorageUsage event, Emitter emit) async {
     final currentState = state;
     if (currentState is! UserProfileLoaded) return;
@@ -170,8 +167,6 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     }
   }
 
-  /// Возвращает состояние с пересчитанными размерами: импорт и очистка
-  /// меняют файлы на диске.
   Future<UserProfileLoaded> _stateWithRefreshedUsage(UserProfileLoaded currentState) async {
     final usage = await _readStorageUsage();
     if (usage == null) return currentState;

@@ -52,8 +52,6 @@ class AiFilmRecommendationModel {
     );
   }
 
-  /// Жанры приходят массивом объектов: `[{ "genre": "комедия" }]`.
-  /// Строка массива тоже принимается, если сервер отдаст плоский список.
   static List<String> _parseGenres(Object? value) {
     if (value is! List) return const <String>[];
 

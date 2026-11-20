@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -50,12 +52,15 @@ class MockUseSharedApiKeyUseCase extends Mock
 
 void main() {
   late MockGetStorageUsageUseCase getStorageUsageUseCase;
+  late MockClearCacheUseCase clearCacheUseCase;
 
   setUp(() async {
     getStorageUsageUseCase = MockGetStorageUsageUseCase();
     when(() => getStorageUsageUseCase.call()).thenAnswer(
       (_) async => const StorageUsage(cacheBytes: 0, libraryBytes: 0),
     );
+    clearCacheUseCase = MockClearCacheUseCase();
+    when(() => clearCacheUseCase.call()).thenAnswer((_) async {});
 
     final getApiKeyInfo = MockGetApiKeyInfoFromStorageUseCase();
     when(getApiKeyInfo.call).thenAnswer((_) async => null);
@@ -73,7 +78,7 @@ void main() {
         exportLibraryUseCase: MockExportLibraryUseCase(),
         clearLibraryUseCase: MockClearLibraryUseCase(),
         getStorageUsageUseCase: getStorageUsageUseCase,
-        clearCacheUseCase: MockClearCacheUseCase(),
+        clearCacheUseCase: clearCacheUseCase,
         openUrlUseCase: MockOpenUrlUseCase(),
         getAppInfoUseCase: getAppInfo,
         shareLibraryUseCase: MockShareLibraryUseCase(),
@@ -113,5 +118,77 @@ void main() {
 
     expect(find.text('Библиотека фильмов: 5 МБ', findRichText: true),
         findsOneWidget);
+  });
+
+  testWidgets('очистка кэша не уничтожает экран и сохраняет прокрутку',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(600, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    // До очистки кэш непустой, после — ноль. Пересчёт после очистки
+    // придержим, чтобы поймать промежуточное состояние «успех».
+    var usageCalls = 0;
+    final usageAfterClear = Completer<StorageUsage>();
+    when(() => getStorageUsageUseCase.call()).thenAnswer((_) {
+      usageCalls++;
+      if (usageCalls <= 2) {
+        return Future.value(
+          const StorageUsage(cacheBytes: 1200000, libraryBytes: 500),
+        );
+      }
+      return usageAfterClear.future;
+    });
+
+    final clearCache = Completer<void>();
+    when(() => clearCacheUseCase.call()).thenAnswer((_) => clearCache.future);
+
+    await tester.pumpWidget(const MaterialApp(home: UserProfileScreen()));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    final position = tester
+        .state<ScrollableState>(find.byType(Scrollable))
+        .position;
+
+    // Прокручиваем список настроек. Смещение меньше реальной высоты контента,
+    // поэтому позиция не упирается в край и не пружинит при пересборке.
+    position.jumpTo(400);
+    await tester.pump();
+
+    final offsetBefore = position.pixels;
+    expect(offsetBefore, greaterThan(0));
+    expect(offsetBefore, lessThan(position.maxScrollExtent));
+
+    await tester.tap(find.text('Очистить кэш'));
+    await tester.pump();
+    await tester.pump();
+
+    // Пока идёт очистка, экран на месте.
+    expect(find.text('Очистить кэш'), findsOneWidget);
+
+    clearCache.complete();
+    await tester.pump();
+    await tester.pump();
+
+    // Блок сообщает об успехе отдельным состоянием. Экран не должен на нём
+    // исчезать: иначе ListView уничтожается и прокрутка теряется.
+    expect(find.text('Очистить кэш'), findsOneWidget);
+    expect(
+      tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      offsetBefore,
+    );
+
+    usageAfterClear.complete(
+      const StorageUsage(cacheBytes: 0, libraryBytes: 500),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Размер кэша: 0 Б', findRichText: true), findsOneWidget);
+    expect(
+      tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      offsetBefore,
+    );
   });
 }

@@ -71,8 +71,6 @@ class AiSessionRepositoryImpl implements AiSessionRepository {
     await imageStorageService.deleteAllSessionImages();
   }
 
-  /// Скачивает постер в папку сессии. Если не получилось — путь остаётся
-  /// `null`, карточка покажет плейсхолдер и повторно постер не докачивается.
   Future<AiFilmSnapshotModel> _toSnapshot(
     int sessionId,
     AiFilmRecommendation recommendation,

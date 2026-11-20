@@ -9,8 +9,6 @@ import 'package:path_provider/path_provider.dart';
 class ImageStorageService {
   final Dio _dio = Dio();
 
-  /// Каталог, в котором лежат изображения библиотеки. Вынесен в поле, чтобы
-  /// тесты могли работать с временным каталогом без плагина path_provider.
   final Future<Directory> Function() _documentsRoot;
 
   ImageStorageService({Future<Directory> Function()? documentsRoot})
@@ -186,11 +184,6 @@ class ImageStorageService {
     }
   }
 
-  /// Скачивает постер фильма в папку сессии AI-Ассистента.
-  ///
-  /// Возвращает относительный путь `'<sessionId>/<filmId>/poster.jpg'` или
-  /// `null`, если постер скачать не удалось: тогда карточка показывает
-  /// плейсхолдер и повторно постер не докачивается.
   Future<String?> saveSessionPoster({
     required int sessionId,
     required int? filmId,
@@ -281,9 +274,6 @@ class ImageStorageService {
     }
   }
 
-  /// Сколько байт занимает библиотека: постеры и скриншоты фильмов плюс
-  /// обложки коллекций. Считается по диску, поэтому осиротевшие файлы тоже
-  /// попадают в цифру. Постеры AI-сессий сюда не входят: это не библиотека.
   Future<int> getLibrarySizeInBytes() async {
     final baseDir = await _documentsRoot();
     int totalSize = 0;

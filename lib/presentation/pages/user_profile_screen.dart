@@ -56,23 +56,20 @@ class _UserProfileViewState extends State<_UserProfileView>
     super.dispose();
   }
 
-  /// Пока профиль открыт, файлы на диске могут измениться (фон, импорт,
-  /// другой экран) — при возврате цифры пересчитываются.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed || !mounted) return;
     context.read<UserProfileBloc>().add(RefreshStorageUsage());
   }
 
-  /// Вкладки живут постоянно: вернувшись на «Профиль» после сохранения
-  /// фильма в ленте, мы не создаём экран заново. Пересчитываем размеры,
-  /// когда вкладку показали.
   void _handleTabChanged() {
     if (_activeTabController?.index.value != AppTabs.profile || !mounted) {
       return;
     }
     context.read<UserProfileBloc>().add(RefreshStorageUsage());
   }
+
+  UserProfileLoaded? _lastLoaded;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +87,9 @@ class _UserProfileViewState extends State<_UserProfileView>
         child: SafeArea(
           child: BlocBuilder<UserProfileBloc, UserProfileState>(
             builder: (context, state) {
+              if (state is UserProfileLoaded) {
+                _lastLoaded = state;
+              }
               if (state is UserProfileLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
@@ -129,14 +129,15 @@ class _UserProfileViewState extends State<_UserProfileView>
                   ),
                 );
               }
-              if (state is UserProfileLoaded) {
+              final loaded = state is UserProfileLoaded ? state : _lastLoaded;
+              if (loaded != null) {
                 return Column(
                   children: [
                     Expanded(
                       child: _UserProfileContent(
-                        userEntity: state.userEntity,
-                        cacheBytes: state.cacheBytes,
-                        libraryBytes: state.libraryBytes,
+                        userEntity: loaded.userEntity,
+                        cacheBytes: loaded.cacheBytes,
+                        libraryBytes: loaded.libraryBytes,
                       ),
                     ),
                   ],
@@ -806,7 +807,6 @@ class _ApiKeyHint extends StatelessWidget {
   }
 }
 
-/// Строка «подпись: значение» в разделе «Память».
 class _StorageSizeCard extends StatelessWidget {
   final String label;
   final String value;

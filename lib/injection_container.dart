@@ -125,7 +125,7 @@ Future<void> initializeDependencies() async {
     getIt.registerLazySingleton(
       () => FilmImageCacheService(cacheRoot: cacheRoot, supportRoot: supportRoot),
     );
-    // Кэш приводится к текущей раскладке до первого обращения к нему.
+
     await getIt<FilmImageCacheService>().init();
     if(Platform.isAndroid){
       await MediaStore.ensureInitialized();

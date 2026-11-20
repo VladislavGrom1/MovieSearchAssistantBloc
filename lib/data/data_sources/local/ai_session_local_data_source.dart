@@ -3,10 +3,6 @@ import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exc
 import 'package:movie_search_assistant_bloc/app/util/constants/hive_storage_keys.dart';
 import 'package:movie_search_assistant_bloc/data/models/ai_session_model.dart';
 
-/// Доступ к боксу сессий AI-Ассистента.
-///
-/// Держит лимит сессий: при переполнении вытесняет самую старую по
-/// `updatedAt` и возвращает её id, чтобы репозиторий удалил постеры.
 class AiSessionLocalDataSource {
   static const int maxSessions = 20;
 
@@ -22,7 +18,6 @@ class AiSessionLocalDataSource {
     }
   }
 
-  /// Сохраняет сессию и возвращает id вытесненных сессий.
   Future<List<int>> saveSession(AiSessionModel session) async {
     try {
       await _box.put(session.id, session);

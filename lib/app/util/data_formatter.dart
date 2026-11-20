@@ -99,7 +99,6 @@ class DataFormatter {
     return '$day.$month.$year $hour:$minute';
   }
 
-  /// День относительно сегодняшнего: «Сегодня», «Вчера», «13.11» или «13.11.2025».
   static String formatRelativeDay(DateTime dateTime, {DateTime? now}) {
     final DateTime reference = now ?? DateTime.now();
     final DateTime day = DateTime(dateTime.year, dateTime.month, dateTime.day);
@@ -124,7 +123,6 @@ class DataFormatter {
     return '$dayPart.$monthPart.${dateTime.year}';
   }
 
-  /// «Сегодня, 15:38» — день по [formatRelativeDay] плюс время.
   static String formatRelativeDayTime(DateTime dateTime, {DateTime? now}) {
     final String dayPart = formatRelativeDay(dateTime, now: now);
     final String hourPart = dateTime.hour.toString().padLeft(2, '0');
@@ -133,7 +131,6 @@ class DataFormatter {
     return '$dayPart, $hourPart:$minutePart';
   }
 
-  /// «2001 · Криминал, комедия» — год и не больше [genreLimit] жанров.
   static String formatYearWithGenres(
     int? year,
     List<String>? genres, {
@@ -154,8 +151,6 @@ class DataFormatter {
     return parts.isEmpty ? '-' : parts.join(' · ');
   }
 
-  /// «0 Б», «640 КБ», «12.4 МБ» — десятичные единицы (1 КБ = 1000 Б), как в
-  /// настройках телефона. `null` — размер ещё неизвестен.
   static String formatBytes(int? bytes) {
     if (bytes == null) return 'неизвестно';
     if (bytes <= 0) return '0 Б';
@@ -171,7 +166,6 @@ class DataFormatter {
   }
 
   static String _formatFraction(double value) {
-    // Округляем до десятых, чтобы 0.99995 не превращалось в «1.0».
     final rounded = (value * 10).round() / 10;
     return rounded == rounded.truncateToDouble()
         ? rounded.toStringAsFixed(0)

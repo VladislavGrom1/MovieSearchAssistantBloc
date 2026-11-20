@@ -184,8 +184,6 @@ class _AiAssistantViewState extends State<_AiAssistantView> {
       return true;
     }
 
-    // Старт повтора: ошибка сменяется загрузкой, но список не дёргаем —
-    // иначе экран «прыгает» в момент нажатия «Повторить».
     if (previous.expanded is AiFilmSearchFailure &&
         current.expanded is AiFilmSearchLoading) {
       return false;
@@ -965,7 +963,6 @@ class _OnlyNewToggle extends StatelessWidget {
   }
 }
 
-/// Пометка у развёрнутого поиска: он был отправлен в режиме «Только новое».
 class _OnlyNewBadge extends StatelessWidget {
   const _OnlyNewBadge();
 

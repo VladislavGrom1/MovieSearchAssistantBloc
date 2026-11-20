@@ -14,10 +14,8 @@ final class UserProfileLoading extends UserProfileState {}
 final class UserProfileLoaded extends UserProfileState{
   final UserEntity? userEntity;
 
-  /// Размер кэша сетевых постеров в байтах; `null` — ещё не посчитан.
   final int? cacheBytes;
-
-  /// Размер библиотеки фильмов в байтах; `null` — ещё не посчитан.
+  
   final int? libraryBytes;
 
   final Map<String, String>? appInfo;

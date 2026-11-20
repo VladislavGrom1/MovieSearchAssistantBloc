@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/local_data_source_exception.dart';
 import 'package:movie_search_assistant_bloc/app/exceptions/remote_data_source_exception.dart';
@@ -33,8 +34,6 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
   Future<void> _onLoadSearchedFilms(LoadSearchedFilms event, Emitter emit) async {
     final currentState = state;
 
-    // Повтор после ошибки: снова показываем загрузку, но держим её минимум
-    // `retryLoadingMinDuration`, чтобы спиннер не мелькал на быстром ответе.
     final isRetry = currentState is SearchedFilmsLoadedFailure;
     emit(SearchedFilmsLoading());
 
@@ -146,14 +145,9 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
         event.yearTo != null;
 
     if (!hasFilters && keyword.isNotEmpty) {
-      try {
-        final films = await searchFilmsByKeywordUseCase(keyword, page) ?? [];
-        if (films.isNotEmpty) {
-          return films;
-        }
-      } on RemoteDataSourceException {
-        // v2.1 не ответил (таймаут или ошибка прокси) — экран не должен
-        // оставаться без результатов, ниже сработает резервный поиск.
+      final films = await _searchByKeywordOrEmpty(keyword, page);
+      if (films.isNotEmpty) {
+        return films;
       }
       return await searchFilterFilmsUseCase(
         keyword,
@@ -173,5 +167,23 @@ class SearchedFilmsBloc extends Bloc<SearchedFilmsEvent, SearchedFilmsState> {
       event.yearTo,
       page,
     ) ?? [];
+  }
+
+  /// Ищет по слову через v2.1. Эндпоинт нестабилен: часть запросов висит до
+  /// `receiveTimeout`, часть отвечает 400. Ошибка здесь означает «результата
+  /// нет», а не «запрос не удался»: вызывающий код повторит поиск через v2.2
+  /// (ADR 0004).
+  Future<List<FilmEntity>> _searchByKeywordOrEmpty(
+    String keyword,
+    int page,
+  ) async {
+    try {
+      return await searchFilmsByKeywordUseCase(keyword, page) ?? [];
+    } on RemoteDataSourceException catch (e) {
+      debugPrint(
+        '[SearchedFilmsBloc] Поиск v2.1 не удался, повтор через v2.2: $e',
+      );
+      return const [];
+    }
   }
 }

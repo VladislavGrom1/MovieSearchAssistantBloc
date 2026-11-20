@@ -79,9 +79,6 @@ class FilmInformationBloc extends Bloc<FilmInformationEvent, FilmInformationStat
   Future<void> _getFilmInformation(GetFilmInformation event, Emitter emit) async {
     final currentState = state;
 
-    // Повтор после ошибки: снова показываем полноэкранную загрузку, но держим
-    // её минимум `retryLoadingMinDuration`, чтобы спиннер не мелькал на
-    // быстром ответе.
     final isRetry = currentState is FilmFailure;
     emit(FilmLoading());
 
